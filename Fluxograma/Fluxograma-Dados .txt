@@ -1,0 +1,42 @@
+Página Home: 
+
+Publicações
+Barra de pesquisa
+Reagir
+Comentar
+
+Perfil:
+
+Editar perfil -> Troca a foto
+		 Troca de link de rede social
+		 Adicionar link de rede social
+
+Tabela de Turma -> Turma
+		   Semestre
+	           Ano
+		   Módulo
+		   Situação
+
+
+Turma:
+
+Nome do aluno
+RM
+Noticias da Turma
+Lista de e-mails de Alunos
+Lista de e-mails de Professores
+
+
+Cardápio:
+Lista das refeições separadas por dia de semana
+
+Sobre nós:
+Nome, e-mails, GitHub dos integrantes
+
+
+Configurações:
+Encerrar sessão
+
+
+
+
