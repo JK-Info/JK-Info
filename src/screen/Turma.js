@@ -1,7 +1,32 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
+
+const dataAlunos = [
+  { key: '1', name: 'Guilherme Gomes', email: 'guilherme.silva2616@etec.sp.gov.br' },
+  { key: '2', name: 'Fernanda Santos', email: 'fernanda.santos@etec.sp.gov.br' },
+  { key: '3', name: 'Pedro Souza', email: 'pedro.souza@etec.sp.gov.br' },
+  { key: '4', name: 'Mariana Oliveira', email: 'mariana.oliveira@etec.sp.gov.br' },
+];
+
+const dataProfessores = [
+  { key: '1', name: 'Prof. Carlos Silva', email: 'carlos.silva@etec.sp.gov.br' },
+  { key: '2', name: 'Prof. Ana Paula', email: 'ana.paula@etec.sp.gov.br' },
+  { key: '3', name: 'Prof. Marcos Oliveira', email: 'marcos.oliveira@etec.sp.gov.br' },
+  { key: '4', name: 'Prof. Marcos Oliveira', email: 'marcos.oliveira@etec.sp.gov.br' }
+];
 
 const TurmaScreen = () => {
+
+  const renderItem = ({ item }) => (
+    <View style={styles.item}>
+      <View style={styles.avatar}></View>
+      <View>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.email}>{item.email}</Text>
+      </View>
+    </View>
+  );
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.profile}>
@@ -21,37 +46,25 @@ const TurmaScreen = () => {
         </View>
       </View>
 
-      <View style={styles.courseSection}>
-        <Text style={styles.courseHeader}>Curso</Text>
-        <Text style={styles.courseName}>Desenvolvimento de Sistemas</Text>
+      <View style={styles.rowContainer}>
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Alunos da Turma</Text>
+          <FlatList
+            data={dataAlunos}
+            renderItem={renderItem}
+            keyExtractor={item => item.key}
+            scrollEnabled={false} // Desabilita o scroll do FlatList
+          />
+        </View>
 
-        {/* Mini tabela */}
-        <View style={styles.table}>
-          {/* Cabeçalho da tabela */}
-          <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderText}>Turma</Text>
-            <Text style={styles.tableHeaderText}>Semestre</Text>
-            <Text style={styles.tableHeaderText}>Ano</Text>
-            <Text style={styles.tableHeaderText}>Módulo</Text>
-            <Text style={styles.tableHeaderText}>Situação</Text>
-          </View>
-
-          {/* Linha de dados da tabela */}
-          <View style={styles.tableRow}>
-            <Text style={styles.tableCell}>A1</Text>
-            <Text style={styles.tableCell}>1º Semestre</Text>
-            <Text style={styles.tableCell}>2024</Text>
-            <Text style={styles.tableCell}>Introdução</Text>
-            <Text style={styles.tableCell}>Em andamento</Text>
-          </View>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableCell}>A1</Text>
-            <Text style={styles.tableCell}>1º Semestre</Text>
-            <Text style={styles.tableCell}>2024</Text>
-            <Text style={styles.tableCell}>Introdução</Text>
-            <Text style={styles.tableCell}>Em andamento</Text>
-          </View>
-          {/* Adicione mais linhas de dados conforme necessário */}
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Professores da Turma</Text>
+          <FlatList
+            data={dataProfessores}
+            renderItem={renderItem}
+            keyExtractor={item => item.key}
+            scrollEnabled={false} // Desabilita o scroll do FlatList
+          />
         </View>
       </View>
     </ScrollView>
@@ -93,47 +106,36 @@ const styles = StyleSheet.create({
   },
   newsItem: {
     backgroundColor: '#f1f1f1',
-    padding: 30,
+    padding: 10,
     borderRadius: 5,
   },
-  courseSection: {
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     padding: 10,
   },
-  courseHeader: {
+  section: {
+    flex: 1,
+    paddingHorizontal: 10,
+    maxWidth: "45%",
+  },
+  sectionHeader: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+    textAlign: "center",
   },
-  courseName: {
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10, 
+  },
+  name: {
     fontSize: 16,
-    marginBottom: 10,
   },
-  table: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    marginTop: 10,
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#f1f1f1',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tableHeaderText: {
-    flex: 1,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    padding: 10,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  tableCell: {
-    flex: 1,
-    textAlign: 'center',
-    padding: 10,
+  email: {
+    fontSize: 14,
+    color: '#555',
   },
 });
 

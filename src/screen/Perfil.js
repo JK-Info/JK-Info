@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Button } from 'react-native';
+import { View, Text, StyleSheet, Image, Button, ScrollView } from 'react-native';
 
 const FotoPerfil = () => (
   <Image
@@ -31,28 +31,56 @@ const Perfil = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <FotoPerfil />
       <InformacoesPerfil />
       <BotaoEditar onPress={EditarPerfil} />
-    </View>
+
+      <View style={styles.table}>
+          {/* Cabeçalho da tabela */}
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderText}>Turma</Text>
+            <Text style={styles.tableHeaderText}>Semestre</Text>
+            <Text style={styles.tableHeaderText}>Ano</Text>
+            <Text style={styles.tableHeaderText}>Módulo</Text>
+            <Text style={styles.tableHeaderText}>Situação</Text>
+          </View>
+
+          {/* Linha de dados da tabela */}
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCell}>A1</Text>
+            <Text style={styles.tableCell}>1º Semestre</Text>
+            <Text style={styles.tableCell}>2024</Text>
+            <Text style={styles.tableCell}>Introdução</Text>
+            <Text style={styles.tableCell}>Em andamento</Text>
+          </View>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCell}>A1</Text>
+            <Text style={styles.tableCell}>1º Semestre</Text>
+            <Text style={styles.tableCell}>2024</Text>
+            <Text style={styles.tableCell}>Introdução</Text>
+            <Text style={styles.tableCell}>Em andamento</Text>
+          </View>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  scrollContainer: {
     alignItems: 'center',
-    margin: 60,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
   },
   fotoPerfil: {
     width: 250,
     height: 250,
     borderRadius: 125,
+    marginBottom: 20,
   },
   informacoesContainer: {
     alignItems: 'center',
+    marginBottom: 20,
   },
   nomeAluno: {
     fontSize: 25,
@@ -60,18 +88,44 @@ const styles = StyleSheet.create({
   },
   emailAluno: {
     fontSize: 20,
-    width:'100%'
+    width: '100%',
+    textAlign: 'center',
   },
   dadosAluno: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '80%',
-    margin: 20,
-    marginBottom: 20,
+    marginTop: 10,
   },
   botaoContainer: {
-    marginTop: 30,
-    width: '100%'
+    marginVertical: 20,
+    width: '100%',
+  },
+  table: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginTop: 10,width: '100%',
+    marginTop: 20,
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f1f1',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  tableHeaderText: {
+    flex: 1,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: 10,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+  },
+  tableCell: {
+    textAlign: 'center',
   },
 });
 

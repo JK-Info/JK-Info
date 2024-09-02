@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const Conf = () => {
+const Config = () => {
   return (
     <View style={styles.container}>
-      <Text>Esta é a página de Conf</Text>
+      <Text>Esta é a página de Configurações</Text>
     </View>
   );
 };
@@ -17,5 +17,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Conf;
+export default Config;
 

@@ -10,10 +10,9 @@ import Atividades from './src/screen/Atividades';
 import Perfil from './src/screen/Perfil';
 import Turma from './src/screen/Turma';
 import AluProf from './src/screen/AluProf';
-import Vagas from './src/screen/Vagas';
 import Cardapio from './src/screen/Cardapio';
-import Conf from './src/screen/Conf';
 import Sobrenos from './src/screen/Sobrenos';
+import Config from './src/screen/Configuracoes';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -24,10 +23,6 @@ function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <DrawerItem
-        label="Configurações"
-        onPress={() => props.navigation.navigate('Conf')}
-      />
     </DrawerContentScrollView>
   );
 }
@@ -56,10 +51,9 @@ const DrawerNavigator = () => (
     <Drawer.Screen name="Perfil" component={Perfil} />
     <Drawer.Screen name="Turma" component={Turma} />
     <Drawer.Screen name="AluProf" component={AluProf} />
-    <Drawer.Screen name="Vagas" component={Vagas} />
     <Drawer.Screen name="Cardapio" component={Cardapio} />
-    <Drawer.Screen name="Conf" component={Conf} />
     <Drawer.Screen name="Sobrenos" component={Sobrenos} />
+    <Drawer.Screen name="Configurações" component={Config} />
     <Drawer.Screen name="Encessar Sessão" component={LoginScreen} />
   </Drawer.Navigator>
 );
@@ -91,20 +85,16 @@ export default function App() {
           component={AluProf}
         />
         <Stack.Screen
-          name="Vagas"
-          component={Vagas}
-        />
-        <Stack.Screen
           name="Cardapio"
           component={Cardapio}
         />
         <Stack.Screen
-          name="Conf"
-          component={Conf}
-        />
-        <Stack.Screen
         name="Sobrenos"
         component={Sobrenos}
+        />
+        <Stack.Screen
+          name="Configurações"
+          component={Config}
         />
       </Stack.Navigator>
     </NavigationContainer>
