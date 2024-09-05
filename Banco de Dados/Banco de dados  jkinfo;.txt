@@ -1,0 +1,43 @@
+create database jkinfo;
+use jkinfo;
+
+create table professores 
+(
+	id_professor bigint PRIMARY KEY auto_increment,
+    nome VARCHAR(100) NOT NULL,
+    email_constitucional VARCHAR(100) UNIQUE NOT NULL,
+    email_pessoal varchar(100) unique not null,
+    telefone VARCHAR(15)
+);
+
+create table alunos
+(
+	id_aluno bigint PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    email_constitucional VARCHAR(100) UNIQUE NOT NULL,
+    email_pessoal varchar(100) unique not null,
+    telefone VARCHAR(15),
+    data_nascimento DATE,
+    turma VARCHAR(50)
+);
+
+create table secretaria
+(
+	id_aluno bigint primary key auto_increment,
+    nome varchar(100) not null,
+    email_constitucional VARCHAR(100) UNIQUE NOT NULL,
+    email_pessoal varchar(100) unique not null,
+    telefone varchar(15),
+    data_nascimento date
+);
+
+create table gestao
+(
+	id_gestor bigint primary key auto_increment,
+    nome varchar (100) not null,
+    email_constitucional VARCHAR(100) UNIQUE NOT NULL,
+    email_pessoal varchar (100) unique not null,
+    telefone varchar(15),
+    data_nascimento date,
+    cargo varchar(100)
+);
