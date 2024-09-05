@@ -9,7 +9,6 @@ import ReclamacoesSugest from './src/screen/ReclamacoesSugest';
 import Atividades from './src/screen/Atividades';
 import Perfil from './src/screen/Perfil';
 import Turma from './src/screen/Turma';
-import AluProf from './src/screen/AluProf';
 import Cardapio from './src/screen/Cardapio';
 import Sobrenos from './src/screen/Sobrenos';
 import Config from './src/screen/Configuracoes';
@@ -50,7 +49,6 @@ const DrawerNavigator = () => (
     <Drawer.Screen name="Home" component={TabNavigator} />
     <Drawer.Screen name="Perfil" component={Perfil} />
     <Drawer.Screen name="Turma" component={Turma} />
-    <Drawer.Screen name="AluProf" component={AluProf} />
     <Drawer.Screen name="Cardapio" component={Cardapio} />
     <Drawer.Screen name="Sobrenos" component={Sobrenos} />
     <Drawer.Screen name="Configurações" component={Config} />
@@ -79,10 +77,6 @@ export default function App() {
           <Stack.Screen
           name="Turma"
           component={Turma}
-        />
-        <Stack.Screen
-          name="AluProf"
-          component={AluProf}
         />
         <Stack.Screen
           name="Cardapio"
