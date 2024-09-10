@@ -41,3 +41,9 @@ create table gestao
     data_nascimento date,
     cargo varchar(100)
 );
+
+
+
+
+
+
