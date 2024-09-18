@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -6,9 +7,8 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = React.useState('');
 
   const handleLogin = () => {
-    // Aqui você faria a lógica de autenticação
-    // Por simplicidade, vamos apenas navegar para HomeScreen
-    navigation.navigate('HomeScreen');
+    // Aqui você faria a lógica de autenticação, se necessário
+    navigation.replace('DrawerNavigator'); // Navega para o DrawerNavigator
   };
 
   return (
@@ -30,7 +30,7 @@ const LoginScreen = ({ navigation }) => {
         value={password}
         onChangeText={text => setPassword(text)}
         placeholder="Digite sua senha"
-        secureTextEntry={true}
+        secureTextEntry
       />
 
       <Button

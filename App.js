@@ -1,12 +1,13 @@
+// App.js
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import LoginScreen from './src/screen/LoginScreen';
 import HomeScreen from './src/screen/HomeScreen';
 import ReclamacoesSugest from './src/screen/ReclamacoesSugest';
-import Atividades from './src/screen/Atividades';
+import Notificacoes from './src/screen/Notificacoes';
 import Perfil from './src/screen/Perfil';
 import Turma from './src/screen/Turma';
 import Cardapio from './src/screen/Cardapio';
@@ -40,7 +41,7 @@ const TabNavigator = () => (
   >
     <Tab.Screen name="Home" component={HomeScreen} />
     <Tab.Screen name="Reclamacoes" component={ReclamacoesSugest} />
-    <Tab.Screen name="Atividades" component={Atividades} />
+    <Tab.Screen name="Notificações" component={Notificacoes} />
   </Tab.Navigator>
 );
 
@@ -52,43 +53,27 @@ const DrawerNavigator = () => (
     <Drawer.Screen name="Cardapio" component={Cardapio} />
     <Drawer.Screen name="Sobrenos" component={Sobrenos} />
     <Drawer.Screen name="Configurações" component={Config} />
-    <Drawer.Screen name="Encessar Sessão" component={LoginScreen} />
   </Drawer.Navigator>
 );
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="DrawerNavigator">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
-          name="DrawerNavigator"
-          component={DrawerNavigator}
-          options={{ headerShown: false }} // Esconde o cabeçalho na tela principal do DrawerNavigator
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="TabNavigator"
           component={TabNavigator}
-          options={{ headerShown: false }} // Esconde o cabeçalho na tela de Home
+          options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="Perfil"
-          component={Perfil}
-        />
-          <Stack.Screen
-          name="Turma"
-          component={Turma}
-        />
-        <Stack.Screen
-          name="Cardapio"
-          component={Cardapio}
-        />
-        <Stack.Screen
-        name="Sobrenos"
-        component={Sobrenos}
-        />
-        <Stack.Screen
-          name="Configurações"
-          component={Config}
+          name="DrawerNavigator"
+          component={DrawerNavigator}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>
