@@ -182,10 +182,105 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Materia` (
     ON UPDATE NO ACTION
 ) ENGINE = InnoDB;
 
-drop table pessoa;
+
 -- -----------------------------------------------------
 -- Table `mydb`.`Materia_has_Professor`
---
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Materia_has_Professor` (
+  `Materia_idMateria` INT NOT NULL,
+  `Materia_Turma_idTurma` INT NOT NULL,
+  `Professor_idProfessor` INT NOT NULL,
+  `Professor_Pessoa_idPessoa` INT NOT NULL,
+  PRIMARY KEY (`Materia_idMateria`, `Materia_Turma_idTurma`, `Professor_idProfessor`, `Professor_Pessoa_idPessoa`),
+  INDEX `fk_Materia_has_Professor_Professor1_idx` (`Professor_idProfessor` ASC, `Professor_Pessoa_idPessoa` ASC) ,
+  INDEX `fk_Materia_has_Professor_Materia1_idx` (`Materia_idMateria` ASC, `Materia_Turma_idTurma` ASC) ,
+  CONSTRAINT `fk_Materia_has_Professor_Materia1`
+    FOREIGN KEY (`Materia_idMateria`)
+    REFERENCES `mydb`.`Materia` (`idMateria`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+ constraint `fk_Materia_has_Professor_Turma`
+    foreign key (`Materia_Turma_idTurma`)
+    references `mydb`. `Turma` (`idTurma`)
+    on delete no action
+    on update no action,
+  CONSTRAINT `fk_Materia_has_Professor_Professor1`
+    FOREIGN KEY (`Professor_idProfessor`)
+    REFERENCES `mydb`.`Professor` (`idProfessor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+    constraint `fk_Materia_has_Professor_Pessoa`
+    foreign key (`Professor_Pessoa_idPessoa`)
+    references `mydb`. `Pessoa`(`idPessoa`)
+    on update no action
+    on delete no action)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Endereco`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Endereco` (
+  `idEndereco` INT NOT NULL AUTO_INCREMENT,
+  `nomeEndereco` VARCHAR(45) NOT NULL,
+  `numeroEndereco` INT NOT NULL,
+  `complemento` VARCHAR(45) NULL,
+  `bairro` VARCHAR(45) NOT NULL,
+  `cidade` VARCHAR(45) NOT NULL,
+  `estado` VARCHAR(45) NOT NULL,
+  `CEP` INT(8) NOT NULL,
+  `Contato_idContato` INT NOT NULL,
+  `Contato_Pessoa_idPessoa` INT NOT NULL,
+  PRIMARY KEY (`idEndereco`, `Contato_idContato`, `Contato_Pessoa_idPessoa`),
+  INDEX `fk_Endereco_Contato1_idx` (`Contato_idContato` ASC, `Contato_Pessoa_idPessoa` ASC) ,
+  CONSTRAINT `fk_Endereco_Contato1`  
+    FOREIGN KEY (`Contato_idContato`)
+    REFERENCES `mydb`.`Contato` (`idContato`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+    constraint `fk_Endereco_Pessoa`
+    foreign key ( `Contato_Pessoa_idPessoa`)
+    references `mydb`. `Pessoa` (`idPessoa`)
+    on update no action
+    on delete no action
+    )
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`RedeSocial`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`RedeSocial` (
+  `idRedeSocial` INT NOT NULL AUTO_INCREMENT,
+  `redeSocial` VARCHAR(45) NOT NULL,
+  `Contato_idContato` INT NOT NULL,
+  `Contato_Pessoa_idPessoa` INT NOT NULL,
+  PRIMARY KEY (`idRedeSocial`, `Contato_idContato`, `Contato_Pessoa_idPessoa`),
+  INDEX `fk_RedeSocial_Contato1_idx` (`Contato_idContato` ASC, `Contato_Pessoa_idPessoa` ASC) ,
+  CONSTRAINT `fk_RedeSocial_Contato1`
+    FOREIGN KEY (`Contato_idContato`)
+    REFERENCES `mydb`.`Contato` (`idContato` )
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+    constraint `fk_RedeSocial_Pessoa`
+    foreign key (`Contato_Pessoa_idPessoa`)
+    references `mydb`. `Pessoa`(`idPessoa`)
+    on delete no action
+    on update cascade)
+ENGINE = InnoDB;
+
+- -----------------------------------------------------
+-- Table `mydb`.`Cardapio`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Cardapio` (
+  `idCardapio` INT NOT NULL AUTO_INCREMENT,
+  `diaSemana` VARCHAR(45) NOT NULL,
+  `refeicao` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idCardapio`))
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 				-- ALUNOS --
 
