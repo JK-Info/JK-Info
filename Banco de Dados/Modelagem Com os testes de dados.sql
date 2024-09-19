@@ -277,6 +277,75 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Cardapio` (
   PRIMARY KEY (`idCardapio`))
 ENGINE = InnoDB;
 
+-- -------------------------------------------------------
+-- table `mydb` . `Chats`
+-- -------------------------------------------------------
+
+create table if not exists `mydb`.`Chats`(
+	`idChat` int not null auto_increment,
+    `idPessoaRemetente` int not null,
+    `idPessoaDestinario` int not null,
+    `mensagem` text not null ,
+    `dataeHoraMensagem` datetime not null,
+    Primary key (`idChat`),
+    index `fk_PessoaRemetente_idx` (`idPessoaRemetente`),
+    index `fk_PessoaDestinaria_idx` (`idPessoaDestinario`),
+    constraint `fk_PessoaRemetente`
+    foreign key (`idPessoaRemetente`)
+    references `mydb`. `Pessoa` (`idPessoa`)
+    on delete no action
+    on update cascade,
+    constraint `fk_PessoaDestinario`
+    foreign key (`idPessoaDestinario`)
+    references `mydb`. `Pessoa` (`idPessoa`)
+    on delete no action
+    on update cascade
+    )engine = InnoDB;
+   
+    -- -------------------------------------------------------
+-- table `mydb` . `Publicação`
+-- -------------------------------------------------------
+
+    CREATE TABLE IF NOT EXISTS `mydb`.`Publicacao` (
+  `idPublicacao` INT NOT NULL AUTO_INCREMENT,
+  `titulo` VARCHAR(255) NOT NULL,
+  `conteudo` TEXT NOT NULL,
+  `idPessoa` INT NOT NULL,
+  `dataHoraPublicacao` DATETIME NOT NULL,
+  PRIMARY KEY (`idPublicacao`),
+  INDEX `fk_Publicacao_Pessoa_idx` (`idPessoa`),
+  CONSTRAINT `fk_Publicacao_Pessoa`
+    FOREIGN KEY (`idPessoa`)
+    REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+) ENGINE = InnoDB;
+
+-- -------------------------------------------------------
+-- table `mydb` . `Comentarios`
+-- -------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `mydb`.`Comentarios` (
+  `idComentario` INT NOT NULL AUTO_INCREMENT,
+  `idPublicacao` INT NOT NULL,
+  `idPessoa` INT NOT NULL,
+  `textoComentario` TEXT NOT NULL,
+  `dataHoraComentario` DATETIME NOT NULL,
+  PRIMARY KEY (`idComentario`),
+  INDEX `fk_Comentarios_Publicacao_idx` (`idPublicacao`),
+  INDEX `fk_Comentarios_Pessoa_idx` (`idPessoa`),
+  CONSTRAINT `fk_Comentarios_Publicacao`
+    FOREIGN KEY (`idPublicacao`)
+    REFERENCES `mydb`.`Publicacao` (`idPublicacao`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Comentarios_Pessoa`
+    FOREIGN KEY (`idPessoa`)
+    REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE
+) ENGINE = InnoDB;
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
@@ -407,3 +476,23 @@ INNER JOIN
     mydb.Cargo c ON f.Cargo_idCargo = c.idCargo;
 					
                     -- FIM TESTE FUNCIONARIOS--
+
+INSERT INTO `mydb`.`Publicacao` (titulo, conteudo, idPessoa, dataHoraPublicacao)
+VALUES 
+('Minha Primeira Publicação', 'Este é o conteúdo da minha primeira publicação!', 1, NOW()),
+('Segunda Publicação', 'Mais conteúdo interessante aqui!', 2, NOW()),
+('Dicas de Programação', 'Aqui estão algumas dicas sobre programação.', 1, NOW());
+
+INSERT INTO `mydb`.`Comentarios` (idPublicacao, idPessoa, textoComentario, dataHoraComentario)
+VALUES 
+(1, 2, 'Ótima publicação!', NOW()),
+(1, 3, 'Concordo, muito interessante!', NOW()),
+(2, 1, 'Mal posso esperar para ler mais!', NOW()),
+(3, 2, 'Essas dicas são muito úteis!', NOW());
+
+INSERT INTO `mydb`.`Chats` (idPessoaRemetente, idPessoaDestinario, mensagem, dataeHoraMensagem)
+VALUES 
+(1, 2, 'Oi, você viu a nova publicação?', NOW()),
+(2, 1, 'Sim, eu achei muito boa!', NOW()),
+(1, 3, 'Vamos nos encontrar mais tarde?', NOW()),
+(3, 1, 'Claro! Que horas?', NOW());
