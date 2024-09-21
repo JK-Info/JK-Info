@@ -1,8 +1,6 @@
 // HomeScreen.js
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Button } from 'react-native-web';
+import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
 
 const FotoPerfil = () => (
   <View style={styles.containerAvatar}>
@@ -80,11 +78,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
   boxFeed: {
     backgroundColor: '#f1f1f1',
     margin: 20,
@@ -95,22 +88,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     margin: 10
   },
-  fotoPerfil: {
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    marginBottom: 20,
-  },
   boxPubli: {
     display: 'flex',
     // alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'red',
     margin: 50,
-  },
-  btnComentar: {
-    height: 100,
-    borderRadius: 10,
   },
   containerAvatar: {
     backgroundColor: 'green',
@@ -122,8 +105,6 @@ const styles = StyleSheet.create({
   containerCurtir: {
     backgroundColor: 'yellow'
   }
-
-
 });
 
 export default HomeScreen;
