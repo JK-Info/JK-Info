@@ -1,14 +1,23 @@
 
 import React from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import { Button, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // Aqui você faria a lógica de autenticação, se necessário
-    navigation.replace('DrawerNavigator'); // Navega para o DrawerNavigator
+    if(email === 'aluno@teste'){
+      navigation.replace('DrawerNavigatorAluno');
+    }
+    else if(email === 'professor@teste'){
+      navigation.replace('DrawerNavigatorProfessor')
+    }
+    else
+    {
+      Alert.alert('Erro', 'Credenciais inválidas!');
+    }
   };
 
   return (
