@@ -4,10 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import HomeScreen from '../screen/HomeScreen'; // Corrigido o caminho para as telas
 import Perfil from '../screen/Perfil';
 import Turma from '../screen/Turma';
-import AluProf from '../screen/AluProf';
-import Vagas from '../screen/Vagas';
 import Cardapio from '../screen/Cardapio';
-import Conf from '../screen/Conf';
 import Sobrenos from '../screen/Sobrenos';
 import LoginScreen from '../screen/LoginScreen';
 
