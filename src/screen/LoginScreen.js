@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View, Alert } from 'react-native';
+import { Button, StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
+import { withSafeAreaInsets } from 'react-native-safe-area-context';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -22,30 +23,44 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text>E-mail</Text>
-      <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={text => setEmail(text)}
-        placeholder="Digite seu e-mail"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
+      <View style={styles.h1}>
+        <Text style={styles.j}>J</Text>
+        <Text style={styles.k}>K</Text>
+        <Text style={styles.info}>Info</Text>
+      </View>
 
-      <Text>Senha</Text>
-      <TextInput
-        style={styles.input}
-        value={password}
-        onChangeText={text => setPassword(text)}
-        placeholder="Digite sua senha"
-        secureTextEntry
-      />
+      <View style={styles.form}>
+        <Text style={styles.textos}>E-mail</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={text => setEmail(text)}
+          placeholder="Digite seu e-mail"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
 
-      <Button
-        title="Logar"
-        onPress={handleLogin}
-      />
+        <Text style={styles.textos}>Senha</Text>
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={text => setPassword(text)}
+          placeholder="Digite sua senha"
+          secureTextEntry
+        />
+
+        {/* <Button
+          title="Logar"
+          onPress={handleLogin}
+          style={styles.logar}
+        /> */}
+
+        <TouchableOpacity style={styles.logar} onPress={handleLogin}>
+          <Text style={styles.textLogar}>Entrar</Text>
+        </TouchableOpacity>
+
+      </View>
     </View>
   );
 };
@@ -62,10 +77,61 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: '80%',
+    marginLeft: 20,
+    width: '90%',
     borderColor: '#ccc',
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+    color: 'white',
+    borderRadius: 30,
+    fontFamily: ''
   },
+  j: {
+    fontSize: 50,
+    fontWeight: 750,
+    color: '#02033f',
+  },
+  k: {
+    fontSize: 50,
+    fontWeight: 750,
+    color: '#ff6400'
+  },
+  info: {
+    fontSize: 50,
+    fontWeight: 750,
+    marginLeft: 15,
+    color: '#02033f',
+  },
+  h1: {
+    flexDirection: 'row',
+    margin: 80,
+  },
+  form: {
+    width: '30%',
+    height: 300,
+    backgroundColor: '#02033f',
+    borderRadius: 30,
+    shadowColor: '#000',
+    borderWidth: 0,
+    shadowRadius: 20
+  },
+  textos: {
+    color: 'white',
+    marginLeft: 20,
+    marginTop: 20,
+  },
+  logar: {
+    display: 1,
+    alignItems: 'center',
+    marginLeft: '25%',
+    width: '50%',
+    height: 30,
+    backgroundColor: 'green',
+    borderRadius: 30,
+  },
+  textLogar: {
+    color: 'white',
+    padding: 5,
+  }
 });

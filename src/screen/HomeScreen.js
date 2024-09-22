@@ -1,12 +1,7 @@
 // HomeScreen.js
 
-<<<<<<< HEAD
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
-import { Button } from 'react-native-web';
-=======
-import { View, Text, StyleSheet, ScrollView, Button } from 'react-native';
->>>>>>> 4a9f7c05dafec156adc75e2045eabb66e865a9b9
+import { View, Text, StyleSheet, ScrollView, Image, Button } from 'react-native';
 
 const Avatar = () => {
   return (
@@ -34,6 +29,7 @@ const BotaoComentar = () => (
   <View style={styles.containerBotao}>
     <Button
     title='Comentar'
+    style={styles.botao}
     />
   </View>
 );
@@ -66,7 +62,28 @@ const HomeScreen = () => {
         <BotaoComentar/>
         </View>
       </View>
+      <Divisao/>
 
+      <View style={styles.boxPubli}>
+
+        <View style={styles.indent}>
+          <Avatar/>
+          <FotoPerfil/>
+          <Text>Diretor(a)</Text>
+        </View>
+
+        <View style={styles.boxFeed}>
+          <Text style={styles.textoPubli}>A National Basketball Association (em português: Associação Nacional de Basquetebol; abreviação oficial: NBA) é a principal liga de basquetebol profissional da América do Norte. Com 30 franquias (29 nos Estados Unidos e 1 no Canadá), a NBA também é considerada a principal liga de basquete do mundo. É um membro ativo da USA Basketball (USAB),[2] que é reconhecida pela FIBA (a Federação Internacional de Basquetebol) como a entidade máxima e organizadora do basquetebol nos Estados Unidos. A NBA é uma das 4 'major leagues' de esporte profissional na América do Norte. Os jogadores da NBA são os atletas mais bem pagos do mundo, por salário médio anual.[3]
+
+          A liga foi fundada na cidade de Nova Iorque em 6 de Junho de 1946, como a Basketball Association of America (BAA).[4] A liga adotou o nome de National Basketball Association em 1949 quando se fundiu com a rival National Basketball League (NBL). A liga tem diversos escritórios ao redor do mundo, além de vários dos próprios clubes fora da sede principal na Olympic Tower localizada na Quinta Avenida 645. Os estúdios da NBA Entertainment e da NBA TV são localizados em Secaucus, Nova Jérsia.
+          </Text>
+        </View>
+
+        <View style={styles.bottons}>
+        <Curtir/>
+        <BotaoComentar/>
+        </View>
+      </View>
       <Divisao/>
     </ScrollView>
   );
@@ -84,6 +101,8 @@ const styles = StyleSheet.create({
     marginRight: '10%',
     //width: '75%',
     borderRadius: 15,
+    borderColor: 'black',
+    borderWidth: 1,
   },
   textoPubli: {
     fontSize: 16,
@@ -103,11 +122,12 @@ const styles = StyleSheet.create({
   containerBotao: {
     width: 190,
     marginLeft: 10,
+    borderRadius: 30,
     //backgroundColor: 'pink'
   },
   containerCurtir: {
-<<<<<<< HEAD
     width: 100,
+    borderRadius: 30,
     //backgroundColor: 'yellow'
   },
   indent: {
@@ -132,10 +152,9 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#d3d3d3'
   },
-=======
-    backgroundColor: 'yellow'
+  botao: {
+    borderRadius: 30,
   }
->>>>>>> 4a9f7c05dafec156adc75e2045eabb66e865a9b9
 });
 
 export default HomeScreen;
