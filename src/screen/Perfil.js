@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Button, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 
 const FotoPerfil = () => (
   <Image
@@ -14,15 +14,15 @@ const InformacoesPerfil = () => (
     <Text style={styles.emailAluno}>Email: alunoteste@etec.sp.gov.br</Text>
     <View style={styles.dadosAluno}>
       <Text>RM: 99999</Text>
-      <Text>Linkedin: aluno.br.com</Text>
+      <Text>LinkedIn: aluno.br.com</Text>
     </View>
   </View>
 );
 
 const BotaoEditar = ({ onPress }) => (
-  <View style={styles.botaoContainer}>
-    <Button title="Editar Perfil" onPress={onPress} />
-  </View>
+  <TouchableOpacity style={styles.botaoContainer} onPress={onPress}>
+    <Text style={styles.textoBotao}>Editar Perfil</Text>
+  </TouchableOpacity>
 );
 
 const Perfil = () => {
@@ -37,30 +37,30 @@ const Perfil = () => {
       <BotaoEditar onPress={EditarPerfil} />
 
       <View style={styles.table}>
-          {/* Cabeçalho da tabela */}
-          <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderText}>Turma</Text>
-            <Text style={styles.tableHeaderText}>Semestre</Text>
-            <Text style={styles.tableHeaderText}>Ano</Text>
-            <Text style={styles.tableHeaderText}>Módulo</Text>
-            <Text style={styles.tableHeaderText}>Situação</Text>
-          </View>
+        {/* Cabeçalho da tabela */}
+        <View style={styles.tableHeader}>
+          <Text style={styles.tableHeaderText}>Turma</Text>
+          <Text style={styles.tableHeaderText}>Semestre</Text>
+          <Text style={styles.tableHeaderText}>Ano</Text>
+          <Text style={styles.tableHeaderText}>Módulo</Text>
+          <Text style={styles.tableHeaderText}>Situação</Text>
+        </View>
 
-          {/* Linha de dados da tabela */}
-          <View style={styles.tableRow}>
-            <Text style={styles.tableCell}>A1</Text>
-            <Text style={styles.tableCell}>1º Semestre</Text>
-            <Text style={styles.tableCell}>2024</Text>
-            <Text style={styles.tableCell}>Introdução</Text>
-            <Text style={styles.tableCell}>Em andamento</Text>
-          </View>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableCell}>A1</Text>
-            <Text style={styles.tableCell}>1º Semestre</Text>
-            <Text style={styles.tableCell}>2024</Text>
-            <Text style={styles.tableCell}>Introdução</Text>
-            <Text style={styles.tableCell}>Em andamento</Text>
-          </View>
+        {/* Linha de dados da tabela */}
+        <View style={styles.tableRow}>
+          <Text style={styles.tableCell}>A1</Text>
+          <Text style={styles.tableCell}>1º Semestre</Text>
+          <Text style={styles.tableCell}>2024</Text>
+          <Text style={styles.tableCell}>Introdução</Text>
+          <Text style={styles.tableCell}>Em andamento</Text>
+        </View>
+        <View style={styles.tableRow}>
+          <Text style={styles.tableCell}>A1</Text>
+          <Text style={styles.tableCell}>1º Semestre</Text>
+          <Text style={styles.tableCell}>2024</Text>
+          <Text style={styles.tableCell}>Introdução</Text>
+          <Text style={styles.tableCell}>Em andamento</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -100,12 +100,20 @@ const styles = StyleSheet.create({
   botaoContainer: {
     marginVertical: 20,
     width: '100%',
+    backgroundColor: '#007BFF', // Customize the button color
+    padding: 15,
+    borderRadius: 30,
+    alignItems: 'center',
+  },
+  textoBotao: {
+    color: '#FFFFFF',
+    fontSize: 18,
   },
   table: {
     borderWidth: 1,
     borderColor: '#ddd',
-    marginTop: 10,width: '100%',
     marginTop: 20,
+    width: '100%',
   },
   tableHeader: {
     flexDirection: 'row',
