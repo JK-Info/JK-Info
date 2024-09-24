@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 
-const FotoPerfil = () => (
+const FotoPerfil = ({ foto }) => (
   <Image
-    source={require('../../assets/FotosPerfil/Foto-perfil-Anonima.jpg')}
+    source={foto ? { uri: foto } : require('../../assets/FotosPerfil/Foto-perfil-Anonima.jpg')}
     style={styles.fotoPerfil}
   />
 );
@@ -25,15 +26,25 @@ const BotaoEditar = ({ onPress }) => (
 );
 
 const PerfilProfessor = () => {
-  const EditarPerfil = () => {
-    console.log('Editar perfil');
+  const [fotoPerfil, setFotoPerfil] = useState(null);
+
+  const editarFotoPerfil = () => {
+    launchImageLibrary({ mediaType: 'photo', quality: 1 }, (response) => {
+      if (response.didCancel) {
+        console.log('Usuário cancelou a seleção da imagem');
+      } else if (response.error) {
+        console.log('Erro ao selecionar imagem: ', response.error);
+      } else {
+        setFotoPerfil(response.assets[0].uri);
+      }
+    });
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <FotoPerfil />
+      <FotoPerfil foto={fotoPerfil} />
       <InformacoesPerfil />
-      <BotaoEditar onPress={EditarPerfil} />
+      <BotaoEditar onPress={editarFotoPerfil} />
     </ScrollView>
   );
 };
@@ -69,15 +80,15 @@ const styles = StyleSheet.create({
     width: '80%',
     marginTop: 10,
   },
-  editarButton: {
+  botaoContainer: {
     marginVertical: 20,
     width: '100%',
-    backgroundColor: '#007BFF', // Example button color
+    backgroundColor: '#007BFF',
     padding: 15,
     borderRadius: 30,
     alignItems: 'center',
   },
-  textEditar: {
+  textoBotao: {
     color: '#FFFFFF',
     fontSize: 18,
   },

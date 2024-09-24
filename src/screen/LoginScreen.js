@@ -3,6 +3,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
 import { withSafeAreaInsets } from 'react-native-safe-area-context';
+//import styles from './style';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');

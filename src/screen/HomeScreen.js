@@ -2,29 +2,25 @@
 
 import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importando o ícone
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-const Avatar = () => {
-  return (
-    <View>
-      <Image source={{ uri: 'https://i.pinimg.com/564x/e6/d0/df/e6d0dfdbf39ec45872bfd55993f6adc1.jpg' }} style={styles.avatarImage} />
-    </View>
-  );
-};
+const Avatar = () => (
+  <View>
+    <Image source={{ uri: 'https://i.pinimg.com/564x/e6/d0/df/e6d0dfdbf39ec45872bfd55993f6adc1.jpg' }} style={styles.avatarImage} />
+  </View>
+);
 
-const Divisao = () => {
-  return (
-    <View style={styles.centroLinha}>
-      <View style={styles.linha} />
-    </View>
-  );
-};
+const Divisao = () => (
+  <View style={styles.centroLinha}>
+    <View style={styles.linha} />
+  </View>
+);
 
 const Usuario = () => (
   <View style={styles.containerAvatar}>
     <View style={styles.informacoesPublicacao}>
-    <Text>Xereca</Text>
-    <Text style={{fontSize: 11}}>Diretor(a)</Text>
+      <Text>Xereca</Text>
+      <Text style={{ fontSize: 11 }}>Diretor(a)</Text>
     </View>
   </View>
 );
@@ -46,75 +42,65 @@ const Curtir = () => (
   </View>
 );
 
-const CommentModal = ({ visible, onClose }) => {
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Comentários</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Escreva um comentário..."
-          />
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
+const CommentModal = ({ visible, onClose }) => (
+  <Modal
+    animationType="slide"
+    transparent={true}
+    visible={visible}
+    onRequestClose={onClose}
+  >
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContainer}>
+        <Text style={styles.modalTitle}>Comentários</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Escreva um comentário..."
+        />
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <Text style={styles.closeButtonText}>Fechar</Text>
+        </TouchableOpacity>
       </View>
-    </Modal>
-  );
-};
+    </View>
+  </Modal>
+);
+
+// Novo Componente de Postagem
+const Post = ({ text, image }) => (
+  <View style={styles.boxPubli}>
+    <View style={styles.indent}>
+      <Avatar />
+      <Usuario />
+    </View>
+
+    <View style={styles.boxFeed}>
+      <Text style={styles.textoPubli}>{text}</Text>
+      {image && <Image source={{ uri: image }} style={styles.postImage} />}
+    </View>
+
+    <View style={styles.bottons}>
+      <Curtir />
+      <BotaoComentar />
+    </View>
+  </View>
+);
 
 const HomeScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
-
-  const toggleModal = () => {
-    setModalVisible(!modalVisible);
-  };
+  const toggleModal = () => setModalVisible(!modalVisible);
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.boxPubli}>
-        <View style={styles.indent}>
-          <Avatar />
-          <Usuario/>
-        </View>
-
-        <View style={styles.boxFeed}>
-          <Text style={styles.textoPubli}>
-            O Club de Regatas Vasco da Gama, mais conhecido como Vasco da Gama ou simplesmente Vasco, cujo acrônimo é CRVG, é uma entidade sócio-poliesportiva brasileira com sede na cidade do Rio de Janeiro, fundada em 21 de agosto de 1898 por um grupo de remadores.
-          </Text>
-        </View>
-
-        <View style={styles.bottons}>
-          <Curtir />
-          <BotaoComentar onPress={toggleModal} />
-        </View>
-      </View>
+      {/* Postagem Apenas de Texto */}
+      <Post 
+        text="O Club de Regatas Vasco da Gama, mais conhecido como Vasco da Gama ou simplesmente Vasco, cujo acrônimo é CRVG, é uma entidade sócio-poliesportiva brasileira com sede na cidade do Rio de Janeiro, fundada em 21 de agosto de 1898 por um grupo de remadores."
+      />
       <Divisao />
 
-      <View style={styles.boxPubli}>
-        <View style={styles.indent}>
-          <Avatar />
-          <Usuario/>
-        </View>
-
-        <View style={styles.boxFeed}>
-          <Text style={styles.textoPubli}>
-            A National Basketball Association (NBA) é a principal liga de basquetebol profissional da América do Norte...
-          </Text>
-        </View>
-
-        <View style={styles.bottons}>
-          <Curtir />
-          <BotaoComentar onPress={toggleModal} />
-        </View>
-      </View>
+      {/* Postagem com Texto e Imagem */}
+      <Post 
+        text="A National Basketball Association (NBA) é a principal liga de basquetebol profissional da América do Norte..."
+        image="https://de2.sportal365images.com/process/smp-betway-images/betway.com/28072023/e7737cea-2040-48fd-a041-c6ec11f367a6.jpg" // Substitua por uma URL de imagem válida
+      />
       <Divisao />
 
       <CommentModal visible={modalVisible} onClose={toggleModal} />
@@ -144,6 +130,13 @@ const styles = StyleSheet.create({
   textoPubli: {
     fontSize: 16,
     margin: 10,
+  },
+  postImage: {
+    width: '99%',
+    height: 600, // Ajuste conforme necessário
+    borderRadius: 10,
+    marginTop: 10,
+    margin: 5
   },
   boxPubli: {
     justifyContent: 'center',
@@ -183,7 +176,7 @@ const styles = StyleSheet.create({
   },
   botao: {
     borderRadius: 30,
-    backgroundColor: '#007BFF', // Cor do botão
+    backgroundColor: '#007BFF',
     padding: 10,
     alignItems: 'center',
     flexDirection: 'row',
@@ -192,7 +185,7 @@ const styles = StyleSheet.create({
   botaoTexto: {
     color: '#FFFFFF',
     fontSize: 16,
-    marginLeft: 5, // Para espaçar o texto do ícone
+    marginLeft: 5,
   },
   modalOverlay: {
     flex: 1,

@@ -32,6 +32,19 @@ const styles = StyleSheet.create({
         color: "red",
         fontSize: 75,
     },
+    botaoTo: {
+        display: 1,
+        alignItems: 'center',
+        marginLeft: '25%',
+        width: '50%',
+        height: 30,
+        backgroundColor: '#2e2e2e',
+        borderRadius: 30,
+    },
+    textoTo: {
+        color: 'white',
+        padding: 5,
+    },
 })
 
 export default styles;

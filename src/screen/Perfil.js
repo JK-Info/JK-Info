@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 
-const FotoPerfil = () => (
+const FotoPerfil = ({ foto }) => (
   <Image
-    source={require('../../assets/FotosPerfil/Foto-perfil-Anonima.jpg')}
+    source={foto ? { uri: foto } : require('../../assets/FotosPerfil/Foto-perfil-Anonima.jpg')}
     style={styles.fotoPerfil}
   />
 );
@@ -26,18 +27,27 @@ const BotaoEditar = ({ onPress }) => (
 );
 
 const Perfil = () => {
-  const EditarPerfil = () => {
-    console.log('Editar perfil');
+  const [fotoPerfil, setFotoPerfil] = useState(null);
+
+  const editarFotoPerfil = () => {
+    launchImageLibrary({ mediaType: 'photo', quality: 1 }, (response) => {
+      if (response.didCancel) {
+        console.log('Usuário cancelou a seleção da imagem');
+      } else if (response.error) {
+        console.log('Erro ao selecionar imagem: ', response.error);
+      } else {
+        setFotoPerfil(response.assets[0].uri); // Atualiza o estado com a nova imagem
+      }
+    });
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <FotoPerfil />
+      <FotoPerfil foto={fotoPerfil} />
       <InformacoesPerfil />
-      <BotaoEditar onPress={EditarPerfil} />
+      <BotaoEditar onPress={editarFotoPerfil} />
 
       <View style={styles.table}>
-        {/* Cabeçalho da tabela */}
         <View style={styles.tableHeader}>
           <Text style={styles.tableHeaderText}>Turma</Text>
           <Text style={styles.tableHeaderText}>Semestre</Text>
@@ -46,7 +56,6 @@ const Perfil = () => {
           <Text style={styles.tableHeaderText}>Situação</Text>
         </View>
 
-        {/* Linha de dados da tabela */}
         <View style={styles.tableRow}>
           <Text style={styles.tableCell}>A1</Text>
           <Text style={styles.tableCell}>1º Semestre</Text>
@@ -100,7 +109,7 @@ const styles = StyleSheet.create({
   botaoContainer: {
     marginVertical: 20,
     width: '100%',
-    backgroundColor: '#007BFF', // Customize the button color
+    backgroundColor: '#007BFF',
     padding: 15,
     borderRadius: 30,
     alignItems: 'center',
