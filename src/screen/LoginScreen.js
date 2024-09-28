@@ -51,12 +51,6 @@ const LoginScreen = ({ navigation }) => {
           secureTextEntry
         />
 
-        {/* <Button
-          title="Logar"
-          onPress={handleLogin}
-          style={styles.logar}
-        /> */}
-
         <TouchableOpacity style={styles.logar} onPress={handleLogin}>
           <Text style={styles.textLogar}>Entrar</Text>
         </TouchableOpacity>
@@ -91,7 +85,7 @@ const styles = StyleSheet.create({
   j: {
     fontSize: 50,
     fontWeight: 750,
-    color: '#02033f',
+    color: '#00527C',
   },
   k: {
     fontSize: 50,
@@ -102,7 +96,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: 750,
     marginLeft: 15,
-    color: '#02033f',
+    color: '#00527C',
   },
   h1: {
     flexDirection: 'row',
@@ -111,7 +105,7 @@ const styles = StyleSheet.create({
   form: {
     width: '30%',
     height: 300,
-    backgroundColor: '#02033f',
+    backgroundColor: '#00527C',
     borderRadius: 30,
     shadowColor: '#000',
     borderWidth: 0,

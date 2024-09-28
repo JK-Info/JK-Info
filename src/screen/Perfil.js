@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   botaoContainer: {
     marginVertical: 20,
     width: '100%',
-    backgroundColor: '#007BFF',
+    backgroundColor: '#00527C',
     padding: 15,
     borderRadius: 30,
     alignItems: 'center',

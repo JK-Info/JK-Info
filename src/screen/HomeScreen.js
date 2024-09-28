@@ -89,7 +89,7 @@ const Post = ({ text, image, comments, onCommentPress }) => (
   <View style={styles.boxPubli}>
     <View style={styles.indent}>
       <Avatar />
-      <Usuario nome="Xereca" cargo="Diretor(a)" />
+      <Usuario nome="Aluno" cargo="Diretor(a)" />
     </View>
 
     <View style={styles.boxFeed}>
@@ -115,7 +115,7 @@ const HomeScreen = () => {
       const newComment = {
         text: commentText,
         author: {
-          name: 'Xereca',
+          name: 'Aluno',
           photo: 'https://i.pinimg.com/564x/e6/d0/df/e6d0dfdbf39ec45872bfd55993f6adc1.jpg', // Exemplo de foto
         },
       };
@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingHorizontal: 20,
   },
   avatarImage: {
     width: 50,
@@ -197,6 +198,7 @@ const styles = StyleSheet.create({
   boxPubli: {
     justifyContent: 'center',
     margin: 50,
+    backgroundColor: '#fff'
   },
   containerAvatar: {
     width: 70,
@@ -232,7 +234,7 @@ const styles = StyleSheet.create({
   },
   botao: {
     borderRadius: 30,
-    backgroundColor: '#007BFF',
+    backgroundColor: '#00527C',
     padding: 10,
     alignItems: 'center',
     flexDirection: 'row',
@@ -279,7 +281,7 @@ const styles = StyleSheet.create({
     borderRadius: 30
   },
   closeButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#00527C',
     borderRadius: 30,
     padding: 10,
     alignItems: 'center',
