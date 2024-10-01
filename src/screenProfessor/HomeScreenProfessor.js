@@ -89,7 +89,7 @@ const Post = ({ text, image, comments, onCommentPress }) => (
   <View style={styles.boxPubli}>
     <View style={styles.indent}>
       <Avatar />
-      <Usuario nome="Xereca" cargo="Diretor(a)" />
+      <Usuario nome="Raimundo" cargo="Diretor(a)" />
     </View>
 
     <View style={styles.boxFeed}>
@@ -132,7 +132,7 @@ const HomeScreenProfessor = () => {
       const newComment = {
         text: commentText,
         author: {
-          name: 'Xereca',
+          name: 'Raimundo',
           photo: 'https://i.pinimg.com/564x/e6/d0/df/e6d0dfdbf39ec45872bfd55993f6adc1.jpg',
         },
       };
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   postButton: {
     backgroundColor: '#28A745',
-    borderRadius: 5,
+    borderRadius: 30,
     padding: 10,
     alignItems: 'center',
     marginVertical: 10,
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   botao: {
     borderRadius: 30,
-    backgroundColor: '#007BFF',
+    backgroundColor: '#00527C',
     padding: 10,
     alignItems: 'center',
     flexDirection: 'row',
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   closeButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#00527C',
     borderRadius: 30,
     padding: 10,
     alignItems: 'center',
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#007BFF',
+    backgroundColor: '#00527C',
     borderRadius: 50,
     padding: 15,
     elevation: 5,

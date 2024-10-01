@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SwipeGestures from 'react-native-swipe-gestures';
+import { TouchableOpacity } from 'react-native';
 
 const ReclamacoesSugest = () => {
   const navigation = useNavigation();
@@ -67,10 +68,9 @@ const ReclamacoesSugest = () => {
           />
         </ScrollView>
 
-        <Button
-          title="Enviar"
-          onPress={EnviarReclamacoesouSugestoes}
-        />
+        <TouchableOpacity onPress={EnviarReclamacoesouSugestoes} style={styles.sendButton}>
+          <Text style={styles.sendButtonText}>Enviar</Text>
+        </TouchableOpacity>
         {mensagemErro !== '' && (
           <Text style={styles.mensagemErro}>{mensagemErro}</Text>
         )}
@@ -122,6 +122,17 @@ const styles = StyleSheet.create({
   mensagemErro: {
     color: 'red',
     marginTop: 10,
+  },
+  sendButton: {
+    width: '15%',
+    backgroundColor: '#28A745',
+    borderRadius: 30,
+    padding: 10,
+    alignItems: 'center',
+  },
+  sendButtonText: {
+    color: '#FFFFFF',
+    borderRadius: 30
   },
 });
 
