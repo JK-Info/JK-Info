@@ -6,6 +6,8 @@ import DrawerNavigatorAluno from './src/Components/DrawerNavigation'; // Navegad
 import DrawerNavigatorProfessor from './src/Components/DrawerNavigationProfessor'; // Navegador de Professores
 import TabNavigatorAluno from './src/Components/TabNavigationAluno.js'; // Navegador de Abas de Alunos
 import TabNavigatorProfessor from './src/Components/TabNavigationProfessor'; // Navegador de Abas de Professores
+import TabNavigatorGestao from './src/Components/TabNavigatorGestor.js';
+import DrawerNavigatorGestor from './src/Components/DrawerNavigationGestao.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +40,17 @@ export default function App() {
           component={TabNavigatorProfessor}
           options={{ headerShown: false }}
         />
+        <Stack.Screen 
+        name="TabNavigatorGestao"
+        component={TabNavigatorGestao}
+        options={{headerShown: false}}
+        />
+        <Stack.Screen 
+        name="DrawerNavigatorGestao"
+        component={DrawerNavigatorGestor}
+        options={{headerShown: false}}
+        />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

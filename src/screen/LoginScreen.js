@@ -13,8 +13,11 @@ const LoginScreen = ({ navigation }) => {
     if(email === 'aluno@teste'){
       navigation.replace('DrawerNavigatorAluno');
     }
-    else if(email === 'professor@teste'){
+    else if(email === 'professor'){
       navigation.replace('DrawerNavigatorProfessor')
+    }
+    if (gestao === 'gestao@teste'){
+      navigation.replace('DrawerNavigatorGestao')
     }
     else
     {
