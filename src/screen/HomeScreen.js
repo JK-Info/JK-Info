@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+const Stack = createStackNavigator();
 
 const Avatar = () => (
   <View>
@@ -156,6 +160,20 @@ const HomeScreen = () => {
   );
 };
 
+const App = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen} 
+          options={{ headerShown: false }} // Desativa o cabeçalho padrão
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -278,7 +296,6 @@ const styles = StyleSheet.create({
   },
   sendButtonText: {
     color: '#FFFFFF',
-    borderRadius: 30
   },
   closeButton: {
     backgroundColor: '#00527C',
@@ -314,9 +331,6 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     marginRight: 10,
-  },
-  comentarioTextoContainer: {
-    flex: 1,
   },
   nomeAutor: {
     fontSize: 12,

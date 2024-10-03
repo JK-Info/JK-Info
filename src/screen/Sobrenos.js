@@ -17,9 +17,8 @@ const membrosDaEquipe = [
     nome: 'Lucas Malone',
     funcao: 'Programador Back-End',
     contatos: [
-      { plataforma: 'Github', link: 'url_github_membro_2' },
-      { plataforma: 'Linkedin', link: 'url_linkedin_membro_2' },
-      { plataforma: 'Instagram', link: 'https://instagram.com/guigozt' },
+      { plataforma: 'Github', link: 'https:/github.com/LucasMalone' },
+      { plataforma: 'Instagram', link: 'https://instagram.com/malonekastel' },
     ],
     foto: fotoGuilherme,
   },
@@ -27,7 +26,7 @@ const membrosDaEquipe = [
     nome: 'Pablo Henrique',
     funcao: 'Programador Back-End',
     contatos: [
-      { plataforma: 'Github', link: 'url_github_membro_3' },
+      { plataforma: 'Github', link: 'https://github.com/PabloHenrique1533' },
       { plataforma: 'Linkedin', link: 'url_linkedin_membro_3' },
       { plataforma: 'Instagram', link: 'https://instagram.com/guigozt' },
     ],
@@ -37,9 +36,8 @@ const membrosDaEquipe = [
     nome: 'Caique Rocha',
     funcao: 'Programador Full-Stack',
     contatos: [
-      { plataforma: 'Github', link: 'url_github_membro_4' },
-      { plataforma: 'Linkedin', link: 'url_linkedin_membro_4' },
-      { plataforma: 'Instagram', link: 'https://instagram.com/guigozt' },
+      { plataforma: 'Github', link: 'https:/github.com/c9iqueee' },
+      { plataforma: 'Instagram', link: 'https://instagram.com/kkjcaique' },
     ],
     foto: fotoGuilherme,
   }
