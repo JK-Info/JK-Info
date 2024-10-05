@@ -80,12 +80,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
     paddingHorizontal: 10,
+    backgroundColor: '#fff', // Fundo branco consistente
   },
   fotoPerfil: {
     width: 250,
     height: 250,
-    borderRadius: 125,
+    borderRadius: 125, // Bordas arredondadas
     marginBottom: 20,
+    borderWidth: 2,
   },
   informacoesContainer: {
     alignItems: 'center',
@@ -94,24 +96,27 @@ const styles = StyleSheet.create({
   nomeAluno: {
     fontSize: 25,
     margin: 10,
+    color: '#333', // Cor azul para o nome
   },
   emailAluno: {
     fontSize: 20,
     width: '100%',
     textAlign: 'center',
+    color: '#333', // Cor do texto
   },
   dadosAluno: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '80%',
     marginTop: 10,
+    color: '#333', // Cor do texto
   },
   botaoContainer: {
     marginVertical: 20,
     width: '100%',
-    backgroundColor: '#00527C',
+    backgroundColor: '#ff6400', // Laranja para o botão
     padding: 15,
-    borderRadius: 30,
+    borderRadius: 30, // Bordas arredondadas
     alignItems: 'center',
   },
   textoBotao: {

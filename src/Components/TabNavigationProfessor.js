@@ -8,11 +8,16 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigatorProfessor = () => (
   <Tab.Navigator
-    screenOptions={{
-      tabBarActiveTintColor: '#e91e63',
-      tabBarInactiveTintColor: 'gray',
-      tabBarStyle: { backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#ccc' },
-    }}
+  screenOptions={{
+    tabBarActiveTintColor: '#FFFFFF', // Cor do texto da aba ativa
+    tabBarInactiveTintColor: 'gray',   // Cor do texto da aba inativa
+    tabBarStyle: {
+      backgroundColor: '#FFFFFF',       // Cor de fundo da tab bar
+      borderTopWidth: 1,
+      borderTopColor: '#ccc',
+    },
+    tabBarActiveBackgroundColor: '#00527C', // Cor de fundo da aba ativa
+  }}
   >
     <Tab.Screen name="Home" component={HomeScreenProfessor} />
     <Tab.Screen name="Reclamações" component={ReclamacoesSugest} />

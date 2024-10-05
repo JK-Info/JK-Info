@@ -12,7 +12,20 @@ import NotasGestao from '../screenGestao/NotasGestao';
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigatorGestao = ( )=> (
-    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />}>
+  <Drawer.Navigator
+    drawerContent={props => <CustomDrawerContent {...props} />}
+    screenOptions={{
+      drawerActiveTintColor: '#FFFFFF',  // Cor do texto quando a aba está ativa
+      drawerInactiveTintColor: '#d3d3d3',  // Cor do texto quando a aba está inativa
+      drawerStyle: {
+        backgroundColor: '#00527C',  // Cor de fundo do drawer
+      },
+      headerStyle: {
+        backgroundColor: '#00527C',  // Cor do fundo do cabeçalho
+      },
+      headerTintColor: '#FFFFFF',  // Cor do texto do cabeçalho
+    }}
+  >
     <Drawer.Screen name="Home" component={TabNavigatorGestor} />
     <Drawer.Screen name="Perfil" component={PerfilGestao} />
     <Drawer.Screen name="Rede" component={RedeGestor} />

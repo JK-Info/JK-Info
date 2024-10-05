@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, FlatList, TextInput } from 'react-native';
 
 const alunosData = [
   { key: '1', nome: 'Guilherme Gomes', email: 'guilherme.silva2616@etec.sp.gov.br' },
@@ -24,11 +24,17 @@ const professoresData = [
 ];
 
 const TurmaScreen = () => {
-  const notasData = [
+  const [notas, setNotas] = useState([
     'Leonardo: Postada a atividade de PAM',
     'Jefferson: Data de entrega da atividade de DES',
     'Ederson: Enviado o Power Point da aula de sexta',
-  ];
+  ]);
+
+  const handleNotaChange = (text, index) => {
+    const updatedNotas = [...notas];
+    updatedNotas[index] = text;
+    setNotas(updatedNotas);
+  };
 
   const renderAlunoItem = ({ item }) => (
     <View style={styles.alunoItem}>
@@ -54,8 +60,15 @@ const TurmaScreen = () => {
         <Text style={styles.notasHeader}>Notas</Text>
         <View style={styles.notasItem}>
           <FlatList
-            data={notasData}
-            renderItem={({ item }) => <Text>{item}</Text>}
+            data={notas}
+            renderItem={({ item, index }) => (
+              <TextInput
+                style={styles.notaInput}
+                value={item}
+                onChangeText={(text) => handleNotaChange(text, index)}
+                multiline={true} // Permite múltiplas linhas
+              />
+            )}
             keyExtractor={(item, index) => index.toString()}
             showsVerticalScrollIndicator={false}
           />
@@ -119,6 +132,7 @@ const styles = StyleSheet.create({
   alunoRM: {
     fontSize: 14,
     color: '#555',
+    textAlign: 'start', // Alinhar RM à direita
   },
   notasSection: {
     padding: 10,
@@ -134,6 +148,14 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
   },
+  notaInput: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 10,
+  },
   rowContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -146,7 +168,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5', // Cor de fundo padrão para alunos
     maxHeight: 400, // Altura máxima para permitir rolagem
   },
   professoresSection: {
@@ -156,7 +178,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5', // Cor de fundo padrão para professores
     maxHeight: 400, // Altura máxima para permitir rolagem
   },
   sectionHeader: {
@@ -169,6 +191,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    backgroundColor: '#fff', // Cor de fundo para cada item da lista
+    padding: 10,
+    borderRadius: 5,
   },
   alunoEmail: {
     fontSize: 11,

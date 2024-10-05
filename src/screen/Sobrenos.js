@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import fotoGuilherme from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
 const membrosDaEquipe = [
@@ -17,7 +17,7 @@ const membrosDaEquipe = [
     nome: 'Lucas Malone',
     funcao: 'Programador Back-End',
     contatos: [
-      { plataforma: 'Github', link: 'https:/github.com/LucasMalone' },
+      { plataforma: 'Github', link: 'https://github.com/LucasMalone' },
       { plataforma: 'Instagram', link: 'https://instagram.com/malonekastel' },
     ],
     foto: fotoGuilherme,
@@ -36,7 +36,7 @@ const membrosDaEquipe = [
     nome: 'Caique Rocha',
     funcao: 'Programador Full-Stack',
     contatos: [
-      { plataforma: 'Github', link: 'https:/github.com/c9iqueee' },
+      { plataforma: 'Github', link: 'https://github.com/c9iqueee' },
       { plataforma: 'Instagram', link: 'https://instagram.com/kkjcaique' },
     ],
     foto: fotoGuilherme,
@@ -53,10 +53,12 @@ const Sobrenos = () => {
             <Text style={styles.nome}>{membro.nome}</Text>
             <Text style={styles.funcao}>{membro.funcao}</Text>
             {membro.contatos.map((contato, index) => (
-              <Text key={index} style={styles.contato}>
-                <Text style={styles.plataformaContato}>{contato.plataforma}: </Text>
-                <Text style={styles.linkContato}>{contato.link}</Text>
-              </Text>
+              <TouchableOpacity key={index} onPress={() => Linking.openURL(contato.link)}>
+                <Text style={styles.contato}>
+                  <Text style={styles.plataformaContato}>{contato.plataforma}: </Text>
+                  <Text style={styles.linkContato}>{contato.link}</Text>
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -74,7 +76,7 @@ const styles = StyleSheet.create({
   containerMembro: {
     marginBottom: 20,
     padding: 15,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: {
@@ -108,12 +110,14 @@ const styles = StyleSheet.create({
   },
   contato: {
     fontSize: 14,
+    marginVertical: 2,
   },
   plataformaContato: {
     fontWeight: 'bold',
   },
   linkContato: {
     color: 'blue',
+    textDecorationLine: 'underline', // Adiciona um sublinhado aos links
   },
 });
 

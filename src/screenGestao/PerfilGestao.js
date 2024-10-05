@@ -11,8 +11,8 @@ const FotoPerfil = ({ foto }) => (
 
 const InformacoesPerfil = () => (
   <View style={styles.informacoesContainer}>
-    <Text style={styles.nomeProfessor}>Nome do Professor(a)</Text>
-    <Text style={styles.emailProfessor}>Email: professor@etec.sp.gov.br</Text>
+    <Text style={styles.nomeProfessor}>Nome do gestor(a)</Text>
+    <Text style={styles.emailProfessor}>Email: gestor@etec.sp.gov.br</Text>
     <View style={styles.dadosProfessor}>
       <Text>LinkedIn: gestor.br.com</Text>
     </View>

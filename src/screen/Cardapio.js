@@ -4,10 +4,10 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 const Cardapio = () => {
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Cardápio</Text>
-
       <View style={styles.weekDayContainer}>
-        <Text style={styles.weekDay}>Segunda-feira</Text>
+        <View style={styles.fundoTitulo}>
+          <Text style={styles.weekDay}>Segunda-feira</Text>
+        </View>
         <View style={styles.menuContainer}>
           <Text>Arroz integral</Text>
           <Text>Feijão</Text>
@@ -17,7 +17,9 @@ const Cardapio = () => {
       </View>
 
       <View style={styles.weekDayContainer}>
-        <Text style={styles.weekDay}>Terça-feira</Text>
+        <View style={styles.fundoTitulo}>
+          <Text style={styles.weekDay}>Terça-feira</Text>
+        </View>
         <View style={styles.menuContainer}>
           <Text>Arroz integral</Text>
           <Text>Feijão</Text>
@@ -27,7 +29,9 @@ const Cardapio = () => {
       </View>
 
       <View style={styles.weekDayContainer}>
-        <Text style={styles.weekDay}>Quarta-feira</Text>
+        <View style={styles.fundoTitulo}>
+          <Text style={styles.weekDay}>Quarta-feira</Text>
+        </View>
         <View style={styles.menuContainer}>
           <Text>Arroz</Text>
           <Text>Feijão preto</Text>
@@ -38,7 +42,9 @@ const Cardapio = () => {
       </View>
 
       <View style={styles.weekDayContainer}>
-        <Text style={styles.weekDay}>Quinta-feira</Text>
+        <View style={styles.fundoTitulo}>
+          <Text style={styles.weekDay}>Quinta-feira</Text>
+        </View>
         <View style={styles.menuContainer}>
           <Text>Arroz integral</Text>
           <Text>Feijão</Text>
@@ -48,7 +54,9 @@ const Cardapio = () => {
       </View>
 
       <View style={styles.weekDayContainer}>
-        <Text style={styles.weekDay}>Sexta-feira</Text>
+        <View style={styles.fundoTitulo}>
+          <Text style={styles.weekDay}>Sexta-feira</Text>
+        </View>
         <View style={styles.menuContainer}>
           <Text>Arroz</Text>
           <Text>Feijão preto</Text>
@@ -75,10 +83,14 @@ const styles = StyleSheet.create({
   weekDayContainer: {
     marginBottom: 20,
   },
+  fundoTitulo: {
+    backgroundColor: '#e0e0e0', // Cor de fundo leve
+    padding: 10,
+    borderRadius: 5,
+  },
   weekDay: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
   },
   menuContainer: {
     padding: 15,

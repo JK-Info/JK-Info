@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SwipeGestures from 'react-native-swipe-gestures';
 import { TouchableOpacity } from 'react-native';
@@ -71,6 +71,7 @@ const ReclamacoesSugest = () => {
         <TouchableOpacity onPress={EnviarReclamacoesouSugestoes} style={styles.sendButton}>
           <Text style={styles.sendButtonText}>Enviar</Text>
         </TouchableOpacity>
+
         {mensagemErro !== '' && (
           <Text style={styles.mensagemErro}>{mensagemErro}</Text>
         )}
@@ -96,14 +97,14 @@ const styles = StyleSheet.create({
     height: 50,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 30, // Bordas arredondadas
     padding: 10,
     marginVertical: 10,
   },
   inputMensagemContainer: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 18, // Bordas arredondadas
     width: '100%',
     maxHeight: 300,
     marginBottom: 10,
@@ -124,15 +125,15 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   sendButton: {
-    width: '15%',
-    backgroundColor: '#28A745',
-    borderRadius: 30,
+    width: '30%', // Aumenta a largura do botão
+    backgroundColor: '#ff6400', // Azul
+    borderRadius: 20,
     padding: 10,
     alignItems: 'center',
   },
   sendButtonText: {
-    color: '#FFFFFF',
-    borderRadius: 30
+    color: '#FFFFFF', // Texto branco
+    fontSize: 16,
   },
 });
 

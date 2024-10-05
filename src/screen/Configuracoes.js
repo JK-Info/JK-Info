@@ -19,43 +19,49 @@ const Configuracoes = () => {
     <View style={styles.container}>
       <Text style={styles.titulo}>Configurações</Text>
 
-      <Text style={styles.opcaoTitulo}>Tema do aplicativo:</Text>
+      <View style={styles.fundoTitulo}>
+        <Text style={styles.opcaoTitulo}>Tema do aplicativo:</Text>
+      </View>
       <View style={styles.opcaoContainer}>
         <TouchableOpacity onPress={() => setTema('claro')} style={styles.radioContainer}>
+          <View style={[styles.radioSelecionado, tema === 'claro' && styles.radioSelecionadoActive]} />
           <Text style={styles.radioTexto}>Claro</Text>
-          {tema === 'claro' && <View style={styles.radioSelecionado} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setTema('escuro')} style={styles.radioContainer}>
+          <View style={[styles.radioSelecionado, tema === 'escuro' && styles.radioSelecionadoActive]} />
           <Text style={styles.radioTexto}>Escuro</Text>
-          {tema === 'escuro' && <View style={styles.radioSelecionado} />}
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.opcaoTitulo}>Tamanho da fonte:</Text>
+      <View style={styles.fundoTitulo}>
+        <Text style={styles.opcaoTitulo}>Tamanho da fonte:</Text>
+      </View>
       <View style={styles.opcaoContainer}>
         <TouchableOpacity onPress={() => setTamanhoFonte('pequena')} style={styles.radioContainer}>
+          <View style={[styles.radioSelecionado, tamanhoFonte === 'pequena' && styles.radioSelecionadoActive]} />
           <Text style={styles.radioTexto}>Pequena</Text>
-          {tamanhoFonte === 'pequena' && <View style={styles.radioSelecionado} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setTamanhoFonte('medio')} style={styles.radioContainer}>
+          <View style={[styles.radioSelecionado, tamanhoFonte === 'medio' && styles.radioSelecionadoActive]} />
           <Text style={styles.radioTexto}>Média</Text>
-          {tamanhoFonte === 'medio' && <View style={styles.radioSelecionado} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setTamanhoFonte('grande')} style={styles.radioContainer}>
+          <View style={[styles.radioSelecionado, tamanhoFonte === 'grande' && styles.radioSelecionadoActive]} />
           <Text style={styles.radioTexto}>Grande</Text>
-          {tamanhoFonte === 'grande' && <View style={styles.radioSelecionado} />}
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.opcaoTitulo}>Idioma do aplicativo:</Text>
+      <View style={styles.fundoTitulo}>
+        <Text style={styles.opcaoTitulo}>Idioma do aplicativo:</Text>
+      </View>
       <View style={styles.opcaoContainer}>
         <TouchableOpacity onPress={() => setIdioma('portugues')} style={styles.radioContainer}>
+          <View style={[styles.radioSelecionado, idioma === 'portugues' && styles.radioSelecionadoActive]} />
           <Text style={styles.radioTexto}>Português</Text>
-          {idioma === 'portugues' && <View style={styles.radioSelecionado} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setIdioma('ingles')} style={styles.radioContainer}>
+          <View style={[styles.radioSelecionado, idioma === 'ingles' && styles.radioSelecionadoActive]} />
           <Text style={styles.radioTexto}>Inglês</Text>
-          {idioma === 'ingles' && <View style={styles.radioSelecionado} />}
         </TouchableOpacity>
       </View>
 
@@ -73,17 +79,22 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
-    justifyContent: 'space-between',
   },
   titulo: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#00527C', // Cor do título
+  },
+  fundoTitulo: {
+    backgroundColor: '#e0e0e0', // Cor de fundo leve (cinza claro)
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
   },
   opcaoTitulo: {
     fontSize: 18,
-    marginTop: 15,
-    marginBottom: 5,
+    color: '#333', // Cor do texto das opções
   },
   opcaoContainer: {
     flexDirection: 'row',
@@ -97,21 +108,29 @@ const styles = StyleSheet.create({
   },
   radioTexto: {
     fontSize: 16,
-    marginRight: 10,
+    marginLeft: 10,
+    color: '#555', // Cor do texto das opções
   },
   radioSelecionado: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#007bff',
+    borderWidth: 2,
+    borderColor: '#007bff', // Cor da borda da bolinha
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent', // Fundo transparente por padrão
+  },
+  radioSelecionadoActive: {
+    backgroundColor: '#007bff', // Cor de fundo da bolinha quando selecionada
   },
   sairContainer: {
     marginTop: 'auto',
   },
   botaoSair: {
-    backgroundColor: '#ff4d4d', // Cor de fundo do botão
+    backgroundColor: '#ff6400', // Cor de fundo do botão
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 20,
     alignItems: 'center',
   },
   textoSair: {

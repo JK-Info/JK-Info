@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableWithoutFeedback, Alert, ScrollView } from 'react-native';
 import SwipeGestures from 'react-native-swipe-gestures';
+import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg'; // Importando a imagem
 
-const Atividades = ({ navigation }) => {
+const Notificacoes = ({ navigation }) => {
   const [notificacoes, setNotificacoes] = useState([]);
 
   useEffect(() => {
@@ -14,7 +15,7 @@ const Atividades = ({ navigation }) => {
       id: Math.random().toString(),
       usuario: 'Usuario',
       atividade: 'reagiu ao seu comentário',
-      fotoUsuario: 'https://th.bing.com/th/id/OIP.5yYQS45nqRuMUGZL6lBN9QHaHa?rs=1&pid=ImgDetMain'
+      fotoUsuario: fotoPerfilAnonima, // Usando a imagem importada
     };
     setNotificacoes(prevNotificacoes => [...prevNotificacoes, novaNotificacao]);
   };
@@ -51,14 +52,14 @@ const Atividades = ({ navigation }) => {
       config={{ velocityThreshold: 0.1, directionalOffsetThreshold: 80 }}
       style={styles.container}
     >
-      <ScrollView>
+      <ScrollView style={styles.scrollContainer}>
         <View style={styles.container}>
           {notificacoes.map((notificacao) => (
             <TouchableWithoutFeedback key={notificacao.id} onLongPress={() => handleLongPressNotification(notificacao.id)}>
               <View style={styles.notificacaoContainer}>
                 <View style={styles.notificacaoContent}>
-                  <Image source={{ uri: notificacao.fotoUsuario }} style={styles.fotoUsuario} />
-                  <Text>{`${notificacao.usuario} ${notificacao.atividade}`}</Text>
+                  <Image source={notificacao.fotoUsuario} style={styles.fotoUsuario} /> {/* Usando a imagem importada */}
+                  <Text style={styles.notificacaoTexto}>{`${notificacao.usuario} ${notificacao.atividade}`}</Text>
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -72,10 +73,11 @@ const Atividades = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 10,
-    paddingTop: 10,
-    backgroundColor: '#f0f0f0',
-    width: '100%', // Deixa o container principal expandir 100% da largura do dispositivo
+    backgroundColor: '#fff', // Cor de fundo consistente
+    padding: 10,
+  },
+  scrollContainer: {
+    width: '100%', // Deixa o container do scroll preencher 100% da largura
   },
   notificacaoContainer: {
     flexDirection: 'column',
@@ -83,14 +85,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
+    borderRadius: 60, // Bordas arredondadas
+    padding: 15,
     width: '100%', // Ajusta para preencher 100% da largura do container principal
+    elevation: 2, // Sombra para um efeito de elevação
   },
   notificacaoContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    width: '100%' // Ajusta para preencher 100% da largura da notificação
+    width: '100%', // Ajusta para preencher 100% da largura da notificação
   },
   fotoUsuario: {
     width: 50,
@@ -98,6 +101,10 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 10,
   },
+  notificacaoTexto: {
+    fontSize: 16,
+    color: '#333', // Cor do texto
+  },
 });
 
-export default Atividades;
+export default Notificacoes;
