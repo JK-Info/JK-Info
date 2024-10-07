@@ -1,416 +1,432 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
 const Avatar = () => (
-    <View>
-      <Image source={{ uri: 'https://i.pinimg.com/564x/e6/d0/df/e6d0dfdbf39ec45872bfd55993f6adc1.jpg' }} style={styles.avatarImage} />
-    </View>
+  <Image source={fotoPerfilAnonima} style={styles.avatarImage} />
+);
+
+const Usuario = ({ nome, cargo }) => (
+  <View style={styles.informacoesPublicacao}>
+    <Text>{nome}</Text>
+    <Text style={{ fontSize: 11 }}>{cargo}</Text>
+  </View>
+);
+
+const BotaoComentar = ({ onPress, comentarioCount }) => (
+  <View style={styles.containerBotao}>
+    <TouchableOpacity onPress={onPress} style={styles.botao}>
+      <Text style={styles.botaoTexto}>Comentar ({comentarioCount})</Text>
+    </TouchableOpacity>
+  </View>
+);
+
+const Curtir = ({ count, liked, onPress }) => (
+  <View style={styles.containerCurtir}>
+    <TouchableOpacity onPress={onPress}>
+      <Icon name="heart" size={24} color={liked ? '#FF0000' : '#000'} />
+    </TouchableOpacity>
+    <Text style={styles.curtidasTexto}>{count}</Text>
+  </View>
+);
+
+const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
+  const [comentario, setComentario] = useState('');
+
+  const handleSendComment = () => {
+    if (comentario.trim()) {
+      const newComment = {
+        text: comentario,
+        author: {
+          name: 'Diretor',
+          photo: fotoPerfilAnonima,
+        },
+        liked: false,
+        likeCount: 0,
+      };
+      onSendComment([...comments, newComment]);
+      setComentario('');
+      onClose();
+    }
+  };
+
+  const handleLikeComment = (index) => {
+    const updatedComments = [...comments];
+    updatedComments[index].liked = !updatedComments[index].liked;
+    updatedComments[index].likeCount += updatedComments[index].liked ? 1 : -1;
+    onSendComment(updatedComments);
+  };
+
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Comentários</Text>
+
+          <ScrollView style={styles.comentariosContainer}>
+            {comments.map((comment, index) => (
+              <View key={index} style={styles.comentarioContainer}>
+                <Image source={comment.author.photo} style={styles.avatarComment} />
+                <View style={styles.comentarioTextoContainer}>
+                  <Text style={styles.nomeAutor}>{comment.author.name}</Text>
+                  <Text style={styles.comentarioTexto}>{comment.text}</Text>
+                </View>
+                <Curtir 
+                  count={comment.likeCount} 
+                  liked={comment.liked} 
+                  onPress={() => handleLikeComment(index)} 
+                />
+              </View>
+            ))}
+          </ScrollView>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Escreva um comentário..."
+            value={comentario}
+            onChangeText={setComentario}
+          />
+          <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
+            <Text style={styles.sendButtonText}>Enviar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
   );
-  
-  const Divisao = () => (
-    <View style={styles.centroLinha}>
-      <View style={styles.linha} />
-    </View>
-  );
-  
-  const Usuario = ({ nome, cargo }) => (
-    <View style={styles.containerAvatar}>
-      <View style={styles.informacoesPublicacao}>
-        <Text>{nome}</Text>
-        <Text style={{ fontSize: 11 }}>{cargo}</Text>
+};
+
+const Post = ({ text, image, comments, onCommentPress, onCommentUpdate }) => {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+
+  const handleLikePost = () => {
+    setLiked(!liked);
+    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+  };
+
+  const handleCommentPress = () => {
+    onCommentPress(comments); // Passa os comentários ao modal
+  };
+
+  return (
+    <View style={styles.boxPubli}>
+      <View style={styles.indent}>
+        <Avatar />
+        <Usuario nome="Diretor" cargo="Diretor(a)" />
+      </View>
+
+      <View style={styles.boxFeed}>
+        <Text style={styles.textoPubli}>{text}</Text>
+        {image && <Image source={{ uri: image }} style={styles.postImage} />}
+      </View>
+      
+      <View style={styles.bottons}>
+        <Curtir count={likeCount} liked={liked} onPress={handleLikePost} />
+        <BotaoComentar onPress={handleCommentPress} comentarioCount={comments.length} />
       </View>
     </View>
   );
-  
-  const BotaoComentar = ({ onPress, comentarioCount }) => (
-    <View style={styles.containerBotao}>
-      <TouchableOpacity onPress={onPress} style={styles.botao}>
-        <Text style={styles.botaoTexto}>Comentar ({comentarioCount})</Text>
-      </TouchableOpacity>
-    </View>
+};
+
+const HomeScreenGestao = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [posts, setPosts] = useState([
+    {
+      text: "O Club de Regatas Vasco da Gama, mais conhecido como Vasco da Gama, é uma entidade sócio-poliesportiva brasileira.",
+      image: null,
+      comments: [],
+    },
+    {
+      text: "A National Basketball Association (NBA) é a principal liga de basquetebol profissional da América do Norte.",
+      image: "https://de2.sportal365images.com/process/smp-betway-images/betway.com/28072023/e7737cea-2040-48fd-a041-c6ec11f367a6.jpg",
+      comments: [],
+    }
+  ]);
+
+  const [newPostText, setNewPostText] = useState('');
+  const [newPostImage, setNewPostImage] = useState('');
+  const [createPostModalVisible, setCreatePostModalVisible] = useState(false);
+
+  const toggleModal = () => setModalVisible(!modalVisible);
+  const toggleCreatePostModal = () => setCreatePostModalVisible(!createPostModalVisible);
+
+  const handleCommentUpdate = (index, newComments) => {
+    const updatedPosts = [...posts];
+    updatedPosts[index].comments = newComments;
+    setPosts(updatedPosts);
+  };
+
+  const handleCreatePost = () => {
+    if (newPostText.trim() || newPostImage) {
+      const newPost = {
+        text: newPostText,
+        image: newPostImage,
+        comments: [],
+      };
+      setPosts([newPost, ...posts]); // Adiciona novo post no topo
+      setNewPostText('');
+      setNewPostImage('');
+      toggleCreatePostModal(); // Fecha o modal após criar o post
+    }
+  };
+
+  const filteredPosts = posts.filter(post =>
+    post.text.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
-  const Curtir = ({ onPress }) => (
-    <View style={styles.containerCurtir}>
-      <TouchableOpacity onPress={onPress} style={styles.botao}>
-        <Icon name="heart" size={24} color="#FF0000" />
-        <Text style={styles.botaoTexto}>Curtir</Text>
+
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Pesquisar..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
+      <ScrollView style={styles.scrollView}>
+        {filteredPosts.map((post, index) => (
+          <Post 
+            key={index}
+            text={post.text}
+            image={post.image}
+            comments={post.comments} // Passando os comentários para o Post
+            onCommentPress={() => {
+              setComments(post.comments); // Passa os comentários do post específico para o modal
+              toggleModal(); // Abre o modal
+            }}
+            onCommentUpdate={(newComments) => handleCommentUpdate(index, newComments)} // Atualiza os comentários
+          />
+        ))}
+      </ScrollView>
+
+      <CommentModal 
+        visible={modalVisible} 
+        onClose={toggleModal} 
+        comments={comments} 
+        onSendComment={(newComments) => {
+          setComments(newComments);
+          // Atualiza os comentários no post atual
+          const postIndex = posts.findIndex(post => post.comments === comments);
+          if (postIndex !== -1) {
+            handleCommentUpdate(postIndex, newComments);
+          }
+        }} 
+      />
+       {/* Botão flutuante para criar publicação */}
+       <TouchableOpacity 
+        style={styles.floatingButton} 
+        onPress={toggleCreatePostModal} // Abre o modal de criação de publicação
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>+</Text>
       </TouchableOpacity>
-    </View>
-  );
-  
-  const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
-    const [comentario, setComentario] = useState('');
-  
-    return (
+
+      {/* Modal para criação de nova publicação */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={visible}
-        onRequestClose={onClose}
+        visible={createPostModalVisible}
+        onRequestClose={toggleCreatePostModal}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Comentários</Text>
-            
-            <ScrollView style={styles.comentariosContainer}>
-              {comments.map((comment, index) => (
-                <View key={index} style={styles.comentarioContainer}>
-                  <Image source={{ uri: comment.author.photo }} style={styles.avatarComment} />
-                  <View style={styles.comentarioTextoContainer}>
-                    <Text style={styles.nomeAutor}>{comment.author.name}</Text>
-                    <Text style={styles.comentarioTexto}>{comment.text}</Text>
-                  </View>
-                  <Curtir onPress={() => alert('Curtido!')} />
-                </View>
-              ))}
-            </ScrollView>
-  
+            <Text style={styles.modalTitle}>Criar Publicação</Text>
+
             <TextInput
-              style={styles.input}
-              placeholder="Escreva um comentário..."
-              value={comentario}
-              onChangeText={setComentario}
+              style={styles.newPostInput}
+              placeholder="Digite o texto da publicação"
+              value={newPostText}
+              onChangeText={setNewPostText}
             />
-            <TouchableOpacity onPress={() => { onSendComment(comentario); setComentario(''); }} style={styles.sendButton}>
-              <Text style={styles.sendButtonText}>Enviar</Text>
+            <TextInput
+              style={styles.newPostInput}
+              placeholder="URL da imagem (opcional)"
+              value={newPostImage}
+              onChangeText={setNewPostImage}
+            />
+            <TouchableOpacity onPress={handleCreatePost} style={styles.sendButton}>
+              <Text style={styles.sendButtonText}>Criar Publicação</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity onPress={toggleCreatePostModal} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Fechar</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
-    );
-  };
-  
-  const Post = ({ text, image, comments, onCommentPress }) => (
-    <View style={styles.boxPubli}>
-      <View style={styles.indent}>
-        <Avatar />
-        <Usuario nome="Raimundo" cargo="Diretor(a)" />
-      </View>
-  
-      <View style={styles.boxFeed}>
-        <Text style={styles.textoPubli}>{text}</Text>
-        {image && <Image source={{ uri: image }} style={styles.postImage} />}
-      </View>
-  
-      <View style={styles.bottons}>
-        <Curtir />
-        <BotaoComentar onPress={onCommentPress} comentarioCount={comments.length} />
-      </View>
     </View>
   );
+};
 
-  const HomeScreenGestao = () => {
-    const [modalVisible, setModalVisible] = useState(false);
-    const [postModalVisible, setPostModalVisible] = useState(false);
-    const [comments, setComments] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [posts, setPosts] = useState([
-      {
-        text: "O Club de Regatas Vasco da Gama, mais conhecido como Vasco da Gama, é uma entidade sócio-poliesportiva brasileira.",
-        image: null,
-        comments: [],
-      },
-      {
-        text: "A National Basketball Association (NBA) é a principal liga de basquetebol profissional da América do Norte.",
-        image: "https://de2.sportal365images.com/process/smp-betway-images/betway.com/28072023/e7737cea-2040-48fd-a041-c6ec11f367a6.jpg",
-        comments: [],
-      }
-    ]);
-    const [newPostText, setNewPostText] = useState('');
-    const [newPostImage, setNewPostImage] = useState('');
-  
-    const toggleModal = () => setModalVisible(!modalVisible);
-    const togglePostModal = () => setPostModalVisible(!postModalVisible);
-  
-    const handleSendComment = (commentText) => {
-      if (commentText) {
-        const newComment = {
-          text: commentText,
-          author: {
-            name: 'Raimundo',
-            photo: 'https://i.pinimg.com/564x/e6/d0/df/e6d0dfdbf39ec45872bfd55993f6adc1.jpg',
-          },
-        };
-        setComments([...comments, newComment]);
-        toggleModal();
-      }
-    };
-  
-    const handlePostSubmit = () => {
-      if (newPostText) {
-        const newPost = {
-          text: newPostText,
-          image: newPostImage,
-          comments: [],
-        };
-        setPosts([newPost, ...posts]); // Adiciona a nova publicação no topo
-        setNewPostText('');
-        setNewPostImage('');
-        togglePostModal(); // Fecha o modal após a postagem
-      }
-    };
-  
-    return (
-      <View style={styles.container}>
-        <ScrollView style={styles.scrollView}>
-          {/* Barra de Pesquisa */}
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Pesquisar..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-  
-          {/* Renderiza as postagens */}
-          {posts.map((post, index) => (
-            <View key={index}>
-              <Post 
-                text={post.text}
-                image={post.image}
-                comments={post.comments}
-                onCommentPress={toggleModal}
-              />
-              <Divisao />
-            </View>
-          ))}
-        </ScrollView>
-  
-        {/* Botão Flutuante para Nova Publicação */}
-        <TouchableOpacity onPress={togglePostModal} style={styles.floatingButton}>
-          <Icon name="plus" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-  
-        {/* Modal para Criar Nova Publicação */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={postModalVisible}
-          onRequestClose={togglePostModal}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Nova Publicação</Text>
-              <TextInput
-                style={styles.newPostInput}
-                placeholder="O que você deseja publicar?"
-                value={newPostText}
-                onChangeText={setNewPostText}
-              />
-              <TextInput
-                style={styles.newPostInput}
-                placeholder="URL da imagem (opcional)"
-                value={newPostImage}
-                onChangeText={setNewPostImage}
-              />
-              <TouchableOpacity onPress={handlePostSubmit} style={styles.postButton}>
-                <Text style={styles.postButtonText}>Publicar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={togglePostModal} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-  
-        <CommentModal visible={modalVisible} onClose={toggleModal} comments={comments} onSendComment={handleSendComment} />
-      </View>
-    );
-  };
-  
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-    },
-    scrollView: {
-      flex: 1,
-    },
-    avatarImage: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-    },
-    searchInput: {
-      height: 40,
-      borderColor: '#ddd',
-      borderWidth: 1,
-      borderRadius: 5,
-      margin: 20,
-      paddingHorizontal: 10,
-    },
-    newPostInput: {
-      height: 40,
-      borderColor: '#ddd',
-      borderWidth: 1,
-      borderRadius: 5,
-      marginBottom: 10,
-      paddingHorizontal: 10,
-      backgroundColor: '#f1f1f1', // Adicionando fundo claro
-    },
-    postButton: {
-      backgroundColor: '#28A745',
-      borderRadius: 30,
-      padding: 10,
-      alignItems: 'center',
-      marginVertical: 10,
-    },
-    postButtonText: {
-      color: '#FFFFFF',
-    },
-    boxFeed: {
-      backgroundColor: '#f1f1f1',
-      margin: 20,
-      marginLeft: '10%',
-      marginRight: '10%',
-      borderRadius: 15,
-      borderColor: 'black',
-      borderWidth: 1,
-    },
-    textoPubli: {
-      fontSize: 16,
-      margin: 10,
-    },
-    postImage: {
-      width: '99%',
-      height: 600,
-      borderRadius: 10,
-      marginTop: 10,
-      margin: 5,
-    },
-    boxPubli: {
-      justifyContent: 'center',
-      margin: 50,
-    },
-    containerAvatar: {
-      width: 70,
-    },
-    containerBotao: {
-      width: 190,
-      marginLeft: 10,
-      borderRadius: 30,
-    },
-    containerCurtir: {
-      width: 100,
-      borderRadius: 30,
-    },
-    indent: {
-      marginLeft: '10%',
-      flexDirection: 'row',
-    },
-    bottons: {
-      flexDirection: 'row',
-      flex: 1,
-      justifyContent: 'center',
-    },
-    centroLinha: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 20,
-    },
-    linha: {
-      width: '99%',
-      height: 1,
-      backgroundColor: '#d3d3d3',
-    },
-    botao: {
-      borderRadius: 30,
-      backgroundColor: '#00527C',
-      padding: 10,
-      alignItems: 'center',
-      flexDirection: 'row',
-      justifyContent: 'center',
-    },
-    botaoTexto: {
-      color: '#FFFFFF',
-      fontSize: 16,
-      marginLeft: 5,
-    },
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalContainer: {
-      width: '80%',
-      backgroundColor: 'white',
-      borderRadius: 10,
-      padding: 20,
-      elevation: 5,
-    },
-    modalTitle: {
-      fontSize: 20,
-      marginBottom: 10,
-      textAlign: 'center',
-    },
-    sendButton: {
-      backgroundColor: '#28A745',
-      borderRadius: 30,
-      padding: 10,
-      alignItems: 'center',
-    },
-    sendButtonText: {
-      color: '#FFFFFF',
-    },
-    closeButton: {
-      backgroundColor: '#00527C',
-      borderRadius: 30,
-      padding: 10,
-      alignItems: 'center',
-    },
-    closeButtonText: {
-      color: '#FFFFFF',
-    },
-    comentarioContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: '#ddd',
-    },
-    comentarioTexto: {
-      flex: 1,
-    },
-    comentariosContainer: {
-      maxHeight: 200,
-      marginBottom: 10,
-    },
-    informacoesPublicacao: {
-      marginLeft: '10%',
-      flex: 1,
-      alignItems: 'flex-start',
-      justifyContent: 'center',
-    },
-    avatarComment: {
-      width: 30,
-      height: 30,
-      borderRadius: 15,
-      marginRight: 10,
-    },
-    comentarioTextoContainer: {
-      flex: 1,
-    },
-    nomeAutor: {
-      fontSize: 12,
-      color: '#555',
-    },
-    floatingButton: {
-      position: 'absolute',
-      bottom: 20,
-      right: 20,
-      backgroundColor: '#00527C',
-      borderRadius: 50,
-      padding: 15,
-      elevation: 5,
-    },
-  });
-  
-  export default HomeScreenGestao;
-  
-  
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: '#007BFF',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    marginVertical: 10,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  boxPubli: {
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+  },
+  indent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  boxFeed: {
+    marginBottom: 10,
+  },
+  textoPubli: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  postImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+  },
+  bottons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  avatarImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  informacoesPublicacao: {
+    marginLeft: 10,
+  },
+  containerBotao: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  botao: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#00527C',
+    borderRadius: 20,
+  },
+  botaoTexto: {
+    color: '#fff',
+  },
+  containerCurtir: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  curtidasTexto: {
+    marginLeft: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  comentariosContainer: {
+    maxHeight: 200,
+  },
+  comentarioContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  avatarComment: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+  comentarioTextoContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
+  nomeAutor: {
+    fontWeight: 'bold',
+  },
+  comentarioTexto: {
+    marginBottom: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  sendButton: {
+    backgroundColor: '#00527C',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sendButtonText: {
+    color: 'white',
+  },
+  closeButton: {
+    backgroundColor: '#ff6400',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: 'white',
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#FF6347',
+    borderRadius: 50,
+    padding: 15,
+    elevation: 3,
+  },
+  newPostInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+});
+
+export default HomeScreenGestao;

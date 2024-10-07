@@ -11,10 +11,10 @@ const FotoPerfil = ({ foto }) => (
 
 const InformacoesPerfil = () => (
   <View style={styles.informacoesContainer}>
-    <Text style={styles.nomeProfessor}>Nome do gestor(a)</Text>
-    <Text style={styles.emailProfessor}>Email: gestor@etec.sp.gov.br</Text>
+    <Text style={styles.nomeProfessor}>Nome do Professor(a)</Text>
+    <Text style={styles.emailProfessor}>Email: professor@etec.sp.gov.br</Text>
     <View style={styles.dadosProfessor}>
-      <Text>LinkedIn: gestor.br.com</Text>
+      <Text>LinkedIn: professor.br.com</Text>
     </View>
   </View>
 );
@@ -50,16 +50,18 @@ const PerfilGestao = () => {
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
+ scrollContainer: {
     alignItems: 'center',
     paddingVertical: 20,
     paddingHorizontal: 10,
+    backgroundColor: '#fff', // Fundo branco consistente
   },
   fotoPerfil: {
     width: 250,
     height: 250,
-    borderRadius: 125,
+    borderRadius: 125, // Bordas arredondadas
     marginBottom: 20,
+    borderWidth: 2,
   },
   informacoesContainer: {
     alignItems: 'center',
@@ -68,24 +70,27 @@ const styles = StyleSheet.create({
   nomeProfessor: {
     fontSize: 25,
     margin: 10,
+    color: '#333', // Cor do nome
   },
   emailProfessor: {
     fontSize: 20,
     width: '100%',
     textAlign: 'center',
+    color: '#333', // Cor do texto
   },
   dadosProfessor: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '80%',
     marginTop: 10,
+    color: '#333', // Cor do texto
   },
   botaoContainer: {
     marginVertical: 20,
     width: '100%',
-    backgroundColor: '#00527C',
+    backgroundColor: '#ff6400', // Laranja para o botão
     padding: 15,
-    borderRadius: 30,
+    borderRadius: 30, // Bordas arredondadas
     alignItems: 'center',
   },
   textoBotao: {

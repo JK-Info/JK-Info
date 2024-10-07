@@ -1,6 +1,6 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import Cardapio from '../screen/Cardapio';
+import CardapioGestao from '../screenGestao/CardapioGestao';
 import Sobrenos from '../screen/Sobrenos';
 import Configuracoes from '../screen/Configuracoes';
 import CustomDrawerContent from './CustomDrawerContent';
@@ -30,7 +30,7 @@ const DrawerNavigatorGestao = ( )=> (
     <Drawer.Screen name="Perfil" component={PerfilGestao} />
     <Drawer.Screen name="Rede" component={RedeGestor} />
     <Drawer.Screen name="Notas" component={NotasGestao} />
-    <Drawer.Screen name="Cardápio" component={Cardapio} />
+    <Drawer.Screen name="Cardápio" component={CardapioGestao} />
     <Drawer.Screen name="Sobre nós" component={Sobrenos} />
     <Drawer.Screen name="Configurações" component={Configuracoes} />
   </Drawer.Navigator>

@@ -6,24 +6,21 @@ import SwipeGestures from 'react-native-swipe-gestures';
 const ReclamacoesSugestGestao = () => {
   const navigation = useNavigation();
 
-  // Simulação de mensagens enviadas pelos alunos
   const [mensagens, setMensagens] = useState([
     { id: '1', assunto: 'Problema com a plataforma', mensagem: 'Estou tendo dificuldades em acessar o sistema.', resposta: '' },
     { id: '2', assunto: 'Sugestão de melhorias', mensagem: 'Seria bom ter uma funcionalidade de lembrete.', resposta: '' },
   ]);
 
-  const [resposta, setResposta] = useState(''); // Estado para armazenar a resposta atual
-  const [mensagemSelecionada, setMensagemSelecionada] = useState(null); // Armazena a mensagem que está sendo visualizada
-  const [modalVisible, setModalVisible] = useState(false); // Controle de exibição do modal
+  const [resposta, setResposta] = useState('');
+  const [mensagemSelecionada, setMensagemSelecionada] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  // Função para excluir mensagem
   const excluirMensagem = (id) => {
     setMensagens(mensagens.filter(mensagem => mensagem.id !== id));
     setModalVisible(false);
     Alert.alert('Mensagem excluída', 'A mensagem foi excluída com sucesso!');
   };
 
-  // Função para responder à mensagem
   const responderMensagem = (id) => {
     if (!resposta) {
       Alert.alert('Erro', 'Por favor, escreva uma resposta antes de enviar.');
@@ -35,15 +32,14 @@ const ReclamacoesSugestGestao = () => {
     );
     
     setMensagens(mensagensAtualizadas);
-    setResposta(''); // Limpa o campo de resposta
-    setModalVisible(false); // Fecha o modal
+    setResposta('');
+    setModalVisible(false);
     Alert.alert('Sucesso', 'Resposta enviada com sucesso!');
   };
 
-  // Função para abrir o modal com a mensagem selecionada
   const abrirModal = (mensagem) => {
     setMensagemSelecionada(mensagem);
-    setResposta(mensagem.resposta); // Carrega a resposta atual da mensagem (se houver)
+    setResposta(mensagem.resposta);
     setModalVisible(true);
   };
 
@@ -51,11 +47,6 @@ const ReclamacoesSugestGestao = () => {
     navigation.navigate('Home');
   };
 
-  const onSwipeRight = () => {
-    // Não faz nada na tela de ReclamacoesSugest
-  };
-
-  // Renderiza uma mensagem
   const renderMensagem = ({ item }) => (
     <TouchableOpacity onPress={() => abrirModal(item)} style={styles.mensagemContainer}>
       <Text style={styles.mensagemAssunto}>{item.assunto}</Text>
@@ -71,7 +62,6 @@ const ReclamacoesSugestGestao = () => {
   return (
     <SwipeGestures
       onSwipeLeft={onSwipeLeft}
-      onSwipeRight={onSwipeRight}
       config={{ velocityThreshold: 0.1, directionalOffsetThreshold: 80 }}
       style={styles.container}
     >
@@ -82,7 +72,6 @@ const ReclamacoesSugestGestao = () => {
           renderItem={renderMensagem}
         />
 
-        {/* Modal para exibir a mensagem completa */}
         {mensagemSelecionada && (
           <Modal
             visible={modalVisible}
@@ -99,25 +88,25 @@ const ReclamacoesSugestGestao = () => {
                   style={styles.inputResposta}
                   placeholder="Escreva sua resposta..."
                   value={resposta}
-                  onChangeText={text => setResposta(text)}
+                  onChangeText={setResposta}
                 />
 
                 <TouchableOpacity
-                  style={styles.responderButton}
+                  style={styles.button}
                   onPress={() => responderMensagem(mensagemSelecionada.id)}
                 >
                   <Text style={styles.buttonText}>Responder</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.excluirButton}
+                  style={[styles.button, styles.excluirButton]}
                   onPress={() => excluirMensagem(mensagemSelecionada.id)}
                 >
                   <Text style={styles.buttonText}>Excluir</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.fecharButton}
+                  style={[styles.button, styles.fecharButton]}
                   onPress={() => setModalVisible(false)}
                 >
                   <Text style={styles.buttonText}>Fechar</Text>
@@ -134,11 +123,11 @@ const ReclamacoesSugestGestao = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
     padding: 20,
   },
   mensagemContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
@@ -188,8 +177,8 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
-  responderButton: {
-    backgroundColor: '#28A745',
+  button: {
+    backgroundColor: '#00527C',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
@@ -197,19 +186,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   excluirButton: {
-    backgroundColor: '#dc3545',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 10,
-    width: '100%',
+    backgroundColor: '#b81414',
   },
   fecharButton: {
-    backgroundColor: '#007BFF',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    width: '100%',
+    backgroundColor: '#ff6400',
   },
   buttonText: {
     color: '#fff',

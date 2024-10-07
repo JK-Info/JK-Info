@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, Button, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, Alert, ScrollView } from 'react-native';
 
-const NotasGestao = () => {
+const NotasGetao = () => {
   const [notasData, setNotasData] = useState([]);
   const [novaNota, setNovaNota] = useState('');
   const [turmaSelecionada, setTurmaSelecionada] = useState('');
@@ -59,7 +59,7 @@ const NotasGestao = () => {
   };
 
   const handleEditNota = (item) => {
-    setTurmaSelecionada(item.turma); // Mantém a turma selecionada
+    setTurmaSelecionada(item.turma);
     setNovaNota(item.nota);
     setCurrentId(item.id);
     setIsEditing(true);
@@ -132,7 +132,9 @@ const NotasGestao = () => {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <Button title="Fechar" onPress={() => setModalVisible(false)} />
+            <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalVisible(false)}>
+              <Text style={styles.textoBotaoFechar}>Fechar</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -144,16 +146,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f9f9',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#333',
   },
   input: {
     backgroundColor: '#fff',
-    borderRadius: 5,
+    borderRadius: 10, // Borda arredondada
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
@@ -164,19 +167,23 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   sendButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#ff6400',
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 10, // Borda arredondada
     marginBottom: 20,
     alignItems: 'center',
   },
   notaContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 5,
+    backgroundColor: '#ffffff',
+    borderRadius: 10, // Borda arredondada
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#dddddd',
     padding: 15,
     marginBottom: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
   },
   turma: {
     fontSize: 18,
@@ -192,29 +199,29 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   editButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#00527C',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10, // Borda arredondada
   },
   deleteButton: {
-    backgroundColor: '#dc3545',
+    backgroundColor: '#ff6400',
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10, // Borda arredondada
   },
   buttonText: {
     color: '#fff',
   },
   modalContainer: {
-    flex: 1,
+    flex: 1,  
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
     width: '80%',
-    maxHeight: '70%', // Limita a altura do modal
-    backgroundColor: 'white',
-    borderRadius: 10,
+    maxHeight: '70%',
+    backgroundColor: '#dddddd',
+    borderRadius: 10, // Borda arredondada
     padding: 20,
     alignItems: 'center',
   },
@@ -222,18 +229,32 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
+    color: '#333',
   },
   turmaButton: {
     padding: 10,
     marginVertical: 5,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 5,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10, // Borda arredondada
     width: '100%',
     alignItems: 'center',
   },
   textoTurma: {
     fontSize: 16,
+    color: '#333',
+  },
+  botaoFechar: {
+    backgroundColor: '#ff6400',
+    padding: 15,
+    borderRadius: 10, // Borda arredondada
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  textoBotaoFechar: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
-export default NotasGestao;
+export default NotasGetao;
