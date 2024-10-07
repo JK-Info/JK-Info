@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { createStackNavigator } from '@react-navigation/stack';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
-
-const Stack = createStackNavigator();
 
 const Avatar = () => (
   <Image source={fotoPerfilAnonima} style={styles.avatarImage} />
@@ -43,7 +40,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
         text: comentario,
         author: {
           name: 'Aluno',
-          photo: fotoPerfilAnonima, // Use a imagem importada aqui
+          photo: fotoPerfilAnonima,
         },
         liked: false,
         likeCount: 0,
@@ -158,13 +155,8 @@ const HomeScreen = () => {
         onCommentPress={toggleModal}
       />
 
-      <Post 
-        text="A National Basketball Association (NBA) é a principal liga de basquetebol profissional da América do Norte..."
-        image="https://de2.sportal365images.com/process/smp-betway-images/betway.com/28072023/e7737cea-2040-48fd-a041-c6ec11f367a6.jpg"
-        comments={comments}
-        onCommentPress={toggleModal}
-      />
-
+      {/* Outros Posts podem ser adicionados aqui */}
+      
       <CommentModal 
         visible={modalVisible} 
         onClose={toggleModal} 
@@ -181,149 +173,136 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
   },
-  avatarImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-  },
   searchInput: {
     height: 40,
-    borderColor: '#ddd',
+    borderColor: '#007BFF',
     borderWidth: 1,
-    borderRadius: 30,
-    margin: 20,
+    borderRadius: 20,
     paddingHorizontal: 10,
+    marginVertical: 10,
+  },
+  boxPubli: {
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+  },
+  indent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   boxFeed: {
-    backgroundColor: '#f1f1f1',
-    borderRadius: 15,
-    borderColor: 'black',
-    borderWidth: 1,
-    padding: 10,
+    marginBottom: 10,
   },
   textoPubli: {
     fontSize: 16,
-    marginVertical: 10,
+    marginBottom: 10,
   },
   postImage: {
     width: '100%',
     height: 200,
     borderRadius: 10,
-    marginTop: 10,
-  },
-  boxPubli: {
-    justifyContent: 'center',
-    marginVertical: 10,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    overflow: 'hidden',
-    elevation: 2,
-    flexDirection: 'column',
-  },
-  informacoesPublicacao: {
-    marginLeft: 10,
-    marginBottom: 10,
-  },
-  containerBotao: {
-    width: '90%',
-    marginLeft: 10,
-    borderRadius: 30,
-  },
-  containerCurtir: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 30,
-  },
-  curtidasTexto: {
-    marginLeft: 5,
-    fontSize: 16,
-  },
-  indent: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginVertical: 10,
   },
   bottons: {
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
     justifyContent: 'space-between',
-  },
-  botao: {
-    borderRadius: 30,
-    backgroundColor: '#00527C',
-    padding: 10,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
     alignItems: 'center',
   },
-  modalContainer: {
-    width: '80%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-  comentariosContainer: {
-    maxHeight: 300,
-  },
-  comentarioContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginVertical: 10,
-  },
-  avatarComment: {
+  avatarImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
     marginRight: 10,
   },
+  informacoesPublicacao: {
+    marginLeft: 10,
+  },
+  containerBotao: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  botao: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#00527C',
+    borderRadius: 20,
+  },
+  botaoTexto: {
+    color: '#fff',
+  },
+  containerCurtir: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  curtidasTexto: {
+    marginLeft: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  comentariosContainer: {
+    maxHeight: 200,
+  },
+  comentarioContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  avatarComment: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 10,
+  },
   comentarioTextoContainer: {
     flex: 1,
+    marginRight: 10,
   },
   nomeAutor: {
     fontWeight: 'bold',
   },
   comentarioTexto: {
-    fontSize: 14,
+    marginBottom: 5,
   },
   input: {
-    height: 40,
-    borderColor: '#ddd',
     borderWidth: 1,
-    borderRadius: 30,
-    marginVertical: 10,
-    paddingHorizontal: 10,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
   },
   sendButton: {
     backgroundColor: '#00527C',
-    borderRadius: 30,
-    padding: 10,
+    borderRadius: 10,
+    paddingVertical: 10,
     alignItems: 'center',
   },
   sendButtonText: {
     color: '#fff',
   },
   closeButton: {
-    backgroundColor: '#ff6400',
-    borderRadius: 30,
-    padding: 10,
-    alignItems: 'center',
     marginTop: 10,
+    backgroundColor: '#ff6400',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
   },
   closeButtonText: {
     color: '#fff',

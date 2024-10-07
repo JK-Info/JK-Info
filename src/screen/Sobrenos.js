@@ -1,6 +1,10 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
-import fotoGuilherme from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
+import fotoGuilherme from '../../assets/FotosSobrenos/Guilherme-gomes.jpeg';
+import fotoLucas from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
+import fotoPablo from '../../assets/FotosSobrenos/Pablo-henrique.jpeg';
+import fotoCaique from '../../assets/FotosSobrenos/Caique-tavares.jpeg';
+
 
 const membrosDaEquipe = [
   {
@@ -20,7 +24,7 @@ const membrosDaEquipe = [
       { plataforma: 'Github', link: 'https://github.com/LucasMalone' },
       { plataforma: 'Instagram', link: 'https://instagram.com/malonekastel' },
     ],
-    foto: fotoGuilherme,
+    foto: fotoLucas,
   },
   {
     nome: 'Pablo Henrique',
@@ -30,7 +34,7 @@ const membrosDaEquipe = [
       { plataforma: 'Linkedin', link: 'url_linkedin_membro_3' },
       { plataforma: 'Instagram', link: 'https://instagram.com/guigozt' },
     ],
-    foto: fotoGuilherme,
+    foto: fotoPablo,
   },
   {
     nome: 'Caique Rocha',
@@ -39,7 +43,7 @@ const membrosDaEquipe = [
       { plataforma: 'Github', link: 'https://github.com/c9iqueee' },
       { plataforma: 'Instagram', link: 'https://instagram.com/kkjcaique' },
     ],
-    foto: fotoGuilherme,
+    foto: fotoCaique,
   }
 ];
 

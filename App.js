@@ -50,7 +50,6 @@ export default function App() {
         component={DrawerNavigatorGestor}
         options={{headerShown: false}}
         />
-        
       </Stack.Navigator>
     </NavigationContainer>
   );
