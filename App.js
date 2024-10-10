@@ -8,6 +8,31 @@ import TabNavigatorAluno from './src/Components/TabNavigationAluno.js'; // Naveg
 import TabNavigatorProfessor from './src/Components/TabNavigationProfessor'; // Navegador de Abas de Professores
 import TabNavigatorGestao from './src/Components/TabNavigatorGestor.js';
 import DrawerNavigatorGestor from './src/Components/DrawerNavigationGestao.js';
+import axios from 'axios';
+
+const Appdb = () => {
+  const [alunos, setAlunos] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:3000/alunos')
+      .then(response => {
+        setAlunos(response.data);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar alunos:', error);
+      });
+  }, []);
+
+  return (
+    <View>
+      {alunos.map(aluno => (
+        <Text key={aluno.idAluno}>{aluno.nome}</Text>
+      ))}
+    </View>
+  );
+};
+
+
 
 const Stack = createNativeStackNavigator();
 
