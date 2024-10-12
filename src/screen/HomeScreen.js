@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
@@ -33,13 +33,14 @@ const Curtir = ({ count, liked, onPress }) => (
 
 const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   const [comentario, setComentario] = useState('');
+  const currentUserName = 'Aluno'; // Substitua pelo identificador do usuário atual
 
   const handleSendComment = () => {
     if (comentario.trim()) {
       const newComment = {
         text: comentario,
         author: {
-          name: 'Aluno',
+          name: currentUserName,
           photo: fotoPerfilAnonima,
         },
         liked: false,
@@ -49,6 +50,25 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
       setComentario('');
       onClose();
     }
+  };
+
+  const handleLongPressComment = (comment) => {
+    if (comment.author.name === currentUserName) {
+      Alert.alert(
+        'Excluir Comentário',
+        'Você deseja excluir este comentário?',
+        [
+          { text: 'Cancelar', onPress: () => console.log('Cancelado') },
+          { text: 'Excluir', onPress: () => excluirComment(comment) },
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
+  const excluirComment = (commentToRemove) => {
+    const updatedComments = comments.filter(comment => comment !== commentToRemove);
+    onSendComment(updatedComments);
   };
 
   const handleLikeComment = (index) => {
@@ -71,7 +91,11 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
 
           <ScrollView style={styles.comentariosContainer}>
             {comments.map((comment, index) => (
-              <View key={index} style={styles.comentarioContainer}>
+              <TouchableOpacity 
+                key={index} 
+                style={styles.comentarioContainer} 
+                onLongPress={() => handleLongPressComment(comment)}
+              >
                 <Image source={comment.author.photo} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
                   <Text style={styles.nomeAutor}>{comment.author.name}</Text>
@@ -82,7 +106,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
                   liked={comment.liked} 
                   onPress={() => handleLikeComment(index)} 
                 />
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
 
@@ -135,7 +159,26 @@ const Post = ({ text, image, comments, onCommentPress }) => {
 
 const HomeScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState([
+    {
+      text: 'Ótima publicação!',
+      author: {
+        name: 'User',
+        photo: fotoPerfilAnonima,
+      },
+      liked: false,
+      likeCount: 0,
+    },
+    {
+      text: 'Muito interessante, obrigado por compartilhar!',
+      author: {
+        name: 'User',
+        photo: fotoPerfilAnonima,
+      },
+      liked: false,
+      likeCount: 0,
+    },
+  ]);
   const [searchQuery, setSearchQuery] = useState('');
 
   const toggleModal = () => setModalVisible(!modalVisible);

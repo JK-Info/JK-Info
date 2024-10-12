@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './src/screen/LoginScreen';
@@ -8,9 +8,13 @@ import TabNavigatorAluno from './src/Components/TabNavigationAluno.js'; // Naveg
 import TabNavigatorProfessor from './src/Components/TabNavigationProfessor'; // Navegador de Abas de Professores
 import TabNavigatorGestao from './src/Components/TabNavigatorGestor.js';
 import DrawerNavigatorGestor from './src/Components/DrawerNavigationGestao.js';
+import DrawerNavigatorFuncionario from './src/Components/DrawerNavigationFuncionario.js';
+import TabNavigatorFuncionario from './src/Components/TabNavigatorFuncionario.js';
 import axios from 'axios';
 
-const Appdb = () => {
+const Stack = createNativeStackNavigator();
+
+export default function App() {
   const [alunos, setAlunos] = useState([]);
 
   useEffect(() => {
@@ -23,20 +27,6 @@ const Appdb = () => {
       });
   }, []);
 
-  return (
-    <View>
-      {alunos.map(aluno => (
-        <Text key={aluno.idAluno}>{aluno.nome}</Text>
-      ))}
-    </View>
-  );
-};
-
-
-
-const Stack = createNativeStackNavigator();
-
-export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
@@ -66,14 +56,24 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen 
-        name="TabNavigatorGestao"
-        component={TabNavigatorGestao}
-        options={{headerShown: false}}
+          name="TabNavigatorGestao"
+          component={TabNavigatorGestao}
+          options={{ headerShown: false }}
         />
         <Stack.Screen 
-        name="DrawerNavigatorGestao"
-        component={DrawerNavigatorGestor}
-        options={{headerShown: false}}
+          name="DrawerNavigatorGestao"
+          component={DrawerNavigatorGestor}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="TabNavigatorFuncionario"
+          component={TabNavigatorFuncionario}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="DrawerNavigatorFuncionario"
+          component={DrawerNavigatorFuncionario}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

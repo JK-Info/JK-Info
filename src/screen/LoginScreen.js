@@ -6,12 +6,19 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
+    if (!email || !password) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+      return;
+    }
+
     if (email === 'aluno@teste') {
       navigation.replace('DrawerNavigatorAluno');
     } else if (email === 'professor@teste') {
       navigation.replace('DrawerNavigatorProfessor');
     } else if (email === 'gestao@teste') {
       navigation.replace('DrawerNavigatorGestao');
+    } else if (email === 'funcionario@teste') {
+      navigation.replace('DrawerNavigatorFuncionario');
     } else {
       Alert.alert('Erro', 'Credenciais inválidas!');
     }
@@ -50,8 +57,6 @@ const LoginScreen = ({ navigation }) => {
     </View>
   );
 };
-
-export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -94,15 +99,8 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '90%',
-    backgroundColor: '#fff', // White background
-    borderRadius: 20,
     padding: 20,
     elevation: 5,
-  },
-  textos: {
-    color: '#000', // Text color
-    marginLeft: 20,
-    marginTop: 10,
   },
   logar: {
     alignItems: 'center',
@@ -118,3 +116,5 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 });
+
+export default LoginScreen;

@@ -1,17 +1,14 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import CardapioGestao from '../screenGestao/CardapioGestao';
+import TabNavigatorFuncionario from './TabNavigatorFuncionario';
+import PerfilFuncionario from '../screenFuncionario/PerfilFuncionario';
 import Sobrenos from '../screen/Sobrenos';
 import Configuracoes from '../screen/Configuracoes';
 import CustomDrawerContent from './CustomDrawerContent';
-import TabNavigatorGestor from './TabNavigatorGestor';
-import PerfilGestao from '../screenGestao/PerfilGestao';
-import RedeGestor from '../screenGestao/RedeGestao';
-import NotasGestao from '../screenGestao/NotasGestao';
 
 const Drawer = createDrawerNavigator();
 
-const DrawerNavigatorGestao = ( )=> (
+const DrawerNavigatorFuncionario = () => (
   <Drawer.Navigator
     drawerContent={props => <CustomDrawerContent {...props} />}
     screenOptions={{
@@ -26,14 +23,11 @@ const DrawerNavigatorGestao = ( )=> (
       headerTintColor: '#FFFFFF',  // Cor do texto do cabeçalho
     }}
   >
-    <Drawer.Screen name="Home" component={TabNavigatorGestor} />
-    <Drawer.Screen name="Perfil" component={PerfilGestao} />
-    <Drawer.Screen name="Rede" component={RedeGestor} />
-    <Drawer.Screen name="Notas" component={NotasGestao} />
-    <Drawer.Screen name="Cardápio" component={CardapioGestao} />
+    <Drawer.Screen name="Home" component={TabNavigatorFuncionario} />
+    <Drawer.Screen name="Perfil" component={PerfilFuncionario} />
     <Drawer.Screen name="Sobre nós" component={Sobrenos} />
     <Drawer.Screen name="Configurações" component={Configuracoes} />
   </Drawer.Navigator>
 );
 
-export default DrawerNavigatorGestao;
+export default DrawerNavigatorFuncionario;
