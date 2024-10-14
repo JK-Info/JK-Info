@@ -1,0 +1,3 @@
+https://pt.linkedin.com/pulse/react-native-como-pegar-dados-do-banco-de-mysql-rest-penha-simplicio
+
+onde ensina fazer a conexao e tbm a implementação de dados com o BD
