@@ -1,3 +1,5 @@
+import axios from 'axios';
+import { el } from 'date-fns/locale';
 import React, { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
 
@@ -5,24 +7,35 @@ const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos.');
       return;
     }
 
-    if (email === 'aluno@teste') {
-      navigation.replace('DrawerNavigatorAluno');
-    } else if (email === 'professor@teste') {
-      navigation.replace('DrawerNavigatorProfessor');
-    } else if (email === 'gestao@teste') {
-      navigation.replace('DrawerNavigatorGestao');
-    } else if (email === 'funcionario@teste') {
-      navigation.replace('DrawerNavigatorFuncionario');
-    } else {
-      Alert.alert('Erro', 'Credenciais inválidas!');
-    }
-  };
+    try{
+      const response = await axios.post('http://localhost:3000/login', {email, password});
+      if(response.data.user) {
+
+          if (email === 'contato1@exemplo.com') {
+            navigation.replace('DrawerNavigatorAluno');
+          } else if (email === 'professor@teste') {
+            navigation.replace('DrawerNavigatorProfessor');
+          } else if (email === 'gestao@teste') {
+            navigation.replace('DrawerNavigatorGestao');
+          } else if (email === 'funcionario@teste') {
+            navigation.replace('DrawerNavigatorFuncionario');
+          } 
+        }
+      }catch (error){
+        if(error.response){
+          Alert.alert('Erro', error.response.data.message || 'Credenciais Invalidas');
+        }else {
+          Alert.alert('Erro', 'Ocorreu um erro ao tentar fazer o login');
+        }
+          }
+        }     
+    
 
   return (
     <View style={styles.container}>
