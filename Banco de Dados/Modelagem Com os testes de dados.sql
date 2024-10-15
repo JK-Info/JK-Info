@@ -1,3 +1,5 @@
+ ----------- GUILHERME ----------------
+
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
@@ -14,6 +16,7 @@ USE mydb ;
 CREATE TABLE IF NOT EXISTS `mydb`.`ContatoInstitucional` (
   `idContatoInstitucional` INT NOT NULL AUTO_INCREMENT,
   `emailInstituicional` VARCHAR(45) NOT NULL,
+  `senhaEmail` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`idContatoInstitucional`),
   UNIQUE INDEX `emailInstituicional_UNIQUE` (`emailInstituicional`)
 ) ENGINE = InnoDB;
@@ -24,19 +27,32 @@ CREATE TABLE IF NOT EXISTS `mydb`.`ContatoInstitucional` (
 CREATE TABLE IF NOT EXISTS `mydb`.`Pessoa` (
   `idPessoa` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(45) NOT NULL,
-  `dataNacimento` DATE NOT NULL,
-  `sexo` VARCHAR(45) NOT NULL,
+  `fotoPessoa` VARCHAR(255) NOT NULL DEFAULT 'assets\FotosPerfil\Foto-perfil-Anonima.jpg',
   `ContatoInstitucional_idContatoInstitucional` INT NOT NULL,
-  `RG` VARCHAR(12) NOT NULL,
-  `CPF` VARCHAR(12) NULL,
+  `TipoUsuario_idTipoUsuario` INT NOT NULL,  -- Relacionando com TipoUsuario
   PRIMARY KEY (`idPessoa`),
-  UNIQUE INDEX `RG_UNIQUE` (`RG`),
+  INDEX `fk_Pessoa_TipoUsuario_idx` (`TipoUsuario_idTipoUsuario`),
   INDEX `fk_Pessoa_ContatoInstitucional1_idx` (`ContatoInstitucional_idContatoInstitucional`),
   CONSTRAINT `fk_Pessoa_ContatoInstitucional1`
     FOREIGN KEY (`ContatoInstitucional_idContatoInstitucional`)
     REFERENCES `mydb`.`ContatoInstitucional` (`idContatoInstitucional`)
     ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Pessoa_TipoUsuario`
+    FOREIGN KEY (`TipoUsuario_idTipoUsuario`)
+    REFERENCES `mydb`.`TipoUsuario` (`idTipoUsuario`)
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION
+) ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`TipoUsuario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`TipoUsuario` (
+  `idTipoUsuario` INT NOT NULL AUTO_INCREMENT,
+  `tipo` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idTipoUsuario`),
+  UNIQUE INDEX `tipo_UNIQUE` (`tipo`)
 ) ENGINE = InnoDB;
 
 -- -----------------------------------------------------
@@ -142,6 +158,11 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Turma` (
   PRIMARY KEY (`idTurma`),
   UNIQUE INDEX `nomeTurma_UNIQUE` (`nomeTurma`)
 ) ENGINE = InnoDB;
+
+ALTER TABLE mydb.Turma
+DROP INDEX nomeTurma_UNIQUE;
+
+DELETE FROM TURMA;
 
 -- -----------------------------------------------------
 -- Table `mydb`.`Aluno_has_Turma`
@@ -346,10 +367,475 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Comentarios` (
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
+CREATE TABLE IF NOT EXISTS `mydb`.`Curtidas` (
+  `idCurtida` INT NOT NULL AUTO_INCREMENT,
+  `idPublicacao` INT NOT NULL,
+  `idPessoa` INT NOT NULL,
+  PRIMARY KEY (`idCurtida`),
+  INDEX `fk_Curtidas_Publicacao_idx` (`idPublicacao`),
+  INDEX `fk_Curtidas_Pessoa_idx` (`idPessoa`),
+  CONSTRAINT `fk_Curtidas_Publicacao`
+    FOREIGN KEY (`idPublicacao`)
+    REFERENCES `mydb`.`Publicacao` (`idPublicacao`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Curtidas_Pessoa`
+    FOREIGN KEY (`idPessoa`)
+    REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -------------------------------------------------------
+-- INSERÇÃO DE TURMAS
+-- -------------------------------------------------------
+INSERT INTO mydb.Turma (nomeTurma)
+VALUES 
+('1º Módulo - Administração - Tarde'),
+('2º Módulo - Administração - Tarde'),
+('3º Módulo - Administração - Tarde'),
+('1º Módulo - Logística - Tarde'),
+('2º Módulo - Logística - Tarde'),
+('3º Módulo - Logística - Tarde'),
+('1º Módulo - Desenvolvimento de Sistemas - Tarde'),
+('2º Módulo - Desenvolvimento de Sistemas - Tarde'),
+('3º Módulo - Desenvolvimento de Sistemas - Tarde'),
+('1º Módulo - Administração - Noite'),
+('2º Módulo - Administração - Noite'),
+('3º Módulo - Administração - Noite'),
+('1º Módulo - Logística - Noite'),
+('2º Módulo - Logística - Noite'),
+('3º Módulo - Logística - Noite'),
+('1º Módulo - Desenvolvimento de Sistemas - Noite'),
+('2º Módulo - Desenvolvimento de Sistemas - Noite'),
+('3º Módulo - Desenvolvimento de Sistemas - Noite');
+
+SELECT * FROM mydb.Turma;
+ALTER TABLE mydb.Turma AUTO_INCREMENT = 1;
+
+
+DELETE FROM mydb.Turma WHERE nomeTurma IN (
+    '1º Módulo - Administração - Tarde', 
+    '2º Módulo - Administração - Tarde', 
+    '3º Módulo - Administração - Tarde',
+    '1º Módulo - Logística - Tarde',
+    '2º Módulo - Logística - Tarde',
+    '3º Módulo - Logística - Tarde',
+    '1º Módulo - Desenvolvimento de Sistemas - Tarde',
+    '2º Módulo - Desenvolvimento de Sistemas - Tarde',
+    '3º Módulo - Desenvolvimento de Sistemas - Tarde',
+    '1º Módulo - Administração - Noite',
+    '2º Módulo - Administração - Noite',
+    '3º Módulo - Administração - Noite',
+    '1º Módulo - Logística - Noite',
+    '2º Módulo - Logística - Noite',
+    '3º Módulo - Logística - Noite',
+    '1º Módulo - Desenvolvimento de Sistemas - Noite',
+    '2º Módulo - Desenvolvimento de Sistemas - Noite',
+    '3º Módulo - Desenvolvimento de Sistemas - Noite'
+);
+-- -------------------------------------------------------
+-- INSERÇÃO DE ALUNOS
+-- -------------------------------------------------------
+
+INSERT INTO mydb.ContatoInstitucional (emailInstituicional, senhaEmail)
+VALUES ('guilherme.silva2616@etec.sp.gov.br', '12345678');
+
+SELECT LAST_INSERT_ID();
+
+INSERT INTO mydb.tipousuario (tipo) VALUES ('aluno');  -- Adapte conforme necessário.
+
+SELECT LAST_INSERT_ID();  -- Para verificar o ID do tipo de usuário recém-inserido.
+
+INSERT INTO mydb.Pessoa (nome, fotoPessoa, ContatoInstitucional_idContatoInstitucional, TipoUsuario_idTipoUsuario)
+VALUES ('Guilherme Gomes da Silva', 'default', 1, 1);
+
+select * from Pessoa;
+
+SET @ID_Pessoa = LAST_INSERT_ID();
+
+SELECT * FROM mydb.Pessoa WHERE idPessoa = 1;
+
+INSERT INTO mydb.Aluno (RM, Pessoa_idPessoa)
+VALUES (13969, 4);
+
+DESCRIBE mydb.ContatoInstitucional;
+
+SELECT 
+    p.idPessoa,
+    p.nome,
+    p.fotoPessoa,
+    ci.emailInstituicional,  -- Use o nome correto aqui
+    ci.senhaEmail,  -- E aqui também
+    a.RM
+FROM 
+    mydb.pessoa p
+JOIN 
+    mydb.aluno a ON p.idPessoa = a.Pessoa_idPessoa
+JOIN 
+    mydb.ContatoInstitucional ci ON p.ContatoInstitucional_idContatoInstitucional = ci.idContatoInstitucional
+LIMIT 0, 1000;
+
+*/
+
+/* -------- PABLO ------------------
+
+  SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+  SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+  SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+  -- -----------------------------------------------------
+  -- Schema mydb
+  -- -----------------------------------------------------
+  CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+  USE mydb ;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`ContatoInstitucional`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`ContatoInstitucional` (
+    `idContatoInstitucional` INT NOT NULL AUTO_INCREMENT,
+    `emailInstituicional` VARCHAR(45) NOT NULL,
+    PRIMARY KEY (`idContatoInstitucional`),
+    UNIQUE INDEX `emailInstituicional_UNIQUE` (`emailInstituicional`)
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Pessoa`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Pessoa` (
+    `idPessoa` INT NOT NULL AUTO_INCREMENT,
+    `nome` VARCHAR(45) NOT NULL,
+    `dataNacimento` DATE NOT NULL,
+    `sexo` VARCHAR(45) NOT NULL,
+    `ContatoInstitucional_idContatoInstitucional` INT NOT NULL,
+    `RG` VARCHAR(12) NOT NULL,
+    `CPF` VARCHAR(12) NULL,
+    PRIMARY KEY (`idPessoa`),
+    UNIQUE INDEX `RG_UNIQUE` (`RG`),
+    INDEX `fk_Pessoa_ContatoInstitucional1_idx` (`ContatoInstitucional_idContatoInstitucional`),
+    CONSTRAINT `fk_Pessoa_ContatoInstitucional1`
+      FOREIGN KEY (`ContatoInstitucional_idContatoInstitucional`)
+      REFERENCES `mydb`.`ContatoInstitucional` (`idContatoInstitucional`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Aluno`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Aluno` (
+    `idAluno` INT NOT NULL AUTO_INCREMENT,
+    `RM` INT NOT NULL,
+    `Pessoa_idPessoa` INT NOT NULL,
+    PRIMARY KEY (`idAluno`),
+    UNIQUE INDEX `RM_UNIQUE` (`RM`),
+    INDEX `fk_Aluno_Pessoa_idx` (`Pessoa_idPessoa`),
+    CONSTRAINT `fk_Aluno_Pessoa`
+      FOREIGN KEY (`Pessoa_idPessoa`)
+      REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Contato`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Contato` (
+    `idContato` INT NOT NULL AUTO_INCREMENT,
+    `numeroCelular` VARCHAR(11) NOT NULL,
+    `emailPessoal` VARCHAR(45) NOT NULL,
+    `Pessoa_idPessoa` INT NOT NULL,
+    PRIMARY KEY (`idContato`),
+    UNIQUE INDEX `numeroCelular_UNIQUE` (`numeroCelular`),
+    UNIQUE INDEX `emailPessoal_UNIQUE` (`emailPessoal`),
+    INDEX `fk_Contato_Pessoa1_idx` (`Pessoa_idPessoa`),
+    CONSTRAINT `fk_Contato_Pessoa1`
+      FOREIGN KEY (`Pessoa_idPessoa`)
+      REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Professor`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Professor` (
+    `idProfessor` INT NOT NULL AUTO_INCREMENT,
+    `Pessoa_idPessoa` INT NOT NULL,
+    PRIMARY KEY (`idProfessor`),
+    INDEX `fk_Professor_Pessoa1_idx` (`Pessoa_idPessoa`),
+    CONSTRAINT `fk_Professor_Pessoa1`
+      FOREIGN KEY (`Pessoa_idPessoa`)
+      REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Cargo`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Cargo` (
+    `idCargo` INT NOT NULL AUTO_INCREMENT,
+    `nomeCargo` VARCHAR(45) NOT NULL,
+    PRIMARY KEY (`idCargo`)
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Funcionario`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Funcionario` (
+    `idFuncionario` INT NOT NULL AUTO_INCREMENT,
+    `ContatoInstitucional_idContatoInstitucional` INT NOT NULL,
+    `Contato_idContato` INT NOT NULL,
+    `Pessoa_idPessoa` INT NOT NULL,
+    `Cargo_idCargo` INT NOT NULL,
+    PRIMARY KEY (`idFuncionario`),
+    INDEX `fk_Funcionario_Pessoa1_idx` (`Pessoa_idPessoa`),
+    INDEX `fk_Funcionario_Cargo1_idx` (`Cargo_idCargo`),
+    CONSTRAINT `fk_Funcionario_Pessoa1`
+      FOREIGN KEY (`Pessoa_idPessoa`)
+      REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+    CONSTRAINT `fk_Funcionario_Cargo1`
+      FOREIGN KEY (`Cargo_idCargo`)
+      REFERENCES `mydb`.`Cargo` (`idCargo`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+    CONSTRAINT `fk_Funcionario_Contato1`
+      FOREIGN KEY (`Contato_idContato` )
+      REFERENCES `mydb`.`Contato` (`idContato` )
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+    constraint `fk_Funcionario_ContatoInstitucional1`
+    foreign key (`ContatoInstitucional_idContatoInstitucional`)
+      references `mydb`. `ContatoInstitucional` (`idContatoInstitucional`)
+          ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Turma`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Turma` (
+    `idTurma` INT NOT NULL AUTO_INCREMENT,
+    `nomeTurma` VARCHAR(45) NOT NULL,
+    PRIMARY KEY (`idTurma`),
+    UNIQUE INDEX `nomeTurma_UNIQUE` (`nomeTurma`)
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Aluno_has_Turma`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Aluno_has_Turma` (
+    `Aluno_idAluno` INT NOT NULL,
+    `Aluno_Pessoa_idPessoa` INT NOT NULL,
+    `Turma_idTurma` INT NOT NULL,
+    PRIMARY KEY (`Aluno_idAluno`, `Aluno_Pessoa_idPessoa`, `Turma_idTurma`),
+    INDEX `fk_Aluno_has_Turma_Turma1_idx` (`Turma_idTurma`),
+    INDEX `fk_Aluno_has_Turma_Aluno1_idx` (`Aluno_idAluno`),
+    CONSTRAINT `fk_Aluno_has_Turma_Aluno1`
+      FOREIGN KEY (`Aluno_idAluno`)
+      REFERENCES `mydb`.`Aluno` (`idAluno`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+    CONSTRAINT `fk_Aluno_has_Turma_Turma1`
+      FOREIGN KEY (`Turma_idTurma`)
+      REFERENCES `mydb`.`Turma` (`idTurma`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+
+  ) ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Materia`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Materia` (
+    `idMateria` INT NOT NULL AUTO_INCREMENT,
+    `nomeMateria` VARCHAR(45) NOT NULL,
+    `Turma_idTurma` INT NOT NULL,
+    PRIMARY KEY (`idMateria`),
+    INDEX `fk_Materia_Turma1_idx` (`Turma_idTurma`),
+    CONSTRAINT `fk_Materia_Turma1`
+      FOREIGN KEY (`Turma_idTurma`)
+      REFERENCES `mydb`.`Turma` (`idTurma`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION
+  ) ENGINE = InnoDB;
+
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Materia_has_Professor`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Materia_has_Professor` (
+    `Materia_idMateria` INT NOT NULL,
+    `Materia_Turma_idTurma` INT NOT NULL,
+    `Professor_idProfessor` INT NOT NULL,
+    `Professor_Pessoa_idPessoa` INT NOT NULL,
+    PRIMARY KEY (`Materia_idMateria`, `Materia_Turma_idTurma`, `Professor_idProfessor`, `Professor_Pessoa_idPessoa`),
+    INDEX `fk_Materia_has_Professor_Professor1_idx` (`Professor_idProfessor` ASC, `Professor_Pessoa_idPessoa` ASC) ,
+    INDEX `fk_Materia_has_Professor_Materia1_idx` (`Materia_idMateria` ASC, `Materia_Turma_idTurma` ASC) ,
+    CONSTRAINT `fk_Materia_has_Professor_Materia1`
+      FOREIGN KEY (`Materia_idMateria`)
+      REFERENCES `mydb`.`Materia` (`idMateria`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+  constraint `fk_Materia_has_Professor_Turma`
+      foreign key (`Materia_Turma_idTurma`)
+      references `mydb`. `Turma` (`idTurma`)
+      on delete no action
+      on update no action,
+    CONSTRAINT `fk_Materia_has_Professor_Professor1`
+      FOREIGN KEY (`Professor_idProfessor`)
+      REFERENCES `mydb`.`Professor` (`idProfessor`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+      constraint `fk_Materia_has_Professor_Pessoa`
+      foreign key (`Professor_Pessoa_idPessoa`)
+      references `mydb`. `Pessoa`(`idPessoa`)
+      on update no action
+      on delete no action)
+  ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`Endereco`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Endereco` (
+    `idEndereco` INT NOT NULL AUTO_INCREMENT,
+    `nomeEndereco` VARCHAR(45) NOT NULL,
+    `numeroEndereco` INT NOT NULL,
+    `complemento` VARCHAR(45) NULL,
+    `bairro` VARCHAR(45) NOT NULL,
+    `cidade` VARCHAR(45) NOT NULL,
+    `estado` VARCHAR(45) NOT NULL,
+    `CEP` INT(8) NOT NULL,
+    `Contato_idContato` INT NOT NULL,
+    `Contato_Pessoa_idPessoa` INT NOT NULL,
+    PRIMARY KEY (`idEndereco`, `Contato_idContato`, `Contato_Pessoa_idPessoa`),
+    INDEX `fk_Endereco_Contato1_idx` (`Contato_idContato` ASC, `Contato_Pessoa_idPessoa` ASC) ,
+    CONSTRAINT `fk_Endereco_Contato1`  
+      FOREIGN KEY (`Contato_idContato`)
+      REFERENCES `mydb`.`Contato` (`idContato`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+      constraint `fk_Endereco_Pessoa`
+      foreign key ( `Contato_Pessoa_idPessoa`)
+      references `mydb`. `Pessoa` (`idPessoa`)
+      on update no action
+      on delete no action
+      )
+  ENGINE = InnoDB;
+
+  -- -----------------------------------------------------
+  -- Table `mydb`.`RedeSocial`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`RedeSocial` (
+    `idRedeSocial` INT NOT NULL AUTO_INCREMENT,
+    `redeSocial` VARCHAR(45) NOT NULL,
+    `Contato_idContato` INT NOT NULL,
+    `Contato_Pessoa_idPessoa` INT NOT NULL,
+    PRIMARY KEY (`idRedeSocial`, `Contato_idContato`, `Contato_Pessoa_idPessoa`),
+    INDEX `fk_RedeSocial_Contato1_idx` (`Contato_idContato` ASC, `Contato_Pessoa_idPessoa` ASC) ,
+    CONSTRAINT `fk_RedeSocial_Contato1`
+      FOREIGN KEY (`Contato_idContato`)
+      REFERENCES `mydb`.`Contato` (`idContato` )
+      ON DELETE NO ACTION
+      ON UPDATE CASCADE,
+      constraint `fk_RedeSocial_Pessoa`
+      foreign key (`Contato_Pessoa_idPessoa`)
+      references `mydb`. `Pessoa`(`idPessoa`)
+      on delete no action
+      on update cascade)
+  ENGINE = InnoDB;
+
+  - -----------------------------------------------------
+  -- Table `mydb`.`Cardapio`
+  -- -----------------------------------------------------
+  CREATE TABLE IF NOT EXISTS `mydb`.`Cardapio` (
+    `idCardapio` INT NOT NULL AUTO_INCREMENT,
+    `diaSemana` VARCHAR(45) NOT NULL,
+    `refeicao` VARCHAR(45) NOT NULL,
+    PRIMARY KEY (`idCardapio`))
+  ENGINE = InnoDB;
+
+  -- -------------------------------------------------------
+  -- table `mydb` . `Chats`
+  -- -------------------------------------------------------
+
+  create table if not exists `mydb`.`Chats`(
+    `idChat` int not null auto_increment,
+      `idPessoaRemetente` int not null,
+      `idPessoaDestinario` int not null,
+      `mensagem` text not null ,
+      `dataeHoraMensagem` datetime not null,
+      Primary key (`idChat`),
+      index `fk_PessoaRemetente_idx` (`idPessoaRemetente`),
+      index `fk_PessoaDestinaria_idx` (`idPessoaDestinario`),
+      constraint `fk_PessoaRemetente`
+      foreign key (`idPessoaRemetente`)
+      references `mydb`. `Pessoa` (`idPessoa`)
+      on delete no action
+      on update cascade,
+      constraint `fk_PessoaDestinario`
+      foreign key (`idPessoaDestinario`)
+      references `mydb`. `Pessoa` (`idPessoa`)
+      on delete no action
+      on update cascade
+      )engine = InnoDB;
+    
+      -- -------------------------------------------------------
+  -- table `mydb` . `Publicação`
+  -- -------------------------------------------------------
+
+      CREATE TABLE IF NOT EXISTS `mydb`.`Publicacao` (
+    `idPublicacao` INT NOT NULL AUTO_INCREMENT,
+    `titulo` VARCHAR(255) NOT NULL,
+    `conteudo` TEXT NOT NULL,
+    `idPessoa` INT NOT NULL,
+    `dataHoraPublicacao` DATETIME NOT NULL,
+    PRIMARY KEY (`idPublicacao`),
+    INDEX `fk_Publicacao_Pessoa_idx` (`idPessoa`),
+    CONSTRAINT `fk_Publicacao_Pessoa`
+      FOREIGN KEY (`idPessoa`)
+      REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+      ON DELETE NO ACTION
+      ON UPDATE CASCADE
+  ) ENGINE = InnoDB;
+
+  -- -------------------------------------------------------
+  -- table `mydb` . `Comentarios`
+  -- -------------------------------------------------------
+
+  CREATE TABLE IF NOT EXISTS `mydb`.`Comentarios` (
+    `idComentario` INT NOT NULL AUTO_INCREMENT,
+    `idPublicacao` INT NOT NULL,
+    `idPessoa` INT NOT NULL,
+    `textoComentario` TEXT NOT NULL,
+    `dataHoraComentario` DATETIME NOT NULL,
+    PRIMARY KEY (`idComentario`),
+    INDEX `fk_Comentarios_Publicacao_idx` (`idPublicacao`),
+    INDEX `fk_Comentarios_Pessoa_idx` (`idPessoa`),
+    CONSTRAINT `fk_Comentarios_Publicacao`
+      FOREIGN KEY (`idPublicacao`)
+      REFERENCES `mydb`.`Publicacao` (`idPublicacao`)
+      ON DELETE NO ACTION
+      ON UPDATE NO ACTION,
+    CONSTRAINT `fk_Comentarios_Pessoa`
+      FOREIGN KEY (`idPessoa`)
+      REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+      ON DELETE NO ACTION
+      ON UPDATE CASCADE
+  ) ENGINE = InnoDB;
+
+
+  SET SQL_MODE=@OLD_SQL_MODE;
+  SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+  SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 				-- ALUNOS --
 
@@ -496,3 +982,5 @@ VALUES
 (2, 1, 'Sim, eu achei muito boa!', NOW()),
 (1, 3, 'Vamos nos encontrar mais tarde?', NOW()),
 (3, 1, 'Claro! Que horas?', NOW());
+
+*/
