@@ -1,41 +1,42 @@
 import axios from 'axios';
-import { el } from 'date-fns/locale';
 import React, { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+    if (!email) {
+      Alert.alert('Erro', 'Por favor, preencha o campo de email.');
       return;
     }
-
-    try{
-      const response = await axios.post('http://localhost:3000/login', {email, password});
-      if(response.data.user) {
-
-          if (email === 'contato1@exemplo.com') {
-            navigation.replace('DrawerNavigatorAluno');
-          } else if (email === 'professor@teste') {
-            navigation.replace('DrawerNavigatorProfessor');
-          } else if (email === 'gestao@teste') {
-            navigation.replace('DrawerNavigatorGestao');
-          } else if (email === 'funcionario@teste') {
-            navigation.replace('DrawerNavigatorFuncionario');
-          } 
+  
+    try {
+      const response = await axios.post('http://localhost:3000/login', { email });
+  
+      if (response.data.user) {
+        const user = response.data.user;
+  
+        // Verifica o tipo de usuário e redireciona para a tela apropriada
+        if (user.tipoUsuario === 'aluno') {
+          navigation.replace('DrawerNavigatorAluno'); // Redireciona para a tela do aluno
+        } else if (user.tipoUsuario === 'professor') {
+          navigation.replace('DrawerNavigatorProfessor'); // Redireciona para a tela do professor
+        } else if (user.tipoUsuario === 'funcionario') {
+          navigation.replace('DrawerNavigatorFuncionario'); // Redireciona para a tela do funcionário
+        } else {
+          Alert.alert('Erro', 'Tipo de usuário não reconhecido.');
         }
-      }catch (error){
-        if(error.response){
-          Alert.alert('Erro', error.response.data.message || 'Credenciais Invalidas');
-        }else {
-          Alert.alert('Erro', 'Ocorreu um erro ao tentar fazer o login');
-        }
-          }
-        }     
-    
+      }
+    } catch (error) {
+      if (error.response) {
+        Alert.alert('Erro', error.response.data.message || 'Email não encontrado.');
+      } else {
+        Alert.alert('Erro', 'Ocorreu um erro ao tentar fazer o login.');
+      }
+    }
+  };
+  
 
   return (
     <View style={styles.container}>
@@ -54,13 +55,6 @@ const LoginScreen = ({ navigation }) => {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
-        />
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={text => setPassword(text)}
-          placeholder="Digite sua senha"
-          secureTextEntry
         />
 
         <TouchableOpacity style={styles.logar} onPress={handleLogin}>
@@ -81,14 +75,13 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 50,
-    marginLeft: 20,
     width: '90%',
-    borderColor: '#00527C', // Blue border
+    borderColor: '#00527C', 
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
-    borderRadius: 20, // Rounded edges
-    color: '#000', // Text color
+    borderRadius: 20, 
+    color: '#000', 
   },
   j: {
     fontSize: 50,
@@ -117,16 +110,15 @@ const styles = StyleSheet.create({
   },
   logar: {
     alignItems: 'center',
-    marginLeft: '25%',
     width: '50%',
     height: 50,
-    backgroundColor: '#ff6400', // Orange button
-    borderRadius: 20, // Rounded edges
+    backgroundColor: '#ff6400', 
+    borderRadius: 20,
     justifyContent: 'center',
   },
   textLogar: {
     color: 'white',
-    padding: 5,
+    fontSize: 18,
   },
 });
 
