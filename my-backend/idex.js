@@ -23,7 +23,7 @@ db.connect((err) => {
     console.log('Conectado ao banco de dados');
   });
   app.post('/login', (req, res) => {
-    const { email, senha } = req.body;
+    const { email } = req.body;
     console.log("Email recebido:", email); 
   
     const query = 'SELECT * FROM ContatoInstitucional WHERE emailInstituicional = ?';
