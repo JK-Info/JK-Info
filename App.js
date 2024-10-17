@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './src/screen/LoginScreen';
+import CadastroSenhaScreen from './src/screen/CadastroSenhaScreen.js';
 import DrawerNavigatorAluno from './src/Components/DrawerNavigation'; // Navegador de Alunos
 import DrawerNavigatorProfessor from './src/Components/DrawerNavigationProfessor'; // Navegador de Professores
 import TabNavigatorAluno from './src/Components/TabNavigationAluno.js'; // Navegador de Abas de Alunos
@@ -18,7 +19,7 @@ export default function App() {
   const [alunos, setAlunos] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:3000/alunos')
+    axios.get('http://localhost:3000')
       .then(response => {
         setAlunos(response.data);
       })
@@ -34,6 +35,11 @@ export default function App() {
           name="Login"
           component={LoginScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CadastroSenhaScreen"
+          component={CadastroSenhaScreen} // Certifique-se de que a tela de cadastro está definida aqui
+          options={{ title: 'Cadastro' }}
         />
         <Stack.Screen
           name="DrawerNavigatorAluno"

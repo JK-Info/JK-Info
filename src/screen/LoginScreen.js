@@ -1,66 +1,80 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
 
   const handleLogin = async () => {
-    if (!email) {
-      Alert.alert('Erro', 'Por favor, preencha o campo de email.');
+    if (!email || !senha) {
+      Alert.alert('Erro', 'Por favor, insira seu e-mail e senha.');
       return;
     }
-  
+
     try {
-      const response = await axios.post('http://localhost:3000/login', { email });
-  
-      if (response.data.user) {
-        const user = response.data.user;
-  
-        // Verifica o tipo de usuário e redireciona para a tela apropriada
-        if (user.tipoUsuario === 'aluno') {
-          navigation.replace('DrawerNavigatorAluno'); // Redireciona para a tela do aluno
-        } else if (user.tipoUsuario === 'professor') {
-          navigation.replace('DrawerNavigatorProfessor'); // Redireciona para a tela do professor
-        } else if (user.tipoUsuario === 'funcionario') {
-          navigation.replace('DrawerNavigatorFuncionario'); // Redireciona para a tela do funcionário
-        } else {
-          Alert.alert('Erro', 'Tipo de usuário não reconhecido.');
+      const response = await axios.post('http://localhost:3000/login', { email, senha });
+      if (response.data.success) {
+        const userType = response.data.userType;
+        switch (userType) {
+          case 'aluno':
+            navigation.navigate('DrawerNavigatorAluno');
+            break;
+          case 'professor':
+            navigation.navigate('DrawerNavigatorProfessor');
+            break;
+          case 'funcionario':
+            navigation.navigate('DrawerNavigatorFuncionario');
+            break;
+          case 'gestao':
+            navigation.navigate('DrawerNavigatorGestao');
+            break;
+          default:
+            Alert.alert('Erro', 'Tipo de usuário inválido.');
         }
+      } else {
+        Alert.alert('Erro', 'Senha incorreta.');
       }
     } catch (error) {
-      if (error.response) {
-        Alert.alert('Erro', error.response.data.message || 'Email não encontrado.');
-      } else {
-        Alert.alert('Erro', 'Ocorreu um erro ao tentar fazer o login.');
-      }
+      Alert.alert('Erro', 'Ocorreu um erro ao tentar fazer o login.');
+      console.error(error);
     }
   };
-  
 
   return (
     <View style={styles.container}>
-      <View style={styles.h1}>
+      <View style={styles.header}>
         <Text style={styles.j}>J</Text>
         <Text style={styles.k}>K</Text>
         <Text style={styles.info}>Info</Text>
       </View>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={text => setEmail(text)}
-          placeholder="Digite seu e-mail"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={text => setEmail(text)}
+        placeholder="Digite seu e-mail"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      <TextInput
+        style={styles.input}
+        value={senha}
+        onChangeText={text => setSenha(text)}
+        placeholder="Digite sua senha"
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity style={styles.logar} onPress={handleLogin}>
-          <Text style={styles.textLogar}>Entrar</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Botão para cadastrar senha */}
+      <TouchableOpacity onPress={() => navigation.navigate('CadastroSenhaScreen')}>
+        <Text style={styles.linkText}>Não tem senha? Cadastre agora</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -71,17 +85,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
   },
-  input: {
-    height: 50,
-    width: '90%',
-    borderColor: '#00527C', 
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    borderRadius: 20, 
-    color: '#000', 
+  header: {
+    flexDirection: 'row',
+    marginBottom: 30,
   },
   j: {
     fontSize: 50,
@@ -99,26 +107,33 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     color: '#00527C',
   },
-  h1: {
-    flexDirection: 'row',
-    margin: 80,
-  },
-  form: {
-    width: '90%',
-    padding: 20,
-    elevation: 5,
-  },
-  logar: {
-    alignItems: 'center',
-    width: '50%',
+  input: {
     height: 50,
-    backgroundColor: '#ff6400', 
+    width: '90%',
+    borderColor: '#00527C',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    color: '#000',
+  },
+  button: {
+    alignItems: 'center',
+    width: '90%',
+    height: 50,
+    backgroundColor: '#00527C',
     borderRadius: 20,
     justifyContent: 'center',
+    marginBottom: 10,
   },
-  textLogar: {
+  buttonText: {
     color: 'white',
     fontSize: 18,
+  },
+  linkText: {
+    color: '#00527C',
+    marginTop: 10,
+    textDecorationLine: 'underline',
   },
 });
 
