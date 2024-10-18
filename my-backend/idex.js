@@ -18,7 +18,7 @@ const db = mysql.createConnection({
 // Conectar ao banco de dados
 db.connect((err) => {
   if (err) {
-    console.error('Erro ao conectar ao banco de dados:', err);
+    console.log('Erro ao conectar ao banco de dados:', err);
     return;
   }
   console.log('Conectado ao banco de dados');
@@ -58,7 +58,7 @@ app.post('/login', async (req, res) => {
 app.post('/check-email', (req, res) => {
   const { email } = req.body;
 
-  const query = 'SELECT * FROM ContatoInstitucional WHERE emailInstitucional = ?';
+  const query = 'SELECT * FROM ContatoInstitucional WHERE emailInstituicional = ?';
   db.query(query, [email], (err, results) => {
     if (err) {
       console.error('Erro na consulta:', err);
@@ -79,7 +79,7 @@ app.post('/set-password', async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(senha, 10);
   
-  const query = 'UPDATE ContatoInstitucional SET senha = ? WHERE emailInstitucional = ?';
+  const query = 'UPDATE ContatoInstitucional SET senha = ? WHERE emailInstituicional = ?';
   db.query(query, [hashedPassword, email], (err, results) => {
     if (err) {
       console.error('Erro ao definir a senha:', err);
@@ -96,6 +96,6 @@ app.post('/set-password', async (req, res) => {
 
 // Servidor rodando
 const PORT = 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

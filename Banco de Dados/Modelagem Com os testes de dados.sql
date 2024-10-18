@@ -13,7 +13,7 @@ USE `mydb`;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`ContatoInstitucional` (
   `idContatoInstitucional` INT NOT NULL AUTO_INCREMENT,
-  `emailInstitucional` VARCHAR(45) NOT NULL,
+  `emailInstituicional` VARCHAR(45) NOT NULL,
   `senha` VARCHAR(255) NOT NULL,  -- Adicionando a coluna senha
   `tipoUsuario` VARCHAR(20) NOT NULL,
   PRIMARY KEY (`idContatoInstitucional`),
@@ -268,7 +268,7 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
             
 -- Inserir Usuários
  
-INSERT INTO mydb.ContatoInstitucional (emailInstitucional, tipoUsuario) VALUES 
+INSERT INTO mydb.ContatoInstitucional (emailInstituicional, tipoUsuario) VALUES 
 ('aluno1@etec.sp.gov.br', 'aluno');
 
 select * from ContatoInstitucional;

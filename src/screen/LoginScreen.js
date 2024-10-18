@@ -13,7 +13,7 @@ const LoginScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/login', { email, senha });
+      const response = await axios.post('http://172.16.2.146:3000/login', { email, senha });
       if (response.data.success) {
         const userType = response.data.userType;
         switch (userType) {
