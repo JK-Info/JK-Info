@@ -311,7 +311,7 @@
 	-- Inserir Aluno
 	 
 	INSERT INTO mydb.ContatoInstitucional (emailInstitucional, tipoUsuario) VALUES 
-	('aluno1@etec.sp.gov.br', 'aluno');
+	('funcionario1@etec.sp.gov.br', 'funcionario');
 
 	select * from ContatoInstitucional;
 

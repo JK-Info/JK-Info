@@ -18,16 +18,16 @@ const LoginScreen = ({ navigation }) => {
         const userType = response.data.userType;
         switch (userType) {
           case 'aluno':
-            navigation.navigate('DrawerNavigatorAluno');
+            navigation.navigate('Aluno');
             break;
           case 'professor':
-            navigation.navigate('DrawerNavigatorProfessor');
+            navigation.navigate('Professor');
             break;
           case 'funcionario':
-            navigation.navigate('DrawerNavigatorFuncionario');
+            navigation.navigate('Funcionario');
             break;
           case 'gestao':
-            navigation.navigate('DrawerNavigatorGestao');
+            navigation.navigate('Gestao');
             break;
           default:
             Alert.alert('Erro', 'Tipo de usuário inválido.');

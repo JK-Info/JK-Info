@@ -10,7 +10,7 @@ import CustomDrawerContent from './CustomDrawerContent';
 
 const Drawer = createDrawerNavigator();
 
-const DrawerNavigatorProfessor = () => (
+const Professor = () => (
   <Drawer.Navigator
     drawerContent={props => <CustomDrawerContent {...props} />}
     screenOptions={{
@@ -34,4 +34,4 @@ const DrawerNavigatorProfessor = () => (
   </Drawer.Navigator>
 );
 
-export default DrawerNavigatorProfessor;
+export default Professor;
