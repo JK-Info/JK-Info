@@ -123,7 +123,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   );
 };
 
-const Post = ({ text, image, comments, onCommentPress, onDelete }) => {
+const Post = ({ text, image, comments, onCommentPress, onDelete, date }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
@@ -146,6 +146,7 @@ const Post = ({ text, image, comments, onCommentPress, onDelete }) => {
       <View style={styles.boxFeed}>
         <Text style={styles.textoPubli}>{text}</Text>
         {image && <Image source={{ uri: image }} style={styles.postImage} />}
+        <Text style={styles.dateText}>{date}</Text> {/* Exibir a data aqui */}
       </View>
       
       <View style={styles.bottons}>
@@ -164,7 +165,65 @@ const HomeScreenGestao = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [comments, setComments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [posts, setPosts] = useState([]); // Inicialize com um array vazio
+  const [posts, setPosts] = useState([
+    {
+      text: 'Bem-vindo à nossa nova plataforma de gestão!',
+      image: 'https://th.bing.com/th/id/OIP.Y5OCXRpkd7E9vEP7VCl8SAHaEN?rs=1&pid=ImgDetMain', // Substitua com um link de imagem válido
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Muito legal! Ansioso para usar.',
+          author: {
+            name: 'Ana',
+            photo: fotoPerfilAnonima,
+          },
+          liked: false,
+          likeCount: 2,
+        },
+        {
+          text: 'Parabéns pela novidade!',
+          author: {
+            name: 'Carlos',
+            photo: fotoPerfilAnonima,
+          },
+          liked: true,
+          likeCount: 1,
+        },
+      ],
+    },
+    {
+      text: 'Confira as novas funcionalidades do sistema.',
+      image: 'https://th.bing.com/th/id/OIP.SIVEijZ1WLmMoOPQFGZV9wAAAA?rs=1&pid=ImgDetMain', // Substitua com um link de imagem válido
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Adorei as melhorias!',
+          author: {
+            name: 'Juliana',
+            photo: fotoPerfilAnonima,
+          },
+          liked: false,
+          likeCount: 0,
+        },
+      ],
+    },
+    {
+      text: 'Estamos comprometidos em melhorar cada vez mais!',
+      image: '',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Isso é ótimo!',
+          author: {
+            name: 'Lucas',
+            photo: fotoPerfilAnonima,
+          },
+          liked: true,
+          likeCount: 3,
+        },
+      ],
+    },
+  ]);
 
   const [newPostText, setNewPostText] = useState('');
   const [newPostImage, setNewPostImage] = useState('');
@@ -179,17 +238,35 @@ const HomeScreenGestao = () => {
     setPosts(updatedPosts);
   };
 
-  const handleCreatePost = () => {
+  const handleCreatePost = async () => {
     if (newPostText.trim() || newPostImage) {
       const newPost = {
-        text: newPostText,
+        descricao: newPostText,
         image: newPostImage,
-        comments: [],
       };
-      setPosts([newPost, ...posts]); // Adiciona novo post no topo
-      setNewPostText('');
-      setNewPostImage('');
-      toggleCreatePostModal(); // Fecha o modal após criar o post
+  
+      try {
+        const response = await fetch('http://localhost:3000/publicacoes', { // Altere para o seu IP local
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newPost),
+        });
+  
+        if (response.ok) {
+          const postData = await response.json();
+          setPosts([{ ...postData }, ...posts]); // Adiciona o novo post no topo
+          setNewPostText('');
+          setNewPostImage('');
+          toggleCreatePostModal(); // Fecha o modal após criar o post
+        } else {
+          alert('Erro ao criar publicação.');
+        }
+      } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao conectar com o servidor.');
+      }
     }
   };
 
@@ -222,19 +299,20 @@ const HomeScreenGestao = () => {
       />
 
       <ScrollView style={styles.scrollView}>
-        {filteredPosts.map((post, index) => (
-          <Post 
-            key={index}
-            text={post.text}
-            image={post.image}
-            comments={post.comments}
-            onCommentPress={() => {
-              setComments(post.comments);
-              toggleModal();
-            }}
-            onDelete={() => handleDeletePost(index)} // Passa o índice correto
-          />
-        ))}
+      {filteredPosts.map((post, index) => (
+        <Post 
+          key={index}
+          text={post.text}
+          image={post.image}
+          date={post.date} // Passando a data
+          comments={post.comments}
+          onCommentPress={() => {
+            setComments(post.comments);
+            toggleModal();
+          }}
+          onDelete={() => handleDeletePost(index)}
+        />
+      ))}
       </ScrollView>
 
       <CommentModal 
@@ -326,7 +404,7 @@ const styles = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    height: 200,
+    height: 500,
     borderRadius: 10,
   },
   bottons: {
@@ -432,28 +510,36 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#FF6347',
-    borderRadius: 50,
-    padding: 15,
-    elevation: 3,
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    backgroundColor: '#ff6400',
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
   },
   newPostInput: {
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 10,
-    paddingHorizontal: 10,
+    padding: 10,
     marginBottom: 10,
   },
   deleteButton: {
     padding: 5,
-    backgroundColor: '#FF6347',
+    backgroundColor: '#ff4d4d',
     borderRadius: 5,
   },
   deleteButtonText: {
     color: 'white',
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 5,
   },
 });
 
