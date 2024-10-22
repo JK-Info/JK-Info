@@ -58,7 +58,7 @@ app.post('/login', async (req, res) => {
 app.post('/check-email', (req, res) => {
   const { email } = req.body;
 
-  const query = 'SELECT * FROM ContatoInstitucional WHERE emailInstituicional = ?';
+  const query = 'SELECT * FROM ContatoInstitucional WHERE emailInstitucional = ?';
   db.query(query, [email], (err, results) => {
     if (err) {
       console.error('Erro na consulta:', err);
@@ -79,7 +79,7 @@ app.post('/set-password', async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(senha, 10);
   
-  const query = 'UPDATE ContatoInstitucional SET senha = ? WHERE emailInstituicional = ?';
+  const query = 'UPDATE ContatoInstitucional SET senha = ? WHERE emailInstitucional = ?';
   db.query(query, [hashedPassword, email], (err, results) => {
     if (err) {
       console.error('Erro ao definir a senha:', err);

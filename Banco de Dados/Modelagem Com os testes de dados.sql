@@ -13,7 +13,7 @@ USE `mydb`;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`ContatoInstitucional` (
   `idContatoInstitucional` INT NOT NULL AUTO_INCREMENT,
-  `emailInstituicional` VARCHAR(45) NOT NULL,
+  `emailInstitucional` VARCHAR(45) NOT NULL,
   `senha` VARCHAR(255) NOT NULL,  -- Adicionando a coluna senha
   `tipoUsuario` VARCHAR(20) NOT NULL,
   PRIMARY KEY (`idContatoInstitucional`),
@@ -73,6 +73,24 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Contato` (
   CONSTRAINT `fk_Contato_Pessoa`
     FOREIGN KEY (`Pessoa_idPessoa`)
     REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `mydb`.`Redes Sociais`
+-- -----------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `mydb`.`RedesSociais` (
+  `idRedeSocial` INT NOT NULL AUTO_INCREMENT,
+  `tipoRedeSocial` VARCHAR(45) NOT NULL,  -- Ex: Facebook, Instagram, etc.
+  `url` VARCHAR(255) NOT NULL,
+  `Contato_idContato` INT NOT NULL,
+  PRIMARY KEY (`idRedeSocial`),
+  INDEX `fk_RedesSociais_Contato_idx` (`Contato_idContato`),
+  CONSTRAINT `fk_RedesSociais_Contato`
+    FOREIGN KEY (`Contato_idContato`)
+    REFERENCES `mydb`.`Contato` (`idContato`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
 ) ENGINE = InnoDB;
@@ -265,70 +283,65 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Comentario` (
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- INSERINDO TURMAS --
+
+INSERT INTO `mydb`.`Turma` (nomeTurma) VALUES
+('1 módulo - Administração - Tarde'), 
+('2 módulo - Administração - Tarde'), 
+('3 módulo - Administração - Tarde'),
+('1 módulo - Desenvolvimento de Sistema - Tarde'),
+('2 módulo - Desenvolvimento de Sistema - Tarde'),
+('3 módulo - Desenvolvimento de Sistema - Tarde'),
+('1 módulo - Logistica - Tarde'),
+('2 módulo - Logistica - Tarde'),
+('3 módulo - Logistica - Tarde'),
+('1 módulo - Administração - Noite'), 
+('2 módulo - Administração - Noite'), 
+('3 módulo - Administração - Noite'),
+('1 módulo - Desenvolvimento de Sistema - Noite'),
+('2 módulo - Desenvolvimento de Sistema - Noite'),
+('3 módulo - Desenvolvimento de Sistema - Noite'),
+('1 módulo - Logistica - Noite'),
+('2 módulo - Logistica - Noite'),
+('3 módulo - Logistica - Noite');
+
+select * from Turma;
             
--- Inserir Usuários
+-- Inserir Aluno
  
-INSERT INTO mydb.ContatoInstitucional (emailInstituicional, tipoUsuario) VALUES 
+INSERT INTO mydb.ContatoInstitucional (emailInstitucional, tipoUsuario) VALUES 
 ('aluno1@etec.sp.gov.br', 'aluno');
 
 select * from ContatoInstitucional;
 
 INSERT INTO mydb.Pessoa (nome, dataNascimento, sexo, ContatoInstitucional_idContatoInstitucional, RG, CPF) VALUES 
-('Aluno Primeiro', '2000-01-01', 'Masculino', 7, '111111111', '11111111111');
+('Aluno Primeiro', '2000-01-01', 'Masculino', 1, '111111111', '11111111111');
 
 select * from Pessoa;
 
 INSERT INTO mydb.Aluno (RM, Pessoa_idPessoa) VALUES 
-(13967, 7);
+(13967, 1);
 
--- Esse select junta as tabelas aluno, pessoa e CInstitucional.
-SELECT 
-    a.idAluno, 
-    a.RM, 
-    p.nome AS NomeAluno,
-    p.dataNascimento, 
-    p.sexo,
-    ci.emailInstitucional
-FROM 
-    mydb.Aluno a
-JOIN 
-    mydb.Pessoa p ON a.Pessoa_idPessoa = p.idPessoa
-JOIN 
-    mydb.ContatoInstitucional ci ON p.ContatoInstitucional_idContatoInstitucional = ci.idContatoInstitucional;
+-- Inserindo Gestores --
 
--- Esse select mostra as tabelas pessoa e cInstitucional. 
-SELECT 
-    p.idPessoa, 
-    p.nome, 
-    p.dataNascimento, 
-    p.sexo, 
-    ci.emailInstitucional
-FROM 
-    mydb.Pessoa p
-JOIN 
-    mydb.ContatoInstitucional ci ON p.ContatoInstitucional_idContatoInstitucional = ci.idContatoInstitucional;
-					
-                    -- TESTE FUNCIONARIOS--
+INSERT INTO `mydb`.`Cargo` (`nomeCargo`) VALUES ('Diretor');
 
-/*
-INSERT INTO `mydb`.`Publicacao` (titulo, conteudo, idPessoa, dataHoraPublicacao)
-VALUES 
-('Minha Primeira Publicação', 'Este é o conteúdo da minha primeira publicação!', 1, NOW()),
-('Segunda Publicação', 'Mais conteúdo interessante aqui!', 2, NOW()),
-('Dicas de Programação', 'Aqui estão algumas dicas sobre programação.', 1, NOW());
+INSERT INTO `mydb`.`ContatoInstitucional` (`emailInstitucional`, `tipoUsuario`)
+VALUES ('diretor1@etec.sp.gov.br', 'gestao');
 
-INSERT INTO `mydb`.`Comentarios` (idPublicacao, idPessoa, textoComentario, dataHoraComentario)
-VALUES 
-(1, 2, 'Ótima publicação!', NOW()),
-(1, 3, 'Concordo, muito interessante!', NOW()),
-(2, 1, 'Mal posso esperar para ler mais!', NOW()),
-(3, 2, 'Essas dicas são muito úteis!', NOW());
+INSERT INTO `mydb`.`Pessoa` (`nome`, `dataNascimento`, `sexo`, `RG`, `CPF`, `ContatoInstitucional_idContatoInstitucional`)
+VALUES ('Diretor Primeiro', '2000-01-01', 'Masculino', '111111112', '11111111112', LAST_INSERT_ID());
 
-INSERT INTO `mydb`.`Chats` (idPessoaRemetente, idPessoaDestinario, mensagem, dataeHoraMensagem)
-VALUES 
-(1, 2, 'Oi, você viu a nova publicação?', NOW()),
-(2, 1, 'Sim, eu achei muito boa!', NOW()),
-(1, 3, 'Vamos nos encontrar mais tarde?', NOW()),
-(3, 1, 'Claro! Que horas?', NOW());
+INSERT INTO `mydb`.`Contato` (`numeroCelular`, `emailPessoal`, `Pessoa_idPessoa`)
+VALUES ('11911111111', 'diretor1@gmail.com', LAST_INSERT_ID());
 
-*/
+INSERT INTO `mydb`.`Funcionario` (`ContatoInstitucional_idContatoInstitucional`, `Contato_idContato`, `Pessoa_idPessoa`, `Cargo_idCargo`)
+VALUES (
+    (SELECT idContatoInstitucional FROM `mydb`.`ContatoInstitucional` WHERE emailInstitucional = 'diretor1@etec.sp.gov.br'),
+    (SELECT idContato FROM `mydb`.`Contato` WHERE emailPessoal = 'diretor1@gmail.com'),
+    (SELECT idPessoa FROM `mydb`.`Pessoa` WHERE nome = 'Diretor Primeiro'),
+    (SELECT idCargo FROM `mydb`.`Cargo` WHERE nomeCargo = 'Diretor')
+);
+
+select * from Pessoa;
