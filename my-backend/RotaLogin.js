@@ -1,6 +1,12 @@
+const express = require('express');
 const bcrypt = require('bcrypt');
+const db = require('./conexaoBD'); // Importa a conexão
 
-app.post('/login', async (req, res) => {
+const router = express.Router();
+
+// Rota de Login
+router.post('/login', async (req, res) => {
+  console.log('Rota de login chamada:', req.body);
   const { email, senha } = req.body;
 
   const query = 'SELECT * FROM ContatoInstitucional WHERE emailInstitucional = ?';
@@ -16,12 +22,10 @@ app.post('/login', async (req, res) => {
 
     const user = results[0];
 
-    // Verifica se o usuário ainda não definiu uma senha
     if (!user.senha) {
       return res.status(400).json({ success: false, message: 'Usuário ainda não definiu uma senha.' });
     }
 
-    // Verifica se a senha fornecida é válida
     const isPasswordValid = await bcrypt.compare(senha, user.senha);
     if (!isPasswordValid) {
       return res.status(401).json({ success: false, message: 'Senha incorreta' });
@@ -31,7 +35,9 @@ app.post('/login', async (req, res) => {
   });
 });
 
-app.post('/set-password', async (req, res) => {
+// Rota para Definir Senha
+router.post('/set-password', async (req, res) => {
+  console.log('Rota de definir senha chamada:', req.body);
   const { email, senha } = req.body;
 
   const hashedPassword = await bcrypt.hash(senha, 10);
@@ -50,3 +56,5 @@ app.post('/set-password', async (req, res) => {
     res.status(200).json({ success: true, message: 'Senha definida com sucesso!' });
   });
 });
+
+module.exports = router; // Exporta as rotas

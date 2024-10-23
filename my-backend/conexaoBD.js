@@ -1,11 +1,4 @@
 const mysql = require('mysql2');
-const express = require('express');
-const cors = require('cors');
-const bcrypt = require('bcrypt');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
 
 // Configurações de conexão
 const db = mysql.createConnection({
@@ -18,14 +11,10 @@ const db = mysql.createConnection({
 // Conectar ao banco de dados
 db.connect((err) => {
   if (err) {
-    console.log('Erro ao conectar ao banco de dados:', err);
+    console.error('Erro ao conectar ao banco de dados:', err); // Corrigido de console.err para console.error
     return;
   }
-  console.log('Conectado ao banco de dados');
+  console.log('Conectado ao banco de dados!!!');
 });
 
-// Servidor rodando
-const PORT = 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+module.exports = db; // Certifique-se de que a conexão está sendo exportada
