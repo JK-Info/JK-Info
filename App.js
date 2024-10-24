@@ -1,17 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './src/screen/LoginScreen';
+import CadastroSenhaScreen from './src/screen/CadastroSenhaScreen.js';
 import DrawerNavigatorAluno from './src/Components/DrawerNavigation'; // Navegador de Alunos
 import DrawerNavigatorProfessor from './src/Components/DrawerNavigationProfessor'; // Navegador de Professores
 import TabNavigatorAluno from './src/Components/TabNavigationAluno.js'; // Navegador de Abas de Alunos
 import TabNavigatorProfessor from './src/Components/TabNavigationProfessor'; // Navegador de Abas de Professores
 import TabNavigatorGestao from './src/Components/TabNavigatorGestor.js';
 import DrawerNavigatorGestor from './src/Components/DrawerNavigationGestao.js';
+import DrawerNavigatorFuncionario from './src/Components/DrawerNavigationFuncionario.js';
+import TabNavigatorFuncionario from './src/Components/TabNavigatorFuncionario.js';
+import axios from 'axios';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [alunos, setAlunos] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:3000')
+      .then(response => {
+        setAlunos(response.data);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar alunos:', error);
+      });
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
@@ -19,6 +35,11 @@ export default function App() {
           name="Login"
           component={LoginScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CadastroSenhaScreen"
+          component={CadastroSenhaScreen} // Certifique-se de que a tela de cadastro está definida aqui
+          options={{ title: 'Cadastro' }}
         />
         <Stack.Screen
           name="DrawerNavigatorAluno"
@@ -41,14 +62,24 @@ export default function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen 
-        name="TabNavigatorGestao"
-        component={TabNavigatorGestao}
-        options={{headerShown: false}}
+          name="TabNavigatorGestao"
+          component={TabNavigatorGestao}
+          options={{ headerShown: false }}
         />
         <Stack.Screen 
-        name="DrawerNavigatorGestao"
-        component={DrawerNavigatorGestor}
-        options={{headerShown: false}}
+          name="DrawerNavigatorGestao"
+          component={DrawerNavigatorGestor}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="TabNavigatorFuncionario"
+          component={TabNavigatorFuncionario}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="DrawerNavigatorFuncionario"
+          component={DrawerNavigatorFuncionario}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

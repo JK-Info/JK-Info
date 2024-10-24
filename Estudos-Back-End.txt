@@ -1,0 +1,631 @@
+BANCO DE DADOS ---------------------------------------------------------------------------------------------------------
+
+1.
+CREATE TABLE IF NOT EXISTS `mydb`.`Usuarios` (
+  `idUsuario` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(100) NOT NULL UNIQUE,
+  `senha` VARCHAR(255) NOT NULL, -- Considere usar criptografia para senhas em produção
+  `tipoUsuario` ENUM('aluno', 'professor', 'funcionario', 'gestao') NOT NULL,
+  `Pessoa_idPessoa` INT NOT NULL,
+  PRIMARY KEY (`idUsuario`),
+  CONSTRAINT `fk_Usuarios_Pessoa`
+    FOREIGN KEY (`Pessoa_idPessoa`)
+    REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE = InnoDB;
+
+INSERT INTO mydb.Usuarios (email, senha, tipoUsuario, Pessoa_idPessoa) VALUES 
+('aluno@escola.com', 'senhaAluno', 'aluno', 1),
+('professor@escola.com', 'senhaProfessor', 'professor', 2),
+('funcionario@escola.com', 'senhaFuncionario', 'funcionario', 3),
+('gestao@escola.com', 'senhaGestao', 'gestao', 4);
+
+2.
+CREATE TABLE IF NOT EXISTS `mydb`.`Notificacoes` (
+  `idNotificacao` INT NOT NULL AUTO_INCREMENT,
+  `idUsuario` INT NOT NULL,
+  `mensagem` TEXT NOT NULL,
+  `lida` BOOLEAN NOT NULL DEFAULT FALSE,
+  `dataHora` DATETIME NOT NULL,
+  PRIMARY KEY (`idNotificacao`),
+  FOREIGN KEY (`idUsuario`) REFERENCES `mydb`.`Usuarios` (`idUsuario`)
+) ENGINE = InnoDB;
+
+CONFIGURAÇÃO DO SERVER.JS -----------------------------------------------------------------------------------------------
+
+const express = require('express');
+const mysql = require('mysql');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'seu_usuario',
+  password: 'sua_senha',
+  database: 'seu_banco_de_dados'
+});
+
+// Rota de login
+app.post('/api/login', (req, res) => {
+  const { email, senha } = req.body;
+
+  db.query('SELECT * FROM Usuarios WHERE email = ?', [email], (error, results) => {
+    if (error) return res.status(500).json({ success: false });
+
+    if (results.length === 0) {
+      return res.json({ success: false }); // Email não encontrado
+    }
+
+    const usuario = results[0];
+
+    // Verifica a senha
+    if (bcrypt.compareSync(senha, usuario.senha)) {
+  const token = jwt.sign({ id: usuario.idUsuario, tipoUsuario: usuario.tipoUsuario }, 'seu_segredo', { expiresIn: '1h' });
+  return res.json({ success: true, token, tipoUsuario: usuario.tipoUsuario });
+}
+
+    res.json({ success: false }); // Senha incorreta
+  });
+});
+
+// Middleware para verificar token
+const authenticateJWT = (req, res, next) => {
+  const token = req.header('Authorization')?.split(' ')[1];
+  if (!token) return res.sendStatus(403);
+
+  jwt.verify(token, 'seu_segredo', (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+// Rota para criar publicação
+app.post('/api/posts', authenticateJWT, (req, res) => {
+  const { titulo, conteudo } = req.body;
+  const { id } = req.user; // Pega o ID do usuário do token
+
+  const query = 'INSERT INTO Publicacao (titulo, conteudo, idPessoa, dataHoraPublicacao) VALUES (?, ?, ?, NOW())';
+  db.query(query, [titulo, conteudo, id], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+// Rota para listar publicações
+app.get('/api/posts', (req, res) => {
+  db.query('SELECT * FROM Publicacao ORDER BY dataHoraPublicacao DESC', (error, results) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json(results);
+  });
+});
+
+// Rota para excluir publicação
+app.delete('/api/posts/:id', authenticateJWT, (req, res) => {
+  const { id } = req.params;
+
+  db.query('DELETE FROM Publicacao WHERE idPublicacao = ?', [id], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+// Rota para comentar
+app.post('/api/comments', authenticateJWT, (req, res) => {
+  const { idPublicacao, textoComentario } = req.body;
+  const { id } = req.user;
+
+  const query = 'INSERT INTO Comentarios (idPublicacao, idPessoa, textoComentario, dataHoraComentario) VALUES (?, ?, ?, NOW())';
+  db.query(query, [idPublicacao, id, textoComentario], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+// Rota para listar comentários de uma publicação
+app.get('/api/comments/:idPublicacao', (req, res) => {
+  const { idPublicacao } = req.params;
+
+  db.query('SELECT * FROM Comentarios WHERE idPublicacao = ?', [idPublicacao], (error, results) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json(results);
+  });
+});
+
+// Rota para excluir comentário
+app.delete('/api/comments/:id', authenticateJWT, (req, res) => {
+  const { id } = req.params;
+
+  db.query('DELETE FROM Comentarios WHERE idComentario = ?', [id], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+// Inicie o servidor
+app.listen(3000, () => {
+  console.log('Servidor rodando na porta 3000');
+});
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Instale as dependências:
+
+npm install express cors body-parser bcrypt
+
+npm install @react-navigation/native @react-navigation/native-stack axios
+
+npm install react-native-gesture-handler react-native-reanimated react-native-screens react-native-safe-area-context @react-native-community/masked-view
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+Inicie o servidor:
+
+node server.js
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Parte 2: Frontend (React Native)
+Crie ou abra o arquivo api.js na pasta do seu projeto React Native e cole o seguinte código:
+
+const API_URL = 'http://10.0.2.2:3000/api'; // Use localhost se estiver no navegador
+
+export const login = async (email, senha) => {
+  const response = await fetch(`${API_URL}/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, senha }),
+  });
+  return response.json();
+};
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+import React, { useState } from 'react';
+import { Button, StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const LoginScreen = ({ navigation }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/login', {
+        email,
+        senha: password,
+      });
+
+      if (response.data.success) {
+        // Armazena o token recebido
+        await AsyncStorage.setItem('token', response.data.token);
+
+        // Navegação com base no tipo de usuário
+        switch (response.data.tipoUsuario) {
+          case 'aluno':
+            navigation.replace('DrawerNavigatorAluno');
+            break;
+          case 'professor':
+            navigation.replace('DrawerNavigatorProfessor');
+            break;
+          case 'gestao':
+            navigation.replace('DrawerNavigatorGestao');
+            break;
+          case 'funcionario':
+            navigation.replace('DrawerNavigatorFuncionario');
+            break;
+          default:
+            Alert.alert('Erro', 'Tipo de usuário não reconhecido.');
+        }
+      } else {
+        Alert.alert('Erro', 'Credenciais inválidas!');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Não foi possível fazer login. Tente novamente.');
+    }
+  };
+
+
+ROUTERS.JS -----------------------------------------------------------------------------------------------------------------------------------------
+
+module.exports = (app) => {
+  // Rotas para publicações
+
+  app.post('/api/posts', authenticateJWT, (req, res) => {
+  const { titulo, conteudo } = req.body;
+  const { tipoUsuario } = req.user;
+
+  if (tipoUsuario !== 'gestao') {
+    return res.status(403).json({ success: false, message: 'Permissão negada.' });
+  }
+
+  const query = 'INSERT INTO Publicacao (titulo, conteudo, idPessoa, dataHoraPublicacao) VALUES (?, ?, ?, NOW())';
+  db.query(query, [titulo, conteudo, req.user.id], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+  app.delete('/api/posts/:id', authenticateJWT, (req, res) => {
+  const { id } = req.params;
+  const { tipoUsuario } = req.user;
+
+  if (tipoUsuario !== 'gestao') {
+    return res.status(403).json({ success: false, message: 'Permissão negada.' });
+  }
+
+  db.query('DELETE FROM Publicacao WHERE idPublicacao = ?', [id], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+  app.post('/api/posts/like/:id', authenticateJWT, (req, res) => {
+  const { id } = req.params;
+
+  const query = 'INSERT INTO Curtidas (idPublicacao, idUsuario) VALUES (?, ?)';
+  db.query(query, [id, req.user.id], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+app.post('/api/comments', authenticateJWT, (req, res) => {
+  const { texto, idPublicacao } = req.body;
+
+  const query = 'INSERT INTO Comentarios (texto, idPublicacao, idUsuario) VALUES (?, ?, ?)';
+  db.query(query, [texto, idPublicacao, req.user.id], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+app.delete('/api/comments/:id', authenticateJWT, (req, res) => {
+  const { id } = req.params;
+
+  const query = 'DELETE FROM Comentarios WHERE idComentario = ? AND (idUsuario = ? OR ? = "gestao")';
+  db.query(query, [id, req.user.id, req.user.tipoUsuario], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+app.post('/api/comments/like/:id', authenticateJWT, (req, res) => {
+  const { id } = req.params;
+
+  const query = 'INSERT INTO CurtidasComentarios (idComentario, idUsuario) VALUES (?, ?)';
+  db.query(query, [id, req.user.id], (error) => {
+    if (error) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+HOMESCREENGESTAO -------------------------------------------------------------------------------------------------------------------------------------------
+
+import React, { useState } from 'react';
+import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput, Alert } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
+
+const Avatar = () => (
+  <Image source={fotoPerfilAnonima} style={styles.avatarImage} />
+);
+
+const Usuario = ({ nome, cargo }) => (
+  <View style={styles.informacoesPublicacao}>
+    <Text>{nome}</Text>
+    <Text style={{ fontSize: 11 }}>{cargo}</Text>
+  </View>
+);
+
+const BotaoComentar = ({ onPress, comentarioCount }) => (
+  <View style={styles.containerBotao}>
+    <TouchableOpacity onPress={onPress} style={styles.botao}>
+      <Text style={styles.botaoTexto}>Comentar ({comentarioCount})</Text>
+    </TouchableOpacity>
+  </View>
+);
+
+const Curtir = ({ count, liked, onPress }) => (
+  <View style={styles.containerCurtir}>
+    <TouchableOpacity onPress={onPress}>
+      <Icon name="heart" size={24} color={liked ? '#FF0000' : '#000'} />
+    </TouchableOpacity>
+    <Text style={styles.curtidasTexto}>{count}</Text>
+  </View>
+);
+
+const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
+  const [comentario, setComentario] = useState('');
+
+  const handleSendComment = () => {
+    if (comentario.trim()) {
+      const newComment = {
+        text: comentario,
+        author: {
+          name: 'User',
+          photo: fotoPerfilAnonima,
+        },
+        liked: false,
+        likeCount: 0,
+      };
+      onSendComment([...comments, newComment]);
+      setComentario('');
+      onClose();
+    }
+  };
+
+  const handleLikeComment = (index) => {
+    const updatedComments = [...comments];
+    updatedComments[index].liked = !updatedComments[index].liked;
+    updatedComments[index].likeCount += updatedComments[index].liked ? 1 : -1;
+    onSendComment(updatedComments);
+  };
+
+  const handleLongPressComment = (index) => {
+    Alert.alert(
+      'Excluir Comentário',
+      'Você deseja excluir este comentário?',
+      [
+        { text: 'Cancelar', onPress: () => console.log('Cancelado') },
+        { text: 'Excluir', onPress: () => {
+          const updatedComments = comments.filter((_, i) => i !== index);
+          onSendComment(updatedComments);
+        }},
+      ],
+      { cancelable: true }
+    );
+  };
+
+  return (
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Comentários</Text>
+          <ScrollView style={styles.comentariosContainer}>
+            {comments.map((comment, index) => (
+              <TouchableOpacity key={index} onLongPress={() => handleLongPressComment(index)} style={styles.comentarioContainer}>
+                <Image source={comment.author.photo} style={styles.avatarComment} />
+                <View style={styles.comentarioTextoContainer}>
+                  <Text style={styles.nomeAutor}>{comment.author.name}</Text>
+                  <Text style={styles.comentarioTexto}>{comment.text}</Text>
+                </View>
+                <Curtir count={comment.likeCount} liked={comment.liked} onPress={() => handleLikeComment(index)} />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <TextInput
+            style={styles.input}
+            placeholder="Escreva um comentário..."
+            value={comentario}
+            onChangeText={setComentario}
+          />
+          <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
+            <Text style={styles.sendButtonText}>Enviar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const CriarPublicacao = ({ visible, onClose, onCreate }) => {
+  const [titulo, setTitulo] = useState('');
+  const [conteudo, setConteudo] = useState('');
+
+  const handleCriarPublicacao = async () => {
+    try {
+      const token = 'SEU_TOKEN_AQUI'; // Obtenha o token do usuário autenticado
+      const response = await fetch('http://seu_ip/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ titulo, conteudo }),
+      });
+
+      if (response.ok) {
+        const newPost = await response.json(); // Supondo que o servidor retorne a nova publicação
+        onCreate(newPost); // Chama a função passada como prop para atualizar a lista de publicações
+        setTitulo('');
+        setConteudo('');
+        onClose(); // Fecha o modal após criar a publicação
+      } else {
+        Alert.alert('Erro', 'Não foi possível criar a publicação.');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Erro ao conectar com o servidor.');
+    }
+  };
+
+  return (
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Criar Publicação</Text>
+          <TextInput
+            style={styles.newPostInput}
+            placeholder="Título"
+            value={titulo}
+            onChangeText={setTitulo}
+          />
+          <TextInput
+            style={styles.newPostInput}
+            placeholder="Conteúdo"
+            value={conteudo}
+            onChangeText={setConteudo}
+            multiline
+          />
+          <TouchableOpacity onPress={handleCriarPublicacao} style={styles.sendButton}>
+            <Text style={styles.sendButtonText}>Publicar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const Post = ({ text, image, comments, onCommentPress, onDelete }) => {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+
+  const handleLikePost = async (postId) => {
+    try {
+      await fetch(`/api/posts/like/${postId}`, { method: 'POST' });
+      setLiked(!liked);
+      setLikeCount(liked ? likeCount - 1 : likeCount + 1);
+    } catch (error) {
+      console.error("Erro ao curtir a publicação:", error);
+    }
+  };
+
+  return (
+    <View style={styles.boxPubli}>
+      <View style={styles.indent}>
+        <Avatar />
+        <Usuario nome="Diretor" cargo="Diretor(a)" />
+      </View>
+
+      <View style={styles.boxFeed}>
+        <Text style={styles.textoPubli}>{text}</Text>
+        {image && <Image source={{ uri: image }} style={styles.postImage} />}
+      </View>
+      
+      <View style={styles.bottons}>
+        <Curtir count={likeCount} liked={liked} onPress={() => handleLikePost(post.id)} />
+        <BotaoComentar onPress={onCommentPress} comentarioCount={comments.length} />
+        
+        <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+          <Text style={styles.deleteButtonText}>Excluir</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const HomeScreenGestao = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [posts, setPosts] = useState([]);
+  const [createPostModalVisible, setCreatePostModalVisible] = useState(false);
+
+  const toggleModal = () => setModalVisible(!modalVisible);
+  const toggleCreatePostModal = () => setCreatePostModalVisible(!createPostModalVisible);
+
+  const handleCommentUpdate = (index, newComments) => {
+    const updatedPosts = [...posts];
+    updatedPosts[index].comments = newComments;
+    setPosts(updatedPosts);
+  };
+
+  const handleCreatePost = (newPost) => {
+    setPosts([newPost, ...posts]);
+  };
+
+  const handleDeletePost = async (index) => {
+    const postId = posts[index].id; // Adapte conforme necessário
+
+    Alert.alert(
+      'Excluir Publicação',
+      'Você deseja excluir esta publicação?',
+      [
+        { text: 'Cancelar', onPress: () => console.log('Cancelado') },
+        { text: 'Excluir', onPress: async () => {
+          try {
+            await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
+            const updatedPosts = posts.filter((_, i) => i !== index);
+            setPosts(updatedPosts);
+          } catch (error) {
+            console.error("Erro ao excluir a publicação:", error);
+          }
+        }},
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const filteredPosts = posts.filter(post =>
+    post.text.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Pesquisar..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+
+      <ScrollView style={styles.scrollView}>
+        {filteredPosts.map((post, index) => (
+          <Post 
+            key={index}
+            text={post.text}
+            image={post.image}
+            comments={post.comments}
+            onCommentPress={() => {
+              setComments(post.comments);
+              toggleModal();
+            }}
+            onDelete={() => handleDeletePost(index)} 
+          />
+        ))}
+      </ScrollView>
+
+      <CommentModal 
+        visible={modalVisible} 
+        onClose={toggleModal} 
+        comments={comments} 
+        onSendComment={(newComments) => {
+          setComments(newComments);
+          const postIndex = posts.findIndex(post => post.comments === comments);
+          if (postIndex !== -1) {
+            handleCommentUpdate(postIndex, newComments);
+          }
+        }} 
+      />
+
+      <TouchableOpacity 
+        style={styles.floatingButton} 
+        onPress={toggleCreatePostModal} 
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>+</Text>
+      </TouchableOpacity>
+
+      <CriarPublicacao
+        visible={createPostModalVisible}
+        onClose={toggleCreatePostModal}
+        onCreate={handleCreatePost} 
+      />
+    </View>
+  );
+};
+
+
+	

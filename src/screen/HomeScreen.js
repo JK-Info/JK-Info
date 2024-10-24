@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
@@ -33,22 +33,41 @@ const Curtir = ({ count, liked, onPress }) => (
 
 const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   const [comentario, setComentario] = useState('');
+  const currentUserName = 'Aluno'; // Identificador do usuário atual
 
   const handleSendComment = () => {
     if (comentario.trim()) {
       const newComment = {
         text: comentario,
-        author: {
-          name: 'Aluno',
-          photo: fotoPerfilAnonima,
-        },
+        author: { name: currentUserName, photo: fotoPerfilAnonima },
         liked: false,
         likeCount: 0,
       };
       onSendComment([...comments, newComment]);
       setComentario('');
       onClose();
+    } else {
+      Alert.alert("Erro", "O comentário não pode estar vazio!");
     }
+  };
+
+  const handleLongPressComment = (comment) => {
+    if (comment.author.name === currentUserName) {
+      Alert.alert(
+        'Excluir Comentário',
+        'Você deseja excluir este comentário?',
+        [
+          { text: 'Cancelar', onPress: () => console.log('Cancelado') },
+          { text: 'Excluir', onPress: () => excluirComment(comment) },
+        ],
+        { cancelable: true }
+      );
+    }
+  };
+
+  const excluirComment = (commentToRemove) => {
+    const updatedComments = comments.filter(comment => comment !== commentToRemove);
+    onSendComment(updatedComments);
   };
 
   const handleLikeComment = (index) => {
@@ -59,19 +78,17 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   };
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
+    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Comentários</Text>
-
           <ScrollView style={styles.comentariosContainer}>
             {comments.map((comment, index) => (
-              <View key={index} style={styles.comentarioContainer}>
+              <TouchableOpacity 
+                key={index} 
+                style={styles.comentarioContainer} 
+                onLongPress={() => handleLongPressComment(comment)}
+              >
                 <Image source={comment.author.photo} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
                   <Text style={styles.nomeAutor}>{comment.author.name}</Text>
@@ -82,7 +99,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
                   liked={comment.liked} 
                   onPress={() => handleLikeComment(index)} 
                 />
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
 
@@ -104,7 +121,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   );
 };
 
-const Post = ({ text, image, comments, onCommentPress }) => {
+const Post = ({ text, image, comments, onCommentPress, onDelete, date }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
@@ -119,12 +136,11 @@ const Post = ({ text, image, comments, onCommentPress }) => {
         <Avatar />
         <Usuario nome="Diretor" cargo="Diretor(a)" />
       </View>
-
       <View style={styles.boxFeed}>
         <Text style={styles.textoPubli}>{text}</Text>
         {image && <Image source={{ uri: image }} style={styles.postImage} />}
+        <Text style={styles.dateText}>{date}</Text> {/* Exibir a data aqui */}
       </View>
-
       <View style={styles.bottons}>
         <Curtir count={likeCount} liked={liked} onPress={handleLikePost} />
         <BotaoComentar onPress={onCommentPress} comentarioCount={comments.length} />
@@ -137,33 +153,89 @@ const HomeScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [comments, setComments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [posts, setPosts] = useState([
+    {
+      text: 'Bem-vindo à nossa nova plataforma de gestão!',
+      image: 'https://th.bing.com/th/id/OIP.Y5OCXRpkd7E9vEP7VCl8SAHaEN?rs=1&pid=ImgDetMain',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Muito legal! Ansioso para usar.',
+          author: { name: 'Ana', photo: fotoPerfilAnonima },
+          liked: false,
+          likeCount: 2,
+        },
+        {
+          text: 'Parabéns pela novidade!',
+          author: { name: 'Carlos', photo: fotoPerfilAnonima },
+          liked: true,
+          likeCount: 1,
+        },
+      ],
+    },
+    {
+      text: 'Confira as novas funcionalidades do sistema.',
+      image: 'https://th.bing.com/th/id/OIP.SIVEijZ1WLmMoOPQFGZV9wAAAA?rs=1&pid=ImgDetMain',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Adorei as melhorias!',
+          author: { name: 'Juliana', photo: fotoPerfilAnonima },
+          liked: false,
+          likeCount: 0,
+        },
+      ],
+    },
+    {
+      text: 'Estamos comprometidos em melhorar cada vez mais!',
+      image: '',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Isso é ótimo!',
+          author: { name: 'Lucas', photo: fotoPerfilAnonima },
+          liked: true,
+          likeCount: 3,
+        },
+      ],
+    },
+  ]);
 
   const toggleModal = () => setModalVisible(!modalVisible);
 
   return (
-    <ScrollView style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Pesquisar..."
+    <View style={styles.container}>
+      <TextInput 
+        style={styles.searchInput} 
+        placeholder="Buscar posts..." 
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
-
-      <Post 
-        text="O Club de Regatas Vasco da Gama, mais conhecido como Vasco da Gama ou simplesmente Vasco, cujo acrônimo é CRVG, é uma entidade sócio-poliesportiva brasileira com sede na cidade do Rio de Janeiro, fundada em 21 de agosto de 1898 por um grupo de remadores."
-        comments={comments}
-        onCommentPress={toggleModal}
-      />
-
-      {/* Outros Posts podem ser adicionados aqui */}
-      
+      <ScrollView>
+        {posts.filter(post => post.text.toLowerCase().includes(searchQuery.toLowerCase())).map((post, index) => (
+          <Post 
+            key={index}
+            text={post.text}
+            image={post.image}
+            comments={post.comments}
+            date={post.date}
+            onCommentPress={() => {
+              setComments(post.comments);
+              toggleModal();
+            }}
+          />
+        ))}
+      </ScrollView>
       <CommentModal 
         visible={modalVisible} 
         onClose={toggleModal} 
         comments={comments} 
-        onSendComment={setComments} 
+        onSendComment={(newComments) => {
+          setComments(newComments);
+          // Update the posts array with the new comments if necessary
+        }} 
       />
-    </ScrollView>
+    </View>
   );
 };
 
@@ -203,7 +275,7 @@ const styles = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    height: 200,
+    height: 500,
     borderRadius: 10,
   },
   bottons: {
@@ -306,6 +378,11 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     color: '#fff',
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 5,
   },
 });
 

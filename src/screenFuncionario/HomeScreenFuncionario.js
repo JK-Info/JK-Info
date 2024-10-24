@@ -140,7 +140,7 @@ const Post = ({ text, image, comments, onCommentPress, onDelete }) => {
     <View style={styles.boxPubli}>
       <View style={styles.indent}>
         <Avatar />
-        <Usuario nome="Professor" cargo="Professor(a)" />
+        <Usuario nome="Funcionário" cargo="Funcionário(a)" />
       </View>
 
       <View style={styles.boxFeed}>
@@ -160,7 +160,7 @@ const Post = ({ text, image, comments, onCommentPress, onDelete }) => {
   );
 };
 
-const HomeScreenProfessor = () => {
+const HomeScreenFuncionario = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [comments, setComments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -457,4 +457,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreenProfessor;
+export default HomeScreenFuncionario;
