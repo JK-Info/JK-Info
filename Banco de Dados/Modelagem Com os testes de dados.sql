@@ -14,7 +14,7 @@
 	CREATE TABLE IF NOT EXISTS `mydb`.`ContatoInstitucional` (
 	  `idContatoInstitucional` INT NOT NULL AUTO_INCREMENT,
 	  `emailInstitucional` VARCHAR(45) NOT NULL,
-	  `senha` VARCHAR(255) NOT NULL,  -- Adicionando a coluna senha
+	  `senha` VARCHAR(255) NOT NULL,
 	  `tipoUsuario` VARCHAR(20) NOT NULL,
 	  PRIMARY KEY (`idContatoInstitucional`),
 	  UNIQUE INDEX `emailInstitucional_UNIQUE` (`emailInstitucional`)
@@ -284,9 +284,9 @@
 	SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 	SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
-	-- INSERINDO TURMAS --
+	-- INSERINDO TURMAS -----------------------------------
 
-	INSERT INTO `mydb`.`Turma` (nomeTurma) VALUES
+	INSERT INTO `mydb`.`Turma` (`nomeTurma`) VALUES
 	('1 módulo - Administração - Tarde'), 
 	('2 módulo - Administração - Tarde'), 
 	('3 módulo - Administração - Tarde'),
@@ -305,27 +305,24 @@
 	('1 módulo - Logistica - Noite'),
 	('2 módulo - Logistica - Noite'),
 	('3 módulo - Logistica - Noite');
-
-	select * from Turma;
 				
-	-- Inserir Aluno
+	-- INSERINDO ALUNOS -----------------------------------------------------------
 	 
-	INSERT INTO mydb.ContatoInstitucional (emailInstitucional, tipoUsuario) VALUES 
-	('funcionario1@etec.sp.gov.br', 'funcionario');
+	INSERT INTO mydb.`ContatoInstitucional`(`emailInstitucional`, `senha`, `tipoUsuario`) VALUES 
+	('aluno1@etec.sp.gov.br', default, 'aluno');
+    
+    select * from ContatoInstitucional;
 
-	select * from ContatoInstitucional;
-
-	INSERT INTO mydb.Pessoa (nome, dataNascimento, sexo, ContatoInstitucional_idContatoInstitucional, RG, CPF) VALUES 
+	INSERT INTO mydb.Pessoa (`nome`, `dataNascimento`, `sexo`, `ContatoInstitucional_idContatoInstitucional`, `RG`, `CPF`) VALUES 
 	('Aluno Primeiro', '2000-01-01', 'Masculino', 1, '111111111', '11111111111');
 
-	select * from Pessoa;
-
-	INSERT INTO mydb.Aluno (RM, Pessoa_idPessoa) VALUES 
+	INSERT INTO mydb.Aluno (`RM`, `Pessoa_idPessoa`) VALUES 
 	(13967, 1);
 
 	-- Preenchendo contatos para o usuário com id 1
-	INSERT INTO mydb.Contato (numeroCelular, emailPessoal, Pessoa_idPessoa)
-	VALUES ('11911111112', 'usuario1@gmail.com', 1);
+    
+	INSERT INTO mydb.Contato (`numeroCelular`, `emailPessoal`, `Pessoa_idPessoa`)
+	VALUES ('11911111111', 'usuario1@gmail.com', LAST_INSERT_ID());
 
 	INSERT INTO mydb.RedesSociais (tipoRedeSocial, url, Contato_idContato)
 	VALUES 
@@ -333,18 +330,18 @@
 	('Instagram', 'https://instagram.com/usuario1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 1)),
 	('Linkedin', 'https://linkedin.com/usuario1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 1));
 
-	-- Inserindo Gestores --
+	-- INSERINDO GESTORES ------------------------------------------------------------
 
 	INSERT INTO `mydb`.`Cargo` (`nomeCargo`) VALUES ('Diretor');
 
-	INSERT INTO `mydb`.`ContatoInstitucional` (`emailInstitucional`, `tipoUsuario`)
-	VALUES ('diretor1@etec.sp.gov.br', 'gestao');
+	INSERT INTO `mydb`.`ContatoInstitucional` (`emailInstitucional`, `senha`, `tipoUsuario`)
+	VALUES ('diretor1@etec.sp.gov.br', default, 'gestao');
 
 	INSERT INTO `mydb`.`Pessoa` (`nome`, `dataNascimento`, `sexo`, `RG`, `CPF`, `ContatoInstitucional_idContatoInstitucional`)
 	VALUES ('Diretor Primeiro', '2000-01-01', 'Masculino', '111111112', '11111111112', LAST_INSERT_ID());
 
 	INSERT INTO `mydb`.`Contato` (`numeroCelular`, `emailPessoal`, `Pessoa_idPessoa`)
-	VALUES ('11911111111', 'diretor1@gmail.com', LAST_INSERT_ID());
+	VALUES ('11911111112', 'diretor1@gmail.com', LAST_INSERT_ID());
 
 	INSERT INTO `mydb`.`Funcionario` (`ContatoInstitucional_idContatoInstitucional`, `Contato_idContato`, `Pessoa_idPessoa`, `Cargo_idCargo`)
 	VALUES (
@@ -360,18 +357,12 @@
 	('Instagram', 'https://instagram.com/diretor1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 2)),
 	('Linkedin', 'https://linkedin.com/diretor1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 2));
 
-	select * from Pessoa;
-
-	SELECT * FROM mydb.Pessoa WHERE idPessoa IN (1, 2);
-	SELECT * FROM mydb.Contato WHERE Pessoa_idPessoa IN (1, 2);
-	SELECT * FROM mydb.RedesSociais WHERE Contato_idContato IN (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa IN (1, 2));
-
-	-- INSERIR ALUNO NA TURMA --
-
-	select * from Turma;
+	-- INSERIR ALUNO NA TURMA ---------------------------------------------
 
 	INSERT INTO mydb.Aluno_has_Turma (Aluno_idAluno, Turma_idTurma) VALUES 
-	(1, 10); -- Aluno 1 na Turma 1
+	(1, 10);
+    
+    /*
 
 	SELECT 
 		a.idAluno, 
@@ -404,3 +395,4 @@ WHERE
     t.idTurma IS NOT NULL  -- Garante que os alunos estão em alguma turma
 GROUP BY 
     p.nome;  -- Agrupamos pelo nome do aluno para evitar duplicações
+*/
