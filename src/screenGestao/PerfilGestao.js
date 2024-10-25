@@ -11,8 +11,8 @@ const FotoPerfil = ({ foto }) => (
 
 const InformacoesPerfil = () => (
   <View style={styles.informacoesContainer}>
-    <Text style={styles.nomeProfessor}>Nome do Professor(a)</Text>
-    <Text style={styles.emailProfessor}>Email: professor@etec.sp.gov.br</Text>
+    <Text style={styles.nomeProfessor}>{nome}</Text>
+    <Text style={styles.emailProfessor}>Email: {email}</Text>
     <View style={styles.dadosProfessor}>
       <Text>LinkedIn: professor.br.com</Text>
     </View>
@@ -25,8 +25,28 @@ const BotaoEditar = ({ onPress }) => (
   </TouchableOpacity>
 );
 
-const PerfilGestao = () => {
+const PerfilGestao = ({ route }) => {
+  const { idPessoa } = route.params; // Assumindo que você está passando idPessoa como parâmetro
   const [fotoPerfil, setFotoPerfil] = useState(null);
+  const [perfil, setPerfil] = useState({ nome: '', email: '' });
+
+  useEffect(() => {
+    const fetchPerfil = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/perfil/${idPessoa}`);
+        const data = await response.json();
+        if (response.ok) {
+          setPerfil({ nome: data.nome, email: data.emailInstitucional });
+        } else {
+          console.error(data.message);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar perfil:', error);
+      }
+    };
+
+    fetchPerfil();
+  }, [idPessoa]);
 
   const editarFotoPerfil = () => {
     launchImageLibrary({ mediaType: 'photo', quality: 1 }, (response) => {

@@ -1,9 +1,21 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
+const routerPerfil = express.router();
 const db = require('./conexaoBD'); 
 
 router.get('/perfil/idPessoa', (req, res) => {
     const idPessoa = req.params.idPessoa;
 
-    const Query = 'SELECT P.nome, CI.emailInstitucional, C.emailPessoal, A.Rm FROM Pessoa P INNER JOIN ContatoInstitucional CI on P.ContatoInstitucional_ContatoInstitucional = idContatoInstitucional LEFT JOIN Contato C on P.idPessoa = C.Pessoa_idPessoa LEFT JOIN Aluno A ON P.idPessoa = A.Pessoa_idPessoa'
-})
+    const Query = 'SELECT p.idPessoa, p.nome, p.dataNascimento, p.sexo, p.RG, p.CPF, ci.emailInstitucional, ci.tipoUsuario FROM mydb.Pessoa p join mydb.ContatoInstitucional ci ON p.ContatoInstitucional_idContatoInstitucional = ci.idContatoInstitucional';
+    db.query(Query,[idPessoa], (err, result) => {
+        if (err){
+            return res.status(500).send({message: 'erro ao buscar informações do perfil', error: err });
+        }
+        if (result.length > 0) {
+            res.send(result[0]);
+        }else{
+            res.status(404).send({message: 'Perfil Não encontrado'});
+        }
+    });
+});
+
+module.exports = routerPerfil;

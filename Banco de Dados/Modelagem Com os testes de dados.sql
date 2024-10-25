@@ -41,6 +41,11 @@
 		ON UPDATE NO ACTION
 	) ENGINE = InnoDB;
 
+INSERT INTO `mydb`.`Pessoa` (nome, dataNascimento, sexo, RG, CPF, ContatoInstitucional_idContatoInstitucional)
+VALUES 
+('João Silva', '1990-05-15', 'Masculino', '123456789', '12345678901', LAST_INSERT_ID());
+
+select * from pessoa;
 	-- -----------------------------------------------------
 	-- Table `mydb`.`Aluno`
 	-- -----------------------------------------------------
@@ -305,7 +310,6 @@
 	('1 módulo - Logistica - Noite'),
 	('2 módulo - Logistica - Noite'),
 	('3 módulo - Logistica - Noite');
-				
 	-- INSERINDO ALUNOS -----------------------------------------------------------
 	 
 	INSERT INTO mydb.`ContatoInstitucional`(`emailInstitucional`, `senha`, `tipoUsuario`) VALUES 
@@ -322,7 +326,10 @@
 	-- Preenchendo contatos para o usuário com id 1
     
 	INSERT INTO mydb.Contato (`numeroCelular`, `emailPessoal`, `Pessoa_idPessoa`)
-	VALUES ('11911111111', 'usuario1@gmail.com', LAST_INSERT_ID());
+	VALUES ('119', 'usuario3@gmail.com', LAST_INSERT_ID());
+
+	select * from contato;	
+	
 
 	INSERT INTO mydb.RedesSociais (tipoRedeSocial, url, Contato_idContato)
 	VALUES 
