@@ -243,42 +243,41 @@
 	-- Table `mydb`.`Publicacao`
 	-- -----------------------------------------------------
 	CREATE TABLE IF NOT EXISTS `mydb`.`Publicacao` (
-	  `idPublicacao` INT NOT NULL AUTO_INCREMENT,
-	  `dataPublicacao` DATETIME NOT NULL,
-	  `descricao` VARCHAR(100) NOT NULL,
-	  `imagem` VARCHAR(45) NULL,
-	  `Pessoa_idPessoa` INT NOT NULL,
-	  PRIMARY KEY (`idPublicacao`),
-	  INDEX `fk_Publicacao_Pessoa1_idx` (`Pessoa_idPessoa`),
-	  CONSTRAINT `fk_Publicacao_Pessoa1`
-		FOREIGN KEY (`Pessoa_idPessoa`)
-		REFERENCES `mydb`.`Pessoa` (`idPessoa`)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
-	) ENGINE = InnoDB;
+  `idPublicacao` INT NOT NULL AUTO_INCREMENT,
+  `dataPublicacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `descricao` VARCHAR(255) NOT NULL,
+  `imagem` VARCHAR(255) NULL,
+  `Pessoa_idPessoa` INT NOT NULL,
+  PRIMARY KEY (`idPublicacao`),
+  CONSTRAINT `fk_Publicacao_Pessoa`
+    FOREIGN KEY (`Pessoa_idPessoa`)
+    REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
 
 	-- -----------------------------------------------------
 	-- Table `mydb`.`Comentario`
 	-- -----------------------------------------------------
 	CREATE TABLE IF NOT EXISTS `mydb`.`Comentario` (
-	  `idComentario` INT NOT NULL AUTO_INCREMENT,
-	  `descricao` VARCHAR(100) NOT NULL,
-	  `Pessoa_idPessoa` INT NOT NULL,
-	  `Publicacao_idPublicacao` INT NOT NULL,
-	  PRIMARY KEY (`idComentario`),
-	  INDEX `fk_Comentario_Pessoa1_idx` (`Pessoa_idPessoa`),
-	  INDEX `fk_Comentario_Publicacao1_idx` (`Publicacao_idPublicacao`),
-	  CONSTRAINT `fk_Comentario_Pessoa1`
-		FOREIGN KEY (`Pessoa_idPessoa`)
-		REFERENCES `mydb`.`Pessoa` (`idPessoa`)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE,
-	  CONSTRAINT `fk_Comentario_Publicacao1`
-		FOREIGN KEY (`Publicacao_idPublicacao`)
-		REFERENCES `mydb`.`Publicacao` (`idPublicacao`)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE
-	) ENGINE = InnoDB;
+  `idComentario` INT NOT NULL AUTO_INCREMENT,
+  `texto` TEXT NOT NULL,
+  `dataComentario` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Publicacao_idPublicacao` INT NOT NULL,
+  `Pessoa_idPessoa` INT NOT NULL,
+  PRIMARY KEY (`idComentario`),
+  CONSTRAINT `fk_Comentario_Publicacao`
+    FOREIGN KEY (`Publicacao_idPublicacao`)
+    REFERENCES `mydb`.`Publicacao` (`idPublicacao`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Comentario_Pessoa`
+    FOREIGN KEY (`Pessoa_idPessoa`)
+    REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 	SET SQL_MODE=@OLD_SQL_MODE;
 	SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

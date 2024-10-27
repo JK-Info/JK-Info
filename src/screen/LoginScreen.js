@@ -1,10 +1,13 @@
 import axios from 'axios';
-import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, TextInput, View, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storeUserData, getUserData, clearUserData } from './SessionStorage'; // Certifique-se de que essas funções estão corretamente definidas
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !senha) {
@@ -12,11 +15,33 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
 
+    setLoading(true);
+    
     try {
       const response = await axios.post('http://localhost:3000/login', { email, senha });
       if (response.data.success) {
         const userType = response.data.userType;
-        switch (userType) {
+
+        // Armazenar os dados do usuário
+        await storeUserData(email, userType);
+        navigation.navigate('LoadingScreen'); // Navegue para uma tela de carregamento ou diretamente para a tela principal
+      } else {
+        Alert.alert('Erro', 'E-mail ou senha incorretos.');
+      }
+    } catch (error) {
+      console.error('Login failed: ', error);
+      Alert.alert('Erro', 'Ocorreu um erro durante o login. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const checkUserSession = async () => {
+      const userData = await getUserData();
+      if (userData) {
+        // Navegar para a tela correspondente com base no tipo de usuário
+        switch (userData.userType) {
           case 'aluno':
             navigation.navigate('DrawerNavigatorAluno');
             break;
@@ -30,17 +55,21 @@ const LoginScreen = ({ navigation }) => {
             navigation.navigate('DrawerNavigatorGestao');
             break;
           default:
-            Alert.alert('Erro', 'Tipo de usuário inválido.');
+            clearUserData(); // Limpa dados se tipo de usuário inválido
+            navigation.navigate('LoginScreen'); // Redireciona para login
         }
       } else {
-        Alert.alert('Erro', 'Senha incorreta.');
+        navigation.navigate('LoginScreen'); // Redireciona para login se não estiver logado
       }
-    } catch (error) {
-      Alert.alert('Erro', 'Ocorreu um erro ao tentar fazer o login.');
-      console.error(error);
-    }
-  };
+    };
 
+    checkUserSession();
+  }, [navigation]);
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#00527C" />;
+  }
+  
   return (
     <View style={styles.container}>
       <View style={styles.header}>

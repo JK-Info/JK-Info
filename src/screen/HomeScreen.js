@@ -121,7 +121,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   );
 };
 
-const Post = ({ text, image, comments, onCommentPress, onDelete, date }) => {
+const Post = ({ text, comments, onCommentPress, date }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
@@ -138,8 +138,7 @@ const Post = ({ text, image, comments, onCommentPress, onDelete, date }) => {
       </View>
       <View style={styles.boxFeed}>
         <Text style={styles.textoPubli}>{text}</Text>
-        {image && <Image source={{ uri: image }} style={styles.postImage} />}
-        <Text style={styles.dateText}>{date}</Text> {/* Exibir a data aqui */}
+        <Text style={styles.dateText}>{date}</Text>
       </View>
       <View style={styles.bottons}>
         <Curtir count={likeCount} liked={liked} onPress={handleLikePost} />
@@ -156,7 +155,6 @@ const HomeScreen = () => {
   const [posts, setPosts] = useState([
     {
       text: 'Bem-vindo à nossa nova plataforma de gestão!',
-      image: 'https://th.bing.com/th/id/OIP.Y5OCXRpkd7E9vEP7VCl8SAHaEN?rs=1&pid=ImgDetMain',
       date: new Date().toLocaleString(),
       comments: [
         {
@@ -175,7 +173,6 @@ const HomeScreen = () => {
     },
     {
       text: 'Confira as novas funcionalidades do sistema.',
-      image: 'https://th.bing.com/th/id/OIP.SIVEijZ1WLmMoOPQFGZV9wAAAA?rs=1&pid=ImgDetMain',
       date: new Date().toLocaleString(),
       comments: [
         {
@@ -188,7 +185,6 @@ const HomeScreen = () => {
     },
     {
       text: 'Estamos comprometidos em melhorar cada vez mais!',
-      image: '',
       date: new Date().toLocaleString(),
       comments: [
         {

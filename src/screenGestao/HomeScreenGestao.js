@@ -123,7 +123,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   );
 };
 
-const Post = ({ text, image, comments, onCommentPress, onDelete, date }) => {
+const Post = ({ text, comments, onCommentPress, onDelete, date }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
@@ -145,7 +145,6 @@ const Post = ({ text, image, comments, onCommentPress, onDelete, date }) => {
 
       <View style={styles.boxFeed}>
         <Text style={styles.textoPubli}>{text}</Text>
-        {image && <Image source={{ uri: image }} style={styles.postImage} />}
         <Text style={styles.dateText}>{date}</Text> {/* Exibir a data aqui */}
       </View>
       
@@ -168,7 +167,6 @@ const HomeScreenGestao = () => {
   const [posts, setPosts] = useState([
     {
       text: 'Bem-vindo à nossa nova plataforma de gestão!',
-      image: 'https://th.bing.com/th/id/OIP.Y5OCXRpkd7E9vEP7VCl8SAHaEN?rs=1&pid=ImgDetMain', // Substitua com um link de imagem válido
       date: new Date().toLocaleString(),
       comments: [
         {
@@ -193,7 +191,6 @@ const HomeScreenGestao = () => {
     },
     {
       text: 'Confira as novas funcionalidades do sistema.',
-      image: 'https://th.bing.com/th/id/OIP.SIVEijZ1WLmMoOPQFGZV9wAAAA?rs=1&pid=ImgDetMain', // Substitua com um link de imagem válido
       date: new Date().toLocaleString(),
       comments: [
         {
@@ -209,7 +206,6 @@ const HomeScreenGestao = () => {
     },
     {
       text: 'Estamos comprometidos em melhorar cada vez mais!',
-      image: '',
       date: new Date().toLocaleString(),
       comments: [
         {
@@ -238,38 +234,20 @@ const HomeScreenGestao = () => {
     setPosts(updatedPosts);
   };
 
-  const handleCreatePost = async () => {
+  const handleCreatePost = () => {
     if (newPostText.trim() || newPostImage) {
       const newPost = {
-        descricao: newPostText,
+        text: newPostText,
         image: newPostImage,
+        comments: [],
       };
-  
-      try {
-        const response = await fetch('http://localhost:3000/publicacoes', { // Altere para o seu IP local
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(newPost),
-        });
-  
-        if (response.ok) {
-          const postData = await response.json();
-          setPosts([{ ...postData }, ...posts]); // Adiciona o novo post no topo
-          setNewPostText('');
-          setNewPostImage('');
-          toggleCreatePostModal(); // Fecha o modal após criar o post
-        } else {
-          alert('Erro ao criar publicação.');
-        }
-      } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao conectar com o servidor.');
-      }
+      setPosts([newPost, ...posts]); // Adiciona novo post no topo
+      setNewPostText('');
+      setNewPostImage('');
+      toggleCreatePostModal(); // Fecha o modal após criar o post
     }
   };
-
+  
   const handleDeletePost = (index) => {
     Alert.alert(
       'Excluir Publicação',

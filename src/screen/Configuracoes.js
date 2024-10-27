@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { clearUserData } from './SessionStorage'; // Importe a função clearUserData
 
 const Configuracoes = () => {
   const navigation = useNavigation();
@@ -8,11 +9,13 @@ const Configuracoes = () => {
   const [tamanhoFonte, setTamanhoFonte] = useState('medio');
   const [idioma, setIdioma] = useState('portugues');
 
-  const handleSair = () => {
+  const handleSair = async () => {
+    await clearUserData(); // Limpa os dados do usuário
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Login' }],
+      routes: [{ name: 'Login' }], // Redireciona para a tela de login
     });
+    Alert.alert('Logout', 'Você saiu com sucesso!'); // Opcional: alerta de sucesso
   };
 
   return (
