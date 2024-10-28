@@ -1,6 +1,6 @@
 const express = require('express');
 const routerPerfil = express.router();
-const db = require('./conexaoBD'); 
+const db = require('../ConexaoBD/conexaoBD'); 
 
 router.get('/perfil/idPessoa', (req, res) => {
     const idPessoa = req.params.idPessoa;

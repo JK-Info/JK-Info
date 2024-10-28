@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router(); // Cria uma instância do roteador
-const db = require('./conexaoBD'); 
+const db = require('../ConexaoBD/conexaoBD'); 
 
 // Rota para buscar publicações
 router.get('/publicacoes', (req, res) => {
