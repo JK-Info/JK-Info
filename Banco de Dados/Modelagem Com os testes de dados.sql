@@ -598,3 +598,7 @@ select * from Publicacao;
 	('Facebook', 'https://facebook.com/funcionario1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 4)),
 	('Instagram', 'https://instagram.com/funcionario1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 4)),
 	('Linkedin', 'https://linkedin.com/funcionario1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 4));
+*/
+select * from ContatoInstitucional;
+select * from Pessoa;
+select * from Turma;

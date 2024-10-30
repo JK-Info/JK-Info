@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput, Alert } from 'react-native';
-import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
@@ -165,23 +164,66 @@ const HomeScreenGestao = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [comments, setComments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([
+    {
+      text: 'Bem-vindo à nossa nova plataforma de gestão!',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Muito legal! Ansioso para usar.',
+          author: {
+            name: 'Ana',
+            photo: fotoPerfilAnonima,
+          },
+          liked: false,
+          likeCount: 2,
+        },
+        {
+          text: 'Parabéns pela novidade!',
+          author: {
+            name: 'Carlos',
+            photo: fotoPerfilAnonima,
+          },
+          liked: true,
+          likeCount: 1,
+        },
+      ],
+    },
+    {
+      text: 'Confira as novas funcionalidades do sistema.',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Adorei as melhorias!',
+          author: {
+            name: 'Juliana',
+            photo: fotoPerfilAnonima,
+          },
+          liked: false,
+          likeCount: 0,
+        },
+      ],
+    },
+    {
+      text: 'Estamos comprometidos em melhorar cada vez mais!',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Isso é ótimo!',
+          author: {
+            name: 'Lucas',
+            photo: fotoPerfilAnonima,
+          },
+          liked: true,
+          likeCount: 3,
+        },
+      ],
+    },
+  ]);
+
   const [newPostText, setNewPostText] = useState('');
+  const [newPostImage, setNewPostImage] = useState('');
   const [createPostModalVisible, setCreatePostModalVisible] = useState(false);
-
-  useEffect(() => {
-    // Fetch posts from API when the component mounts
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get('https://localhost:3000/getpublicacao');
-        setPosts(response.data); // Ajuste conforme a estrutura de dados retornada
-      } catch (error) {
-        console.error('Erro ao buscar publicações:', error);
-      }
-    };
-
-    fetchPosts();
-  }, []);
 
   const toggleModal = () => setModalVisible(!modalVisible);
   const toggleCreatePostModal = () => setCreatePostModalVisible(!createPostModalVisible);
@@ -192,40 +234,29 @@ const HomeScreenGestao = () => {
     setPosts(updatedPosts);
   };
 
-  const handleCreatePost = async () => {
-    if (newPostText.trim()) {
+  const handleCreatePost = () => {
+    if (newPostText.trim() || newPostImage) {
       const newPost = {
         text: newPostText,
+        image: newPostImage,
         comments: [],
       };
-  
-      try {
-        const response = await axios.post('https://localhost:3000/postpublicacao', newPost);
-        setPosts([response.data, ...posts]); // Adiciona novo post no topo
-        setNewPostText('');
-        toggleCreatePostModal(); // Fecha o modal após criar o post
-        Alert.alert('Sucesso', 'Publicação criada com sucesso!'); // Adiciona um alerta de sucesso
-      } catch (error) {
-        console.error('Erro ao criar publicação:', error);
-        Alert.alert('Erro', 'Falha ao criar publicação.'); // Adiciona um alerta de erro
-      }
+      setPosts([newPost, ...posts]); // Adiciona novo post no topo
+      setNewPostText('');
+      setNewPostImage('');
+      toggleCreatePostModal(); // Fecha o modal após criar o post
     }
   };
   
-  const handleDeletePost = async (id) => {
+  const handleDeletePost = (index) => {
     Alert.alert(
       'Excluir Publicação',
       'Você deseja excluir esta publicação?',
       [
         { text: 'Cancelar', onPress: () => console.log('Cancelado') },
-        { text: 'Excluir', onPress: async () => {
-          try {
-            await axios.delete(`https://localhost:3000/deletepublicacao/${id}`);
-            const updatedPosts = posts.filter((post) => post.id !== id);
-            setPosts(updatedPosts);
-          } catch (error) {
-            console.error('Erro ao excluir publicação:', error);
-          }
+        { text: 'Excluir', onPress: () => {
+          const updatedPosts = posts.filter((_, i) => i !== index);
+          setPosts(updatedPosts);
         }},
       ],
       { cancelable: true }
@@ -246,31 +277,40 @@ const HomeScreenGestao = () => {
       />
 
       <ScrollView style={styles.scrollView}>
-        {filteredPosts.map((post, index) => (
-          <Post 
-            key={post.id} // Use um identificador único
-            text={post.text}
-            comments={post.comments}
-            date={new Date(post.createdAt).toLocaleDateString()} // Ajuste conforme necessário
-            onCommentPress={(currentComments) => {
-              setComments(currentComments);
-              toggleModal();
-            }}
-            onDelete={() => handleDeletePost(post.id)} // Passa o id do post
-          />
-        ))}
+      {filteredPosts.map((post, index) => (
+        <Post 
+          key={index}
+          text={post.text}
+          image={post.image}
+          date={post.date} // Passando a data
+          comments={post.comments}
+          onCommentPress={() => {
+            setComments(post.comments);
+            toggleModal();
+          }}
+          onDelete={() => handleDeletePost(index)}
+        />
+      ))}
       </ScrollView>
 
-      <TouchableOpacity onPress={toggleCreatePostModal} style={styles.createPostButton}>
-        <Text style={styles.createPostButtonText}>Criar Publicação</Text>
-      </TouchableOpacity>
-
-      <CommentModal
-        visible={modalVisible}
-        onClose={toggleModal}
-        comments={comments}
-        onSendComment={(newComments) => handleCommentUpdate(posts.findIndex(post => post.comments === comments), newComments)}
+      <CommentModal 
+        visible={modalVisible} 
+        onClose={toggleModal} 
+        comments={comments} 
+        onSendComment={(newComments) => {
+          setComments(newComments);
+          const postIndex = posts.findIndex(post => post.comments === comments);
+          if (postIndex !== -1) {
+            handleCommentUpdate(postIndex, newComments);
+          }
+        }} 
       />
+      <TouchableOpacity 
+        style={styles.floatingButton} 
+        onPress={toggleCreatePostModal} // Abre o modal de criação de publicação
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>+</Text>
+      </TouchableOpacity>
 
       <Modal
         animationType="slide"
@@ -280,15 +320,19 @@ const HomeScreenGestao = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Criar Publicação</Text>
+
             <TextInput
-              style={styles.input}
-              placeholder="Digite o texto da publicação"
+              style={styles.newPostInput}
+              placeholder="Digite sua publicação..."
               value={newPostText}
               onChangeText={setNewPostText}
             />
+
             <TouchableOpacity onPress={handleCreatePost} style={styles.sendButton}>
-              <Text style={styles.sendButtonText}>Criar</Text>
+              <Text style={styles.sendButtonText}>Publicar</Text>
             </TouchableOpacity>
+
             <TouchableOpacity onPress={toggleCreatePostModal} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Fechar</Text>
             </TouchableOpacity>
@@ -474,27 +518,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
     marginTop: 5,
-  },
-  floatingButton: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
-    backgroundColor: '#007bff',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5, // Para Android
-    shadowColor: '#000', // Para iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  floatingButtonText: {
-    color: '#fff',
-    fontSize: 30,
-    lineHeight: 30,
   },
 });
 
