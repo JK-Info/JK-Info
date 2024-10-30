@@ -1,11 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
+const routerFiltrar = require('./RotaFIltrarTurma');
 
-const router = express.Router();
+const routerLogin = express.Router();
 
 // Rota de Login
-router.post('/login', async (req, res) => {
+routerLogin.post('/login', async (req, res) => {
   console.log('Rota de login chamada:', req.body);
   const { email, senha } = req.body;
 
@@ -36,7 +37,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Rota para Definir Senha
-router.post('/set-password', async (req, res) => {
+routerLogin.post('/set-password', async (req, res) => {
   console.log('Rota de definir senha chamada:', req.body);
   const { email, senha } = req.body;
 
@@ -57,4 +58,4 @@ router.post('/set-password', async (req, res) => {
   });
 });
 
-module.exports = router; // Exporta as rotas
+module.exports = routerLogin; // Exporta as rotas

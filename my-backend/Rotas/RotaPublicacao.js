@@ -1,10 +1,10 @@
 const express = require('express');
-const router = express.Router();
+const routerPubli = express.Router();
 const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
 const { body, validationResult } = require('express-validator'); // Para validação
 
 // Rota para buscar todas as publicações com comentários
-router.get('/getpublicacao', (req, res) => {
+routerPubli.get('/getpublicacao', (req, res) => {
   console.log('Rota GET /getpublicacao chamada'); // Log quando a rota é chamada
   const query = `
     SELECT 
@@ -42,7 +42,7 @@ router.get('/getpublicacao', (req, res) => {
 });
 
 // Rota para criar nova publicação
-router.post('/postpublicacoes', [
+routerPubli.post('/postpublicacoes', [
   body('descricao').notEmpty().withMessage('Descrição é obrigatória.'),
   body('Pessoa_idPessoa').notEmpty().withMessage('ID da pessoa é obrigatório.')
 ], (req, res) => {
@@ -69,7 +69,7 @@ router.post('/postpublicacoes', [
 });
 
 // Rota para excluir uma publicação
-router.delete('/deletepublicacao/:id', (req, res) => {
+routerPubli.delete('/deletepublicacao/:id', (req, res) => {
   const id = req.params.id;
 
   // Verifica se o ID é um número
@@ -96,4 +96,4 @@ router.delete('/deletepublicacao/:id', (req, res) => {
   });
 });
 
-module.exports = router;  
+module.exports = routerPubli;  

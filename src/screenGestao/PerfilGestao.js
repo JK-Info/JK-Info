@@ -1,122 +1,139 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Button, ActivityIndicator, StyleSheet, TextInput } from 'react-native';
 
-const FotoPerfil = ({ foto }) => (
-  <Image
-    source={foto ? { uri: foto } : require('../../assets/FotosPerfil/Foto-perfil-Anonima.jpg')}
-    style={styles.fotoPerfil}
-  />
-);
+const PerfilGestao = () => {
+    const [profileData, setProfileData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [editing, setEditing] = useState(false);
+    const [emailPessoal, setEmailPessoal] = useState('');
 
-const InformacoesPerfil = () => (
-  <View style={styles.informacoesContainer}>
-    <Text style={styles.nomeProfessor}>{nome}</Text>
-    <Text style={styles.emailProfessor}>Email: {email}</Text>
-    <View style={styles.dadosProfessor}>
-      <Text>LinkedIn: professor.br.com</Text>
-    </View>
-  </View>
-);
+    const fetchProfileData = async () => {
+        try {
+            const idPessoa = '1'; // Exemplo de ID
+            const response = await fetch(`http://localhost:3000/perfil/${idPessoa}`);
 
-const BotaoEditar = ({ onPress }) => (
-  <TouchableOpacity style={styles.botaoContainer} onPress={onPress}>
-    <Text style={styles.textoBotao}>Editar Perfil</Text>
-  </TouchableOpacity>
-);
-
-const PerfilGestao = ({ route }) => {
-  const { idPessoa } = route.params; // Assumindo que você está passando idPessoa como parâmetro
-  const [fotoPerfil, setFotoPerfil] = useState(null);
-  const [perfil, setPerfil] = useState({ nome: '', email: '' });
-
-  useEffect(() => {
-    const fetchPerfil = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/perfil/${idPessoa}`);
-        const data = await response.json();
-        if (response.ok) {
-          setPerfil({ nome: data.nome, email: data.emailInstitucional });
-        } else {
-          console.error(data.message);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('[INFO] Dados do perfil recebidos:', data);
+                setProfileData(data);
+                setEmailPessoal(data.emailPessoal || ''); // Define o email pessoal, se existir
+            } else {
+                console.warn('[AVISO] Não foi possível encontrar o perfil:', response.status);
+                setError('Perfil não encontrado.');
+            }
+        } catch (error) {
+            console.error('[ERRO] Erro ao buscar dados do perfil:', error);
+            setError('Erro ao buscar dados do perfil.');
+        } finally {
+            setLoading(false);
         }
-      } catch (error) {
-        console.error('Erro ao buscar perfil:', error);
-      }
     };
 
-    fetchPerfil();
-  }, [idPessoa]);
+    const updateProfileData = async () => {
+        try {
+            const idPessoa = '1'; // Exemplo de ID
+            const response = await fetch(`http://localhost:3000/perfil/${idPessoa}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ emailPessoal }),
+            });
 
-  const editarFotoPerfil = () => {
-    launchImageLibrary({ mediaType: 'photo', quality: 1 }, (response) => {
-      if (response.didCancel) {
-        console.log('Usuário cancelou a seleção da imagem');
-      } else if (response.error) {
-        console.log('Erro ao selecionar imagem: ', response.error);
-      } else {
-        setFotoPerfil(response.assets[0].uri);
-      }
-    });
-  };
+            if (response.ok) {
+                alert('Perfil atualizado com sucesso!');
+                setEditing(false);
+                fetchProfileData(); // Atualiza os dados do perfil
+            } else {
+                console.warn('[AVISO] Não foi possível atualizar o perfil:', response.status);
+                setError('Erro ao atualizar perfil.');
+            }
+        } catch (error) {
+            console.error('[ERRO] Erro ao atualizar dados do perfil:', error);
+            setError('Erro ao atualizar dados do perfil.');
+        }
+    };
 
-  return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <FotoPerfil foto={fotoPerfil} />
-      <InformacoesPerfil />
-      <BotaoEditar onPress={editarFotoPerfil} />
-    </ScrollView>
-  );
+    useEffect(() => {
+        fetchProfileData();
+    }, []);
+
+    if (loading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" color="#0000ff" />
+                <Text>Carregando...</Text>
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.errorText}>{error}</Text>
+                <Button title="Tentar novamente" onPress={fetchProfileData} />
+            </View>
+        );
+    }
+
+    return (
+        <View style={styles.Informacoescontainer}>
+            {profileData ? (
+                <>
+                    <Text style={styles.name}>{profileData.nome}</Text>
+                    <Text style={styles.email}>Email Institucional: {profileData.emailInstitucional}</Text>
+                    <Text style={styles.email}>Email Pessoal:</Text>
+                    {editing ? (
+                        <TextInput
+                            style={styles.input}
+                            value={emailPessoal}
+                            onChangeText={setEmailPessoal}
+                            placeholder="Digite seu email pessoal"
+                        />
+                    ) : (
+                        <Text style={styles.email}>{profileData.emailPessoal}</Text>
+                    )}
+                    {editing ? (
+                        <Button title="Salvar Alterações" onPress={updateProfileData} />
+                    ) : (
+                        <Button title="Editar Perfil" onPress={() => setEditing(true)} />
+                    )}
+                </>
+            ) : (
+                <Text>Perfil não encontrado.</Text>
+            )}
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
- scrollContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff', // Fundo branco consistente
-  },
-  fotoPerfil: {
-    width: 250,
-    height: 250,
-    borderRadius: 125, // Bordas arredondadas
-    marginBottom: 20,
-    borderWidth: 2,
-  },
-  informacoesContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  nomeProfessor: {
-    fontSize: 25,
-    margin: 10,
-    color: '#333', // Cor do nome
-  },
-  emailProfessor: {
-    fontSize: 20,
-    width: '100%',
-    textAlign: 'center',
-    color: '#333', // Cor do texto
-  },
-  dadosProfessor: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '80%',
-    marginTop: 10,
-    color: '#333', // Cor do texto
-  },
-  botaoContainer: {
-    marginVertical: 20,
-    width: '100%',
-    backgroundColor: '#ff6400', // Laranja para o botão
-    padding: 15,
-    borderRadius: 30, // Bordas arredondadas
-    alignItems: 'center',
-  },
-  textoBotao: {
-    color: '#FFFFFF',
-    fontSize: 18,
-  },
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+    },
+    name: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    email: {
+        fontSize: 16,
+        color: '#333',
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 20,
+        width: '100%',
+    },
+    errorText: {
+        color: 'red',
+        marginBottom: 10,
+    },
 });
 
 export default PerfilGestao;

@@ -1,10 +1,10 @@
 const express = require('express');
 const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
 
-const router = express.Router();
+const routerFiltrar = express.Router();
 
 // Rota para buscar turmas filtradas por nome
-router.get('/getturmas', (req, res) => {
+routerFiltrar.get('/getturmas', (req, res) => {
     const nome = req.query.nome; // Recebe o parâmetro de filtro pela query string
     console.log(`Rota /getturmas chamada com o nome: ${nome}`); // Log da chamada
 
@@ -26,7 +26,7 @@ router.get('/getturmas', (req, res) => {
 });
 
 // Rota para buscar alunos por turma
-router.get('/getalunos', (req, res) => {
+routerFiltrar.get('/getalunos', (req, res) => {
     const { turma } = req.query; // Recebe a turma da query string
     console.log(`Rota /getalunos chamada com a turma: ${turma}`); // Log da chamada
 
@@ -71,4 +71,4 @@ router.get('/getalunos', (req, res) => {
     });
 });
 
-module.exports = router; // Exporta as rotas
+module.exports = routerFiltrar; // Exporta as rotas
