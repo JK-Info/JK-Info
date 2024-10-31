@@ -256,7 +256,14 @@
     ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-select * from Publicacao;
+CREATE TABLE CurtidaPublicacao (
+    idCurtidaPublicacao INT AUTO_INCREMENT PRIMARY KEY,
+    Publicacao_idPublicacao INT,
+    userId INT,
+    FOREIGN KEY (Publicacao_idPublicacao) REFERENCES Publicacao(idPublicacao),
+    FOREIGN KEY (userId) REFERENCES Pessoa(idPessoa)
+);
+
 	-- -----------------------------------------------------
 	-- Table `mydb`.`Comentario`
 	-- -----------------------------------------------------
@@ -277,6 +284,21 @@ select * from Publicacao;
     REFERENCES `mydb`.`Pessoa` (`idPessoa`)
     ON DELETE CASCADE
     ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `CurtidaComentario` (
+    `idCurtidaComentario` INT NOT NULL AUTO_INCREMENT,
+    `Comentario_idComentario` INT NOT NULL,
+    `Pessoa_idPessoa` INT NOT NULL,
+    PRIMARY KEY (`idCurtidaComentario`),
+    CONSTRAINT `fk_CurtidaComentario_Comentario`
+        FOREIGN KEY (`Comentario_idComentario`)
+        REFERENCES `Comentario` (`idComentario`)
+        ON DELETE CASCADE,
+    CONSTRAINT `fk_CurtidaComentario_Pessoa`
+        FOREIGN KEY (`Pessoa_idPessoa`)
+        REFERENCES `Pessoa` (`idPessoa`)
+        ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 	SET SQL_MODE=@OLD_SQL_MODE;
@@ -599,6 +621,66 @@ select * from Publicacao;
 	('Instagram', 'https://instagram.com/funcionario1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 4)),
 	('Linkedin', 'https://linkedin.com/funcionario1', (SELECT idContato FROM mydb.Contato WHERE Pessoa_idPessoa = 4));
 */
-select * from ContatoInstitucional;
-select * from Pessoa;
-select * from Turma;
+
+	-- CRIANDO PUBLICAÇÕES -------------------------------------------
+
+	INSERT INTO `Publicacao` (descricao, imagem, Pessoa_idPessoa) 
+	VALUES ('Primeira publicação de teste', NULL, 21);
+
+	INSERT INTO `Publicacao` (descricao, imagem, Pessoa_idPessoa) 
+	VALUES ('Segunda publicação de teste', NULL, 21);
+    
+    -- INSERINDO COMENTÁRIOS NAS PUBLICAÇÕES --------------------------
+    
+    INSERT INTO Comentario (texto, Publicacao_idPublicacao, Pessoa_idPessoa)
+	VALUES 
+    ('Ótima publicação! Adorei o conteúdo.', 1, 1), 
+    ('Acho que podemos explorar mais esse tópico.', 2, 2);
+    
+SELECT 
+    p.idPublicacao,
+    c.idComentario,
+    c.texto,
+    pes.nome AS nome_comentador
+FROM 
+    Comentario c
+JOIN 
+    Publicacao p ON c.Publicacao_idPublicacao = p.idPublicacao
+JOIN 
+    Pessoa pes ON c.Pessoa_idPessoa = pes.idPessoa
+ORDER BY 
+    p.idPublicacao, c.idComentario
+LIMIT 0, 1000;
+
+-- -------------------------------------------------------------
+
+SELECT 
+    p.idPublicacao,
+    p.descricao AS publicacao_descricao,
+    pes.nome AS nome_pessoa,
+    c.nomeCargo AS cargo,
+    p.dataPublicacao, -- Incluindo a data e hora da criação da publicação
+    COUNT(DISTINCT cur.idCurtidaPublicacao) AS quantidade_likes,  -- Alterado para idCurtidaPublicacao
+    COUNT(DISTINCT com.idComentario) AS quantidade_comentarios
+FROM 
+    Publicacao p
+JOIN 
+    Pessoa pes ON p.Pessoa_idPessoa = pes.idPessoa
+JOIN 
+    Funcionario f ON pes.idPessoa = f.Pessoa_idPessoa
+JOIN 
+    Cargo c ON f.Cargo_idCargo = c.idCargo
+LEFT JOIN 
+    CurtidaPublicacao cur ON p.idPublicacao = cur.Publicacao_idPublicacao
+LEFT JOIN 
+    Comentario com ON p.idPublicacao = com.Publicacao_idPublicacao
+GROUP BY 
+    p.idPublicacao, pes.nome, c.nomeCargo, p.dataPublicacao -- Adicione p.dataPublicacao ao GROUP BY
+ORDER BY 
+    p.dataPublicacao DESC
+LIMIT 0, 1000;
+
+
+SELECT * FROM Publicacao;
+SELECT * FROM Pessoa;
+SELECT * FROM ContatoInstitucional;

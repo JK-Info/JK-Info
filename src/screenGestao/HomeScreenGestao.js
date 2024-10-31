@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { View, Text, FlatList, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
@@ -32,264 +32,156 @@ const Curtir = ({ count, liked, onPress }) => (
   </View>
 );
 
-const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
-  const [comentario, setComentario] = useState('');
-
-  const handleSendComment = () => {
-    if (comentario.trim()) {
-      const newComment = {
-        text: comentario,
-        author: {
-          name: 'User',
-          photo: fotoPerfilAnonima,
-        },
-        liked: false,
-        likeCount: 0,
-      };
-      onSendComment([...comments, newComment]);
-      setComentario('');
-      onClose();
-    }
-  };
-
-  const handleLikeComment = (index) => {
-    const updatedComments = [...comments];
-    updatedComments[index].liked = !updatedComments[index].liked;
-    updatedComments[index].likeCount += updatedComments[index].liked ? 1 : -1;
-    onSendComment(updatedComments);
-  };
-
-  const handleLongPressComment = (index) => {
-    Alert.alert(
-      'Excluir Comentário',
-      'Você deseja excluir este comentário?',
-      [
-        { text: 'Cancelar', onPress: () => console.log('Cancelado') },
-        { text: 'Excluir', onPress: () => {
-          const updatedComments = comments.filter((_, i) => i !== index);
-          onSendComment(updatedComments);
-        }},
-      ],
-      { cancelable: true }
-    );
-  };
-
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Comentários</Text>
-
-          <ScrollView style={styles.comentariosContainer}>
-            {comments.map((comment, index) => (
-              <TouchableOpacity 
-                key={index} 
-                onLongPress={() => handleLongPressComment(index)} 
-                style={styles.comentarioContainer}
-              >
-                <Image source={comment.author.photo} style={styles.avatarComment} />
-                <View style={styles.comentarioTextoContainer}>
-                  <Text style={styles.nomeAutor}>{comment.author.name}</Text>
-                  <Text style={styles.comentarioTexto}>{comment.text}</Text>
-                </View>
-                <Curtir 
-                  count={comment.likeCount} 
-                  liked={comment.liked} 
-                  onPress={() => handleLikeComment(index)} 
-                />
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Escreva um comentário..."
-            value={comentario}
-            onChangeText={setComentario}
-          />
-          <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
-            <Text style={styles.sendButtonText}>Enviar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
-const Post = ({ text, comments, onCommentPress, onDelete, date }) => {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-
-  const handleLikePost = () => {
-    setLiked(!liked);
-    setLikeCount(liked ? likeCount - 1 : likeCount + 1);
-  };
-
-  const handleCommentPress = () => {
-    onCommentPress(comments); // Passa os comentários ao modal
-  };
-
-  return (
-    <View style={styles.boxPubli}>
-      <View style={styles.indent}>
-        <Avatar />
-        <Usuario nome="Diretor" cargo="Diretor(a)" />
-      </View>
-
-      <View style={styles.boxFeed}>
-        <Text style={styles.textoPubli}>{text}</Text>
-        <Text style={styles.dateText}>{date}</Text> {/* Exibir a data aqui */}
-      </View>
-      
-      <View style={styles.bottons}>
-        <Curtir count={likeCount} liked={liked} onPress={handleLikePost} />
-        <BotaoComentar onPress={handleCommentPress} comentarioCount={comments.length} />
-        
-        <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-          <Text style={styles.deleteButtonText}>Excluir</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
 const HomeScreenGestao = () => {
+  const [publicacoes, setPublicacoes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [comments, setComments] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [posts, setPosts] = useState([]);
-  const [newPostText, setNewPostText] = useState('');
-  const [createPostModalVisible, setCreatePostModalVisible] = useState(false);
+  const [likes, setLikes] = useState({});
+  const [newComment, setNewComment] = useState('');
+  const [selectedPublicationId, setSelectedPublicationId] = useState(null);
+  
+  // Substitua este valor pelo ID do usuário logado
+  const userId = 1; 
 
   useEffect(() => {
-    // Fetch posts from API when the component mounts
-    const fetchPosts = async () => {
+    const fetchPublicacoes = async () => {
       try {
-        const response = await axios.get('https://localhost:3000/getpublicacao');
-        setPosts(response.data); // Ajuste conforme a estrutura de dados retornada
+        const response = await axios.get('http://localhost:3000/getpublicacao');
+        setPublicacoes(response.data.data);
+        const initialLikes = {};
+        response.data.data.forEach((item) => {
+          initialLikes[item.idPublicacao] = {
+            liked: false,
+            count: item.quantidade_likes,
+          };
+        });
+        setLikes(initialLikes);
       } catch (error) {
         console.error('Erro ao buscar publicações:', error);
       }
     };
 
-    fetchPosts();
+    fetchPublicacoes();
   }, []);
 
-  const toggleModal = () => setModalVisible(!modalVisible);
-  const toggleCreatePostModal = () => setCreatePostModalVisible(!createPostModalVisible);
-
-  const handleCommentUpdate = (index, newComments) => {
-    const updatedPosts = [...posts];
-    updatedPosts[index].comments = newComments;
-    setPosts(updatedPosts);
-  };
-
-  const handleCreatePost = async () => {
-    if (newPostText.trim()) {
-      const newPost = {
-        text: newPostText,
-        comments: [],
-      };
-  
-      try {
-        const response = await axios.post('https://localhost:3000/postpublicacao', newPost);
-        setPosts([response.data, ...posts]); // Adiciona novo post no topo
-        setNewPostText('');
-        toggleCreatePostModal(); // Fecha o modal após criar o post
-        Alert.alert('Sucesso', 'Publicação criada com sucesso!'); // Adiciona um alerta de sucesso
-      } catch (error) {
-        console.error('Erro ao criar publicação:', error);
-        Alert.alert('Erro', 'Falha ao criar publicação.'); // Adiciona um alerta de erro
-      }
+  const fetchComments = async (idPublicacao) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/comentarios/${idPublicacao}`);
+      setComments(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar comentários:', error);
     }
   };
-  
-  const handleDeletePost = async (id) => {
-    Alert.alert(
-      'Excluir Publicação',
-      'Você deseja excluir esta publicação?',
-      [
-        { text: 'Cancelar', onPress: () => console.log('Cancelado') },
-        { text: 'Excluir', onPress: async () => {
-          try {
-            await axios.delete(`https://localhost:3000/deletepublicacao/${id}`);
-            const updatedPosts = posts.filter((post) => post.id !== id);
-            setPosts(updatedPosts);
-          } catch (error) {
-            console.error('Erro ao excluir publicação:', error);
-          }
-        }},
-      ],
-      { cancelable: true }
-    );
+
+  const handleLike = async (idPublicacao) => {
+    try {
+        const liked = likes[idPublicacao].liked;
+        console.log(`Curtindo publicação: ${idPublicacao}, estado atual: ${liked}`); // Log para depuração
+        const response = await axios.post('http://localhost:3000/like', { 
+            idPublicacao, 
+            liked: !liked, 
+            userId: 21 // Adicione o userId aqui
+        });
+
+        console.log('Resposta do servidor:', response.data); // Log para depuração
+
+        const newCount = response.data.newCount; 
+        setLikes({
+            ...likes,
+            [idPublicacao]: { liked: !liked, count: newCount },
+        });
+    } catch (error) {
+        console.error('Erro ao atualizar like:', error);
+    }
+};
+
+  const handleSendComment = async () => {
+    if (newComment.trim() === '') return;
+
+    try {
+      await axios.post('http://localhost:3000/postcomentario', { 
+        idPublicacao: selectedPublicationId, 
+        text: newComment,
+        userId // Enviar o ID do usuário, se necessário
+      });
+
+      await fetchComments(selectedPublicationId);
+      setNewComment('');
+    } catch (error) {
+      console.error('Erro ao enviar comentário:', error);
+    }
   };
 
-  const filteredPosts = posts.filter(post =>
-    post.text.toLowerCase().includes(searchQuery.toLowerCase())
+  const renderPublicacao = ({ item }) => (
+    <View style={styles.boxPubli}>
+      <View style={styles.indent}>
+        <Avatar />
+        <Usuario nome={item.nome_pessoa} cargo={item.cargo} />
+      </View>
+      <View style={styles.boxFeed}>
+        <Text style={styles.textoPubli}>{item.publicacao_descricao}</Text>
+      </View>
+      <View style={styles.bottons}>
+        <Curtir 
+          count={likes[item.idPublicacao]?.count || 0} 
+          liked={likes[item.idPublicacao]?.liked || false} 
+          onPress={() => handleLike(item.idPublicacao)} 
+        />
+        <BotaoComentar onPress={() => {
+          setSelectedPublicationId(item.idPublicacao);
+          fetchComments(item.idPublicacao);
+          setModalVisible(true);
+        }} comentarioCount={item.quantidade_comentarios} />
+      </View>
+    </View>
   );
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Pesquisar..."
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-
-      <ScrollView style={styles.scrollView}>
-        {filteredPosts.map((post, index) => (
-          <Post 
-            key={post.id} // Use um identificador único
-            text={post.text}
-            comments={post.comments}
-            date={new Date(post.createdAt).toLocaleDateString()} // Ajuste conforme necessário
-            onCommentPress={(currentComments) => {
-              setComments(currentComments);
-              toggleModal();
-            }}
-            onDelete={() => handleDeletePost(post.id)} // Passa o id do post
-          />
-        ))}
-      </ScrollView>
-
-      <TouchableOpacity onPress={toggleCreatePostModal} style={styles.createPostButton}>
-        <Text style={styles.createPostButtonText}>Criar Publicação</Text>
-      </TouchableOpacity>
-
-      <CommentModal
-        visible={modalVisible}
-        onClose={toggleModal}
-        comments={comments}
-        onSendComment={(newComments) => handleCommentUpdate(posts.findIndex(post => post.comments === comments), newComments)}
+      <FlatList
+        data={publicacoes}
+        renderItem={renderPublicacao}
+        keyExtractor={(item) => item.idPublicacao.toString()}
       />
 
       <Modal
         animationType="slide"
         transparent={true}
-        visible={createPostModalVisible}
-        onRequestClose={toggleCreatePostModal}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+          setComments([]); // Limpa os comentários ao fechar o modal
+          setNewComment(''); // Limpa o novo comentário ao fechar o modal
+        }}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite o texto da publicação"
-              value={newPostText}
-              onChangeText={setNewPostText}
+            <Text style={styles.modalTitle}>Comentários</Text>
+            <ScrollView style={styles.comentariosContainer}>
+              {comments.map((comment, index) => (
+                <View key={index} style={styles.comentarioContainer}>
+                  <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
+                  <View style={styles.comentarioTextoContainer}>
+                    <Text style={styles.nomeAutor}>{comment.author.name}</Text>
+                    <Text style={styles.comentarioTexto}>{comment.text}</Text>
+                  </View>
+                  <Curtir count={comment.likeCount} liked={comment.liked} onPress={() => { /* Implementar lógica de like */ }} />
+                </View>
+              ))}
+            </ScrollView>
+            <TextInput 
+              style={styles.input} 
+              placeholder="Escreva um comentário..." 
+              value={newComment}
+              onChangeText={setNewComment}
             />
-            <TouchableOpacity onPress={handleCreatePost} style={styles.sendButton}>
-              <Text style={styles.sendButtonText}>Criar</Text>
+            <TouchableOpacity 
+              style={styles.sendButton} 
+              onPress={handleSendComment}
+            >
+              <Text style={styles.sendButtonText}>Enviar</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={toggleCreatePostModal} style={styles.closeButton}>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Fechar</Text>
             </TouchableOpacity>
           </View>
@@ -304,17 +196,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingHorizontal: 20,
-  },
-  searchInput: {
-    height: 40,
-    borderColor: '#007BFF',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-  },
-  scrollView: {
-    flex: 1,
   },
   boxPubli: {
     marginVertical: 10,
@@ -335,11 +216,6 @@ const styles = StyleSheet.create({
   textoPubli: {
     fontSize: 16,
     marginBottom: 10,
-  },
-  postImage: {
-    width: '100%',
-    height: 500,
-    borderRadius: 10,
   },
   bottons: {
     flexDirection: 'row',
@@ -408,7 +284,6 @@ const styles = StyleSheet.create({
   },
   comentarioTextoContainer: {
     flex: 1,
-    marginRight: 10,
   },
   nomeAutor: {
     fontWeight: 'bold',
@@ -419,82 +294,25 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 10,
+    borderRadius: 5,
     padding: 10,
     marginBottom: 10,
   },
   sendButton: {
     backgroundColor: '#00527C',
-    borderRadius: 10,
+    borderRadius: 5,
     paddingVertical: 10,
     alignItems: 'center',
-    marginBottom: 10,
   },
   sendButtonText: {
-    color: 'white',
+    color: '#fff',
   },
   closeButton: {
-    backgroundColor: '#ff6400',
-    borderRadius: 10,
-    paddingVertical: 10,
+    marginTop: 10,
     alignItems: 'center',
   },
   closeButtonText: {
-    color: 'white',
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 30,
-    right: 30,
-    width: 60,
-    height: 60,
-    backgroundColor: '#ff6400',
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
-  },
-  newPostInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-  },
-  deleteButton: {
-    padding: 5,
-    backgroundColor: '#ff4d4d',
-    borderRadius: 5,
-  },
-  deleteButtonText: {
-    color: 'white',
-  },
-  dateText: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 5,
-  },
-  floatingButton: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
-    backgroundColor: '#007bff',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5, // Para Android
-    shadowColor: '#000', // Para iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  floatingButtonText: {
-    color: '#fff',
-    fontSize: 30,
-    lineHeight: 30,
+    color: '#00527C',
   },
 });
 

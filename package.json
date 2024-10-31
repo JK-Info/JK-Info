@@ -17,20 +17,11 @@
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
     "@react-navigation/stack": "^6.3.29",
-    "axios": "^1.7.7",
-    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
     "date-fns": "^4.1.0",
-    "dotenv": "^16.4.5",
     "expo": "^51.0.9",
     "expo-status-bar": "~1.12.1",
-    "express": "^4.21.1",
-    "mongoose": "^8.7.3",
     "mysql2": "^3.11.3",
-    "pg": "^8.13.1",
-    "pg-hstore": "^2.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "^0.74.5",
@@ -43,12 +34,23 @@
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-swipe-gestures": "^1.0.5",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-web": "~0.19.6",
-    "sqlite3": "^5.1.7"
+    "react-native-web": "~0.19.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "nodemon": "^3.1.7"
+    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "install": "^0.13.0",
+    "mongoose": "^8.7.3",
+    "nodemon": "^3.1.7",
+    "npm": "^10.9.0",
+    "pg": "^8.13.1",
+    "pg-hstore": "^2.3.4",
+    "sqlite3": "^5.1.7"
   },
   "private": true
 }
