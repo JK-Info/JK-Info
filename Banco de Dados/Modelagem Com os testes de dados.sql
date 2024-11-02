@@ -548,10 +548,10 @@ CREATE TABLE IF NOT EXISTS `CurtidaComentario` (
 
 	INSERT INTO `mydb`.`Contato` (`numeroCelular`, `emailPessoal`, `Pessoa_idPessoa`)
 	VALUES 
-    ('11911111135', 'professor1@gmail.com', 29),
-    ('11911111136', 'professor2@gmail.com', 30),
-    ('11911111137', 'professor3@gmail.com', 31),
-    ('11911111138', 'professor4@gmail.com', 32);
+    ('11911111135', 'professor1@gmail.com', 25),
+    ('11911111136', 'professor2@gmail.com', 26),
+    ('11911111137', 'professor3@gmail.com', 27),
+    ('11911111138', 'professor4@gmail.com', 28);
 
 	INSERT INTO `mydb`.`Funcionario` (`ContatoInstitucional_idContatoInstitucional`, `Contato_idContato`, `Pessoa_idPessoa`, `Cargo_idCargo`) 
 	VALUES (
@@ -596,6 +596,8 @@ CREATE TABLE IF NOT EXISTS `CurtidaComentario` (
     -- INSERINDO FUNCIONARIOS ------------------------------------------------------------
 
 	INSERT INTO `mydb`.`Cargo` (`nomeCargo`) VALUES ('Funcionario');
+    
+    select * from Pessoa;
 
 	INSERT INTO `mydb`.`ContatoInstitucional` (`emailInstitucional`, `senha`, `tipoUsuario`)
 	VALUES ('funcionario1@etec.sp.gov.br', default, 'funcionario');
@@ -604,7 +606,7 @@ CREATE TABLE IF NOT EXISTS `CurtidaComentario` (
 	VALUES ('Funcionario Primeiro', '1985-01-01', 'Masculino', '111111139', '11111111139', 29);
 
 	INSERT INTO `mydb`.`Contato` (`numeroCelular`, `emailPessoal`, `Pessoa_idPessoa`)
-	VALUES ('11911111139', 'funcionario1@gmail.com', 41);
+	VALUES ('11911111139', 'funcionario1@gmail.com', 29);
 
 	INSERT INTO `mydb`.`Funcionario` (`ContatoInstitucional_idContatoInstitucional`, `Contato_idContato`, `Pessoa_idPessoa`, `Cargo_idCargo`)
 	VALUES (
@@ -636,7 +638,8 @@ CREATE TABLE IF NOT EXISTS `CurtidaComentario` (
 	VALUES 
     ('Ótima publicação! Adorei o conteúdo.', 1, 1), 
     ('Acho que podemos explorar mais esse tópico.', 2, 2);
-    
+
+-- COMENTÁRIOS NA PUBLICAÇÃO ----------------------------------
 SELECT 
     p.idPublicacao,
     c.idComentario,
@@ -652,7 +655,7 @@ ORDER BY
     p.idPublicacao, c.idComentario
 LIMIT 0, 1000;
 
--- -------------------------------------------------------------
+-- PUBLICAÇÃO -------------------------------------------------------------
 
 SELECT 
     p.idPublicacao,
@@ -679,8 +682,3 @@ GROUP BY
 ORDER BY 
     p.dataPublicacao DESC
 LIMIT 0, 1000;
-
-
-SELECT * FROM Publicacao;
-SELECT * FROM Pessoa;
-SELECT * FROM ContatoInstitucional;

@@ -21,16 +21,16 @@ router.post('/postcomentario', async (req, res) => {
 });
 
 // Rota para obter comentários de uma publicação específica
-router.get('/comentarios/:idPublicacao', async (req, res) => {
-    const idPublicacao = req.params.idPublicacao;
+router.get('/comentarios/:idPublicacao', (req, res) => {
+    const idPublicacao = req.params.idPublicacao; // Pega o ID da publicação da URL
 
-    const sql = `
+    const query = `
         SELECT 
             c.idComentario, 
             c.texto AS comentario_texto,
             p.nome AS nome_autor,
             pub.descricao AS publicacao_descricao,
-            COUNT(l.idCurtida) AS numero_likes
+            IFNULL(COUNT(l.idCurtidaComentario), 0) AS numero_likes
         FROM 
             Comentario c
         JOIN 
@@ -38,23 +38,23 @@ router.get('/comentarios/:idPublicacao', async (req, res) => {
         JOIN 
             Publicacao pub ON c.Publicacao_idPublicacao = pub.idPublicacao
         LEFT JOIN 
-            CurtidasComentario l ON c.idComentario = l.idComentario
+            CurtidaComentario l ON c.idComentario = l.Comentario_idComentario
         WHERE 
-            c.Publicacao_idPublicacao = ?
+            c.Publicacao_idPublicacao = ?  -- Usar ? para prevenir SQL injection
         GROUP BY 
             c.idComentario, p.nome, pub.descricao
         ORDER BY 
-            c.dataComentario DESC
-        LIMIT 0, 1000;
+            c.dataComentario DESC;
     `;
 
-    try {
-        const results = await db.query(sql, [idPublicacao]);
-        res.json(results);
-    } catch (error) {
-        console.error('Erro ao buscar comentários:', error);
-        res.status(500).json({ error: 'Erro ao buscar comentários.' });
-    }
-});
+    db.query(query, [idPublicacao], (error, results) => {
+        if (error) {
+            console.error('Erro ao buscar comentários:', error);
+            return res.status(500).json({ success: false, message: 'Erro ao buscar comentários.' });
+        }
+
+        res.json({ success: true, data: results });
+    });
+}); 
 
 module.exports = router;
