@@ -21,6 +21,8 @@
     "date-fns": "^4.1.0",
     "expo": "^51.0.9",
     "expo-status-bar": "~1.12.1",
+    "express-validator": "^7.2.0",
+    "mysql": "^2.18.1",
     "mysql2": "^3.11.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -34,7 +36,8 @@
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-swipe-gestures": "^1.0.5",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-web": "~0.19.6"
+    "react-native-web": "~0.19.6",
+    "sequelize": "^6.37.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
