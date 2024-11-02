@@ -4,25 +4,28 @@ const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
 
 // Rota para adicionar comentário
 router.post('/postcomentario', async (req, res) => {
-    const { idPublicacao, text, idPessoa } = req.body; // Adicionando idPessoa
-    try {
-        if (!idPublicacao || !text || !idPessoa) {
-            return res.status(400).json({ error: 'ID da publicação, texto e ID da pessoa são obrigatórios' });
-        }
+    const { text, Publicacao_idPublicacao, Pessoa_id } = req.body; // Ajuste aqui para obter os nomes corretos
+    if (!text || !Publicacao_idPublicacao || !Pessoa_id) {
 
-        const query = 'INSERT INTO Comentario (Publicacao_idPublicacao, texto, Pessoa_idPessoa) VALUES (?, ?, ?)';
-        await db.query(query, [idPublicacao, text, idPessoa]);
-        
-        res.status(201).json({ message: 'Comentário adicionado com sucesso!' });
-    } catch (error) {
-        console.error('Erro ao adicionar comentário:', error);
-        res.status(500).json({ error: 'Erro ao adicionar comentário' });
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
+
+      try {
+    const query = 'INSERT INTO Comentario (texto, Publicacao_idPublicacao, Pessoa_id) VALUES (?, ?, ?)';
+    await db.query(query, [text, Publicacao_idPublicacao, Pessoa_id]); // Insira os dados no banco de dados
+    res.status(201).json({ message: 'Comentário adicionado com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao adicionar comentário:', error);
+    res.status(500).json({ error: 'Erro ao adicionar comentário.' });
+  }
 });
 
 // Rota para obter comentários de uma publicação específica
 router.get('/comentarios/:idPublicacao', (req, res) => {
     const idPublicacao = req.params.idPublicacao; // Pega o ID da publicação da URL
+
+    // Log da requisição
+    console.log('Recebendo requisição para obter comentários da publicação:', idPublicacao);
 
     const query = `
         SELECT 
@@ -53,6 +56,7 @@ router.get('/comentarios/:idPublicacao', (req, res) => {
             return res.status(500).json({ success: false, message: 'Erro ao buscar comentários.' });
         }
 
+        console.log('Comentários encontrados para a publicação:', idPublicacao, results);
         res.json({ success: true, data: results });
     });
 }); 
