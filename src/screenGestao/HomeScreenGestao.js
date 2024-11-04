@@ -41,23 +41,31 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
   const [textoComentario, setTextoComentario] = useState('');
 
   const handleSendComment = async () => {
-  if (textoComentario.trim()) {
-    try {
-      await axios.post('http://localhost:3000/postcomentario', {
-        text: textoComentario, // Use 'text' para combinar com o que você está esperando na rota
-        Publicacao_idPublicacao: publicacaoId, // Mantenha o nome se você quiser, mas atualize na rota
-        Pessoa_id: 21, // ID do usuário logado
-      });
-      
-      setTextoComentario(''); // Limpa o campo de texto após enviar
-      onCommentAdded({ text: textoComentario, author: { name: 'Seu Nome', photo: fotoPerfilAnonima }, likeCount: 0 }); // Atualiza os comentários na tela
-    } catch (error) {
-      console.error('Erro ao enviar comentário:', error);
-      Alert.alert('Erro', 'Falha ao enviar o comentário.');
+    if (textoComentario.trim()) {
+        try {
+            // Faz uma requisição para buscar os dados do usuário com ID 21
+            const response = await axios.get(`http://localhost:3000/getusuario/21`);
+            const usuario = response.data; // Supondo que a resposta contenha as informações do usuário
+            const nomeUsuario = usuario.nome; // Ajuste conforme a estrutura de retorno da sua API
+
+            // Envia o comentário com o ID fixo do usuário 21
+            await axios.post('http://localhost:3000/postcomentario', {
+                text: textoComentario,
+                Publicacao_idPublicacao: publicacaoId,
+                Pessoa_id: 21, // ID do usuário logado
+            });
+
+            // Atualiza a lista de comentários na tela com o nome correto do usuário
+            onCommentAdded({ texto: textoComentario, nome_comentador: nomeUsuario, num_likes: 0 });
+            
+            setTextoComentario(''); // Limpa o campo de texto após enviar
+        } catch (error) {
+            console.error('Erro ao enviar comentário:', error);
+            Alert.alert('Erro', 'Falha ao enviar o comentário.');
+        }
+    } else {
+        Alert.alert('Atenção', 'Por favor, insira um comentário.');
     }
-  } else {
-    Alert.alert('Atenção', 'Por favor, insira um comentário.');
-  }
 };
 
   return (
@@ -73,12 +81,12 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
           <ScrollView style={styles.comentariosContainer}>
             {Array.isArray(comments) && comments.map((comment) => (
               <View key={comment.idComentario} style={styles.comentarioContainer}>
-                <Image source={fotoPerfilAnonima} style={styles.avatarComment} /> {/* Use uma imagem padrão */}
+                <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
                   <Text style={styles.nomeAutor}>{comment.nome_comentador}</Text>
                   <Text style={styles.comentarioTexto}>{comment.texto}</Text>
                 </View>
-                <Curtir count={comment.num_likes} liked={comment.liked} onPress={() => { /* Implementar lógica de like */ }} />
+                <Curtir count={comment.num_likes} liked={false} onPress={() => {}} />
               </View>
             ))}
           </ScrollView>
@@ -123,9 +131,10 @@ const HomeScreenGestao = () => {
   const fetchComments = async (postId) => {
     try {
       const response = await axios.get(`http://localhost:3000/getcomentarios/${postId}`);
-      setSelectedComments(response.data.data);
+      setSelectedComments(response.data); // Atualiza o estado com os comentários
     } catch (error) {
-      console.error('Erro ao buscar comentários:', error.message, error.response.data);
+      console.error('Erro ao buscar comentários:', error);
+      Alert.alert('Erro', 'Não foi possível carregar os comentários.');
     }
   };
 

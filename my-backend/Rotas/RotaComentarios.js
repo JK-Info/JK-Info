@@ -3,22 +3,28 @@ const router = express.Router();
 const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
 
 // Rota para adicionar comentário
-router.post('/postcomentario', async (req, res) => {
-    const { text, Publicacao_idPublicacao, Pessoa_id } = req.body; // Ajuste aqui para obter os nomes corretos
-    if (!text || !Publicacao_idPublicacao || !Pessoa_id) {
+router.post('/postcomentario', (req, res) => {
+    const { text, Publicacao_idPublicacao } = req.body; // Não pega Pessoa_id do body
+    const Pessoa_id = 21; // Define o ID fixo da pessoa como 21
 
+    // Verifica se os campos obrigatórios estão presentes
+    if (!text || !Publicacao_idPublicacao) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
 
-      try {
-    const query = 'INSERT INTO Comentario (texto, Publicacao_idPublicacao, Pessoa_id) VALUES (?, ?, ?)';
-    await db.query(query, [text, Publicacao_idPublicacao, Pessoa_id]); // Insira os dados no banco de dados
-    res.status(201).json({ message: 'Comentário adicionado com sucesso!' });
-  } catch (error) {
-    console.error('Erro ao adicionar comentário:', error);
-    res.status(500).json({ error: 'Erro ao adicionar comentário.' });
-  }
+    try {
+        const query = 'INSERT INTO Comentario (texto, Publicacao_idPublicacao, Pessoa_idPessoa) VALUES (?, ?, ?)';
+        
+        // Usa o ID fixo (21) ao invés de pegar o Pessoa_id do body
+        db.query(query, [text, Publicacao_idPublicacao, Pessoa_id]); 
+        
+        res.status(201).json({ message: 'Comentário adicionado com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao adicionar comentário:', error);
+        res.status(500).json({ error: 'Erro ao adicionar comentário.' });
+    }
 });
+
 
 // Rota para obter comentários de uma publicação específica
 router.get('/getcomentarios/:idPublicacao', (req, res) => {
