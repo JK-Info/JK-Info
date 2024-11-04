@@ -71,14 +71,14 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Comentários</Text>
           <ScrollView style={styles.comentariosContainer}>
-            {Array.isArray(comments) && comments.map((comment, index) => (
-              <View key={index} style={styles.comentarioContainer}>
-                <Image source={comment.author.photo || fotoPerfilAnonima} style={styles.avatarComment} />
+            {Array.isArray(comments) && comments.map((comment) => (
+              <View key={comment.idComentario} style={styles.comentarioContainer}>
+                <Image source={fotoPerfilAnonima} style={styles.avatarComment} /> {/* Use uma imagem padrão */}
                 <View style={styles.comentarioTextoContainer}>
-                  <Text style={styles.nomeAutor}>{comment.author.name}</Text>
-                  <Text style={styles.comentarioTexto}>{comment.text}</Text>
+                  <Text style={styles.nomeAutor}>{comment.nome_comentador}</Text>
+                  <Text style={styles.comentarioTexto}>{comment.texto}</Text>
                 </View>
-                <Curtir count={comment.likeCount} liked={comment.liked} onPress={() => { /* Implementar lógica de like */ }} />
+                <Curtir count={comment.num_likes} liked={comment.liked} onPress={() => { /* Implementar lógica de like */ }} />
               </View>
             ))}
           </ScrollView>
@@ -123,9 +123,9 @@ const HomeScreenGestao = () => {
   const fetchComments = async (postId) => {
     try {
       const response = await axios.get(`http://localhost:3000/getcomentarios/${postId}`);
-      setSelectedComments(response.data.data); // Assume que os dados dos comentários estão na estrutura correta
+      setSelectedComments(response.data.data);
     } catch (error) {
-      console.error('Erro ao buscar comentários:', error);
+      console.error('Erro ao buscar comentários:', error.message, error.response.data);
     }
   };
 
