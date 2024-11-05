@@ -1,4 +1,4 @@
-const express = require('express');
+/*const express = require('express');
 const routerNotas = express.Router();
 const db = require('../ConexaoBD/conexaoBD');
 
@@ -44,3 +44,4 @@ routerNotas.post('/alunos/:idAluno/notas', async (req, res) => {
 });
 
     module.exports = router;
+    */

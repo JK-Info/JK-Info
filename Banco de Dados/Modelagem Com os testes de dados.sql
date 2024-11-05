@@ -639,6 +639,7 @@ CREATE TABLE IF NOT EXISTS `CurtidaComentario` (
     ('Ótima publicação! Adorei o conteúdo.', 1, 1), 
     ('Acho que podemos explorar mais esse tópico.', 2, 2);
 
+
 -- COMENTÁRIOS NA PUBLICAÇÃO ----------------------------------
 SELECT 
     p.idPublicacao,
@@ -657,28 +658,28 @@ LIMIT 0, 1000;
 
 -- PUBLICAÇÃO -------------------------------------------------------------
 
-SELECT 
-    p.idPublicacao,
-    p.descricao AS publicacao_descricao,
-    pes.nome AS nome_pessoa,
-    c.nomeCargo AS cargo,
-    p.dataPublicacao, -- Incluindo a data e hora da criação da publicação
-    COUNT(DISTINCT cur.idCurtidaPublicacao) AS quantidade_likes,  -- Alterado para idCurtidaPublicacao
-    COUNT(DISTINCT com.idComentario) AS quantidade_comentarios
-FROM 
-    Publicacao p
-JOIN 
-    Pessoa pes ON p.Pessoa_idPessoa = pes.idPessoa
-JOIN 
-    Funcionario f ON pes.idPessoa = f.Pessoa_idPessoa
-JOIN 
-    Cargo c ON f.Cargo_idCargo = c.idCargo
-LEFT JOIN 
-    CurtidaPublicacao cur ON p.idPublicacao = cur.Publicacao_idPublicacao
-LEFT JOIN 
-    Comentario com ON p.idPublicacao = com.Publicacao_idPublicacao
-GROUP BY 
-    p.idPublicacao, pes.nome, c.nomeCargo, p.dataPublicacao -- Adicione p.dataPublicacao ao GROUP BY
-ORDER BY 
-    p.dataPublicacao DESC
-LIMIT 0, 1000;
+	SELECT 
+		p.idPublicacao,
+		p.descricao AS publicacao_descricao,
+		pes.nome AS nome_pessoa,
+		c.nomeCargo AS cargo,
+		p.dataPublicacao, -- Incluindo a data e hora da criação da publicação
+		COUNT(DISTINCT cur.idCurtidaPublicacao) AS quantidade_likes,  -- Alterado para idCurtidaPublicacao
+		COUNT(DISTINCT com.idComentario) AS quantidade_comentarios
+	FROM 
+		Publicacao p
+	JOIN 
+		Pessoa pes ON p.Pessoa_idPessoa = pes.idPessoa
+	JOIN 
+		Funcionario f ON pes.idPessoa = f.Pessoa_idPessoa
+	JOIN 
+		Cargo c ON f.Cargo_idCargo = c.idCargo
+	LEFT JOIN 
+		CurtidaPublicacao cur ON p.idPublicacao = cur.Publicacao_idPublicacao
+	LEFT JOIN 
+		Comentario com ON p.idPublicacao = com.Publicacao_idPublicacao
+	GROUP BY 
+		p.idPublicacao, pes.nome, c.nomeCargo, p.dataPublicacao -- Adicione p.dataPublicacao ao GROUP BY
+	ORDER BY 
+		p.dataPublicacao DESC
+	LIMIT 0, 1000;

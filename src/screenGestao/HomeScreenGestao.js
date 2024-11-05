@@ -14,7 +14,7 @@ const Usuario = ({ nome, cargo }) => (
   <View style={styles.informacoesPublicacao}>
     <Text>{nome}</Text>
     <Text style={{ fontSize: 11 }}>{cargo}</Text>
-  </View>
+  </View> 
 );
 
 // Componente de Botão de Comentar
@@ -28,6 +28,16 @@ const BotaoComentar = ({ onPress, comentarioCount }) => (
 
 // Componente de Curtir
 const Curtir = ({ count, liked, onPress }) => (
+  <View style={styles.containerCurtir}>
+    <TouchableOpacity onPress={onPress}>
+      <Icon name="heart" size={24} color={liked ? '#FF0000' : '#000'} />
+    </TouchableOpacity>
+    <Text style={styles.curtidasTexto}>{count}</Text>
+  </View>
+);
+
+// Componente de Curtir
+const CurtirComentario = ({ count, liked, onPress }) => (
   <View style={styles.containerCurtir}>
     <TouchableOpacity onPress={onPress}>
       <Icon name="heart" size={24} color={liked ? '#FF0000' : '#000'} />
@@ -68,6 +78,29 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
     }
 };
 
+const handleLikeComment = async (commentId) => {
+  const isLiked = comments.find(comment => comment.idComentario === commentId).liked || false;
+  try {
+    const response = await axios.post('http://localhost:3000/like/comentario', {
+      idComentario: commentId,
+      liked: !isLiked,
+      userId: 21, // ID do usuário logado
+    });
+
+    const newCount = response.data.newCount; // Supondo que a API retorne o novo número de curtidas
+
+    // Atualizar a contagem de curtidas localmente
+    setSelectedComments((prevComments) =>
+      prevComments.map(comment =>
+        comment.idComentario === commentId ? { ...comment, num_likes: newCount, liked: !isLiked } : comment
+      )
+    );
+  } catch (error) {
+    console.error('Erro ao curtir comentário:', error);
+    Alert.alert('Erro', 'Falha ao curtir o comentário. Tente novamente.');
+  }
+};
+
   return (
     <Modal
       animationType="slide"
@@ -79,14 +112,18 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Comentários</Text>
           <ScrollView style={styles.comentariosContainer}>
-            {Array.isArray(comments) && comments.map((comment) => (
+          {Array.isArray(comments) && comments.map((comment) => (
               <View key={comment.idComentario} style={styles.comentarioContainer}>
                 <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
                   <Text style={styles.nomeAutor}>{comment.nome_comentador}</Text>
                   <Text style={styles.comentarioTexto}>{comment.texto}</Text>
                 </View>
-                <Curtir count={comment.num_likes} liked={false} onPress={() => {}} />
+                <CurtirComentario
+                  count={comment.num_likes}
+                  liked={comment.liked}
+                  onPress={() => handleLikeComment(comment.idComentario)}
+                />
               </View>
             ))}
           </ScrollView>
