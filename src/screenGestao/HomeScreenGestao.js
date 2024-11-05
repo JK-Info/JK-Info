@@ -36,7 +36,6 @@ const Curtir = ({ count, liked, onPress }) => (
   </View>
 );
 
-// Componente de Curtir
 const CurtirComentario = ({ count, liked, onPress }) => (
   <View style={styles.containerCurtir}>
     <TouchableOpacity onPress={onPress}>
@@ -78,16 +77,18 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
     }
 };
 
-const handleLikeComment = async (commentId) => {
-  const isLiked = comments.find(comment => comment.idComentario === commentId).liked || false;
-  try {
-    const response = await axios.post('http://localhost:3000/likecomentario', {
-      idComentario: commentId,
-      liked: !isLiked,
-      userId: 21, // ID do usuário logado
-    });
-
-    const newCount = response.data.newCount; // Supondo que a API retorne o novo número de curtidas
+const handleLikeComment = async (commentId) => {  
+    const isLiked = comments.find(comment => comment.idComentario === commentId).liked || false;
+    const userId = 21; // Substitua isso pelo ID do usuário logado dinamicamente
+  
+    try {
+      const response = await axios.post('http://localhost:3000/likecomentario', {
+        idComentario: commentId,
+        liked: !isLiked,
+        userId: userId,
+      });
+  
+      const newCount = response.data.newCount;
 
     // Atualizar a contagem de curtidas localmente
     setSelectedComments((prevComments) =>
@@ -444,26 +445,31 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    right: 20,
-    bottom: 20,
-    backgroundColor: '#007bff',
+    bottom: 30,
+    right: 30,
     width: 60,
     height: 60,
     borderRadius: 30,
+    backgroundColor: '#00527C',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5, // Para Android
-    shadowColor: '#000', // Para iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
   },
   floatingButtonText: {
-    color: '#fff',
-    fontSize: 30,
-    lineHeight: 30,
-    color: '#00527C',
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
+  createPostButton: {
+    backgroundColor: '#00527C',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  createPostButtonText: {
+    color: 'white',
+    fontSize: 16,
+  }
 });
 
 export default HomeScreenGestao;
