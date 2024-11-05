@@ -7,6 +7,7 @@ const routerPerfil = require('../Rotas/RotaPerfil');
 const RotaLikes = require('../Rotas/RotaLikes');
 const RotaComentarios = require('../Rotas/RotaComentarios');
 const RotaBuscaUsuario = require('../Rotas/RotaBuscaUsuario');
+const routerNotas = require('../Rotas/RotaNotas');
 //const RotaNotas = require('../Rotas/RotaNotas');
 
 const PORT = 3000;
@@ -22,6 +23,7 @@ app.use('/', routerPerfil);
 app.use('/', RotaLikes);
 app.use('/', RotaComentarios);
 app.use('/', RotaBuscaUsuario);
+app.use('/', routerNotas);
 //app.use('/', RotaNotas);
 
 app.listen(PORT, () => {

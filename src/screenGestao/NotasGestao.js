@@ -1,138 +1,160 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, Alert, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity, Modal, Image, TextInput, Button } from 'react-native';
+import axios from 'axios';
 
-const NotasGetao = () => {
-  const [notasData, setNotasData] = useState([]);
-  const [novaNota, setNovaNota] = useState('');
-  const [turmaSelecionada, setTurmaSelecionada] = useState('');
+const NotasGestao = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentId, setCurrentId] = useState(null);
+  const [turmaSelecionada, setTurmaSelecionada] = useState('Todas');
+  const [turmas, setTurmas] = useState([]);
+  const [alunos, setAlunos] = useState([]);
+  const [nota, setNota] = useState('');
+  const [alunoSelecionado, setAlunoSelecionado] = useState(null);
+  const [modalTurmaVisible, setModalTurmaVisible] = useState(false);
 
-  const turmas = [
-    '1 módulo - Administração - Tarde', 
-    '2 módulo - Administração - Tarde', 
-    '3 módulo - Administração - Tarde',
-    '1 módulo - Desenvolvimento de Sistema - Tarde',
-    '2 módulo - Desenvolvimento de Sistema - Tarde',
-    '3 módulo - Desenvolvimento de Sistema - Tarde',
-    '1 módulo - Logistica - Tarde',
-    '2 módulo - Logistica - Tarde',
-    '3 módulo - Logistica - Tarde',
-    '1 módulo - Administração - Noite', 
-    '2 módulo - Administração - Noite', 
-    '3 módulo - Administração - Noite',
-    '1 módulo - Desenvolvimento de Sistema - Noite',
-    '2 módulo - Desenvolvimento de Sistema - Noite',
-    '3 módulo - Desenvolvimento de Sistema - Noite',
-    '1 módulo - Logistica - Noite',
-    '2 módulo - Logistica - Noite',
-    '3 módulo - Logistica - Noite',
-  ];
-
-  const handleSendNota = () => {
-    if (!novaNota || !turmaSelecionada) {
-      Alert.alert('Erro', 'Por favor, selecione uma turma e escreva uma nota.');
-      return;
+  // Função para buscar as turmas do banco de dados
+  const fetchTurmas = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/getturmasnotas');
+      setTurmas(response.data); // Armazena as turmas no estado
+    } catch (error) {
+      console.error('Erro ao buscar turmas:', error);
     }
+  };
 
-    const newNota = {
-      id: isEditing ? currentId : (notasData.length + 1).toString(),
-      turma: turmaSelecionada,
-      nota: novaNota,
-    };
+  // Função para buscar todos os alunos ou alunos filtrados por turma
+  const fetchAlunos = async (turma) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/getalunosnotas?turma=${turma}`); // Certifique-se de que 'turma' seja o parâmetro correto
+      setAlunos(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar alunos:', error);
+    }
+  };
 
-    if (isEditing) {
-      setNotasData(notasData.map(item => (item.id === currentId ? newNota : item)));
-      setIsEditing(false);
+  useEffect(() => {
+    fetchTurmas(); // Chama a função ao montar o componente
+    fetchAlunos(''); // Busca todos os alunos ao carregar a página
+  }, []);
+
+  useEffect(() => {
+    if (turmaSelecionada === 'Todas') {
+      fetchAlunos(''); // Busque todos os alunos
     } else {
-      setNotasData([...notasData, newNota]);
+      fetchAlunos(turmaSelecionada);
     }
+  }, [turmaSelecionada]);
 
-    resetFields();
-  };
-
-  const resetFields = () => {
-    setNovaNota('');
-    setTurmaSelecionada('');
-    setModalVisible(false);
-  };
-
-  const handleEditNota = (item) => {
-    setTurmaSelecionada(item.turma);
-    setNovaNota(item.nota);
-    setCurrentId(item.id);
-    setIsEditing(true);
-  };
-
-  const handleDeleteNota = (id) => {
-    setNotasData(notasData.filter(item => item.id !== id));
-  };
-
-  const renderNotaItem = ({ item }) => (
-    <View style={styles.notaContainer}>
-      <Text style={styles.turma}>{item.turma}</Text>
-      <Text style={styles.nota}>{item.nota}</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.editButton} onPress={() => handleEditNota(item)}>
-          <Text style={styles.buttonText}>Editar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteNota(item.id)}>
-          <Text style={styles.buttonText}>Excluir</Text>
-        </TouchableOpacity>
+  const renderAlunoItem = ({ item }) => (
+    <TouchableOpacity style={styles.itemContainer} onPress={() => handleAlunoSelect(item)}>
+      <Image
+        source={require('../../assets/FotosPerfil/Foto-perfil-Anonima.jpg')}
+        style={styles.avatar}
+      />
+      <View style={styles.textContainer}>
+        <Text style={styles.alunoNome}>{item.NomeAluno || 'Nome não disponível'}</Text>
+        <Text style={styles.alunoEmail}>{item.EmailInstitucional || 'Email não disponível'}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+
+  const handleAlunoSelect = (aluno) => {
+    setAlunoSelecionado(aluno);
+    setNota(''); // Limpa a nota ao selecionar um aluno
+    setModalVisible(true); // Abre o modal para inserir/editar nota
+  };
+
+  const handleNotaSubmit = async () => {
+    try {
+      await axios.post('http://localhost:3000/adicionarNota', {
+        alunoId: alunoSelecionado.id, // Ajuste conforme sua estrutura de dados
+        nota: nota,
+      });
+      setModalVisible(false); // Fecha o modal após salvar a nota
+      fetchAlunos(turmaSelecionada); // Atualiza a lista de alunos
+    } catch (error) {
+      console.error('Erro ao adicionar nota:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Notas Enviadas</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Digite a nota..."
-        value={novaNota}
-        onChangeText={setNovaNota}
-      />
-
-      <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
-        <Text style={styles.turmaSelecionada}>{turmaSelecionada || 'Selecione a turma'}</Text>
+      <TouchableOpacity
+        style={styles.botaoFiltro}
+        onPress={() => setModalTurmaVisible(true)} // Abre o modal de seleção de turma
+      >
+        <Text style={styles.textoBotao}>Filtrar por Turma: {turmaSelecionada}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.sendButton} onPress={handleSendNota}>
-        <Text style={styles.buttonText}>{isEditing ? 'Atualizar Nota' : 'Enviar Nota'}</Text>
-      </TouchableOpacity>
-
-      <FlatList
-        data={notasData}
-        renderItem={renderNotaItem}
-        keyExtractor={item => item.id}
-      />
+      <ScrollView style={styles.scrollContainer}>
+        <Text style={styles.titulo}>Emails dos Alunos:</Text>
+        <View style={styles.listaContainer}>
+          <FlatList
+            data={alunos}
+            renderItem={renderAlunoItem}
+            keyExtractor={item => item.id}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
+      </ScrollView>
 
       <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => setModalVisible(!modalVisible)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitulo}>Adicionar Nota para {alunoSelecionado?.NomeAluno}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite a nota"
+              value={nota}
+              onChangeText={setNota}
+              keyboardType="numeric"
+            />
+            <Button title="Salvar Nota" onPress={handleNotaSubmit} />
+            <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalVisible(false)}>
+              <Text style={styles.textoBotaoFechar}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal para seleção de turmas */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalTurmaVisible}
+        onRequestClose={() => setModalTurmaVisible(!modalTurmaVisible)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitulo}>Selecionar Turma</Text>
-            <ScrollView>
-              {turmas.map((turma, index) => (
+            <ScrollView style={styles.turmaScroll}>
+              <TouchableOpacity
+                style={styles.turmaButton}
+                onPress={() => {
+                  setTurmaSelecionada('Todas'); // A opção "Todas"
+                  setModalTurmaVisible(false);
+                }}
+              >
+                <Text style={styles.textoTurma}>Todas as Turmas</Text>
+              </TouchableOpacity>
+              {turmas.map((turma) => (
                 <TouchableOpacity
-                  key={index}
+                  key={turma.idTurma} // Use o ID da turma como chave
                   style={styles.turmaButton}
                   onPress={() => {
-                    setTurmaSelecionada(turma);
-                    setModalVisible(false);
+                    setTurmaSelecionada(turma.nomeTurma); // Acesse o nome da turma
+                    setModalTurmaVisible(false);
                   }}
                 >
-                  <Text style={styles.textoTurma}>{turma}</Text>
+                  <Text style={styles.textoTurma}>{turma.nomeTurma}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalTurmaVisible(false)}>
               <Text style={styles.textoBotaoFechar}>Fechar</Text>
             </TouchableOpacity>
           </View>
@@ -148,34 +170,37 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f9f9f9',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: 10, // Borda arredondada
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 15,
-  },
-  turmaSelecionada: {
-    fontSize: 16,
-    color: '#555',
-  },
-  sendButton: {
+  botaoFiltro: {
     backgroundColor: '#ff6400',
     padding: 15,
-    borderRadius: 10, // Borda arredondada
-    marginBottom: 20,
+    borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 20,
   },
-  notaContainer: {
+  textoBotao: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  titulo: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 15,
+    color: '#333',
+  },
+  listaContainer: {
+    backgroundColor: '#dddddd',
+    borderRadius: 8,
+    padding: 10,
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#ffffff',
-    borderRadius: 10, // Borda arredondada
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#dddddd',
     padding: 15,
@@ -185,76 +210,78 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
-  turma: {
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#e0e0e0',
+    marginRight: 15,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  alunoNome: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: '#333',
   },
-  nota: {
+  alunoEmail: {
     fontSize: 14,
-    marginVertical: 5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  editButton: {
-    backgroundColor: '#00527C',
-    padding: 10,
-    borderRadius: 10, // Borda arredondada
-  },
-  deleteButton: {
-    backgroundColor: '#ff6400',
-    padding: 10,
-    borderRadius: 10, // Borda arredondada
-  },
-  buttonText: {
-    color: '#fff',
+    color: '#666',
   },
   modalContainer: {
-    flex: 1,  
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '80%',
-    maxHeight: '70%',
+    width: '85%',
     backgroundColor: '#dddddd',
-    borderRadius: 10, // Borda arredondada
+    borderRadius: 10,
     padding: 20,
     alignItems: 'center',
   },
   modalTitulo: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '700',
     marginBottom: 15,
     color: '#333',
   },
-  turmaButton: {
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10, // Borda arredondada
+  turmaScroll: {
+    maxHeight: 300,
     width: '100%',
+  },
+  turmaButton: {
+    backgroundColor: '#ff6400',
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 10,
   },
   textoTurma: {
+    color: '#ffffff',
     fontSize: 16,
-    color: '#333',
   },
   botaoFechar: {
     backgroundColor: '#ff6400',
-    padding: 15,
-    borderRadius: 10, // Borda arredondada
+    padding: 10,
+    borderRadius: 5,
     marginTop: 15,
-    alignItems: 'center',
   },
   textoBotaoFechar: {
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
+  input: {
+    width: '100%',
+    borderColor: '#cccccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+  },
 });
 
-export default NotasGetao;
+export default NotasGestao;
