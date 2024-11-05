@@ -81,7 +81,7 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
 const handleLikeComment = async (commentId) => {
   const isLiked = comments.find(comment => comment.idComentario === commentId).liked || false;
   try {
-    const response = await axios.post('http://localhost:3000/like/comentario', {
+    const response = await axios.post('http://localhost:3000/likecomentario', {
       idComentario: commentId,
       liked: !isLiked,
       userId: 21, // ID do usuário logado

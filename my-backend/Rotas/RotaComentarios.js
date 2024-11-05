@@ -69,7 +69,6 @@ router.get('/getcomentarios/:idPublicacao', (req, res) => {
     });
 });
 
-// Rota para adicionar ou remover curtida em comentário
 router.post('/likecomentario', (req, res) => {
     const { idComentario, liked, userId } = req.body;
 
@@ -82,7 +81,7 @@ router.post('/likecomentario', (req, res) => {
     // Lógica para adicionar ou remover a curtida no comentário
     if (liked) {
         // Verifica se o usuário já curtiu o comentário
-        const checkLikeQuery = 'SELECT * FROM CurtidaComentario WHERE Comentario_idComentario = ? AND userId = ?';
+        const checkLikeQuery = 'SELECT * FROM CurtidaComentario WHERE Comentario_idComentario = ? AND Pessoa_idPessoa = ?';
         db.query(checkLikeQuery, [idComentario, userId], (err, results) => {
             if (err) {
                 console.error('Erro ao verificar like no comentário:', err);
@@ -91,7 +90,7 @@ router.post('/likecomentario', (req, res) => {
 
             if (results.length === 0) {
                 // Se não existir, insere o like
-                const insertLikeQuery = 'INSERT INTO CurtidaComentario (Comentario_idComentario, userId) VALUES (?, ?)';
+                const insertLikeQuery = 'INSERT INTO CurtidaComentario (Comentario_idComentario, Pessoa_idPessoa) VALUES (?, ?)';
                 db.query(insertLikeQuery, [idComentario, userId], (err) => {
                     if (err) {
                         console.error('Erro ao inserir like no comentário:', err);
@@ -107,7 +106,7 @@ router.post('/likecomentario', (req, res) => {
         });
     } else {
         // Remove o like se já existir
-        const deleteLikeQuery = 'DELETE FROM CurtidaComentario WHERE Comentario_idComentario = ? AND userId = ?';
+        const deleteLikeQuery = 'DELETE FROM CurtidaComentario WHERE Comentario_idComentario = ? AND Pessoa_idPessoa = ?';
         db.query(deleteLikeQuery, [idComentario, userId], (err) => {
             if (err) {
                 console.error('Erro ao remover like no comentário:', err);
