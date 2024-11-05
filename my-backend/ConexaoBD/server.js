@@ -6,7 +6,8 @@ const RotaFiltrarTurma = require('../Rotas/RotaFIltrarTurma');
 const routerPerfil = require('../Rotas/RotaPerfil');
 const RotaLikes = require('../Rotas/RotaLikes');
 const RotaComentarios = require('../Rotas/RotaComentarios');
-const RotaBuscaUsuario = require('../Rotas/RotaBuscaUsuario')
+const RotaBuscaUsuario = require('../Rotas/RotaBuscaUsuario');
+const RotaNotas = require('../Rotas/RotaNotas');
 
 const PORT = 3000;
 const app = express();
@@ -21,6 +22,7 @@ app.use('/', routerPerfil);
 app.use('/', RotaLikes);
 app.use('/', RotaComentarios);
 app.use('/', RotaBuscaUsuario);
+app.use('/', RotaNotas);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
