@@ -2,93 +2,97 @@ const express = require('express');
 const routerNotas = express.Router();
 const db = require('../ConexaoBD/conexaoBD');
 
+// Rota para obter turmas com notas associadas
 routerNotas.get('/getturmasnotas', (req, res) => {
-    const nome = req.query.nome; // Recebe o parâmetro de filtro pela query string
-    console.log(`Rota /get turmasNotas chamada com o nome: ${nome}`); // Log da chamada
+  const nome = req.query.nome;
+  let query = 'SELECT * FROM turma';
 
-    let query = 'SELECT * FROM Turma';
-    
-    if (nome) {
-        query += ' WHERE nomeTurma LIKE ?'; // Filtra turmas pelo nome
+  if (nome) {
+    query += ' WHERE nomeTurma LIKE ?';
+  }
+
+  db.query(query, [`%${nome}%`], (err, results) => {
+    if (err) {
+      console.error('Erro ao buscar turmas:', err);
+      return res.status(500).json({ error: 'Erro ao buscar turmas.' });
     }
-    
-    db.query(query, [`%${nome}%`], (err, results) => {
-        if (err) {
-            console.error('Erro ao buscar turmas:', err); // Log de erro
-            res.status(500).json({ error: 'Erro ao buscar turmas.' });
-        } else {
-            console.log('Resultados das turmas:', results); // Log dos resultados
-            res.json(results);
-        }
-    });
+    res.json(results);
+  });
 });
 
-routerNotas.get('/getalunosnotas', (req, res) => {
-    const { turma } = req.query; // Recebe a turma da query string
-    console.log(`Rota /get alunosNotas chamada com a turma: ${turma}`); // Log da chamada
+// Rota para obter notas de uma turma específica
+routerNotas.get('/getnotasturma', (req, res) => {
+  const { turmaId } = req.query;
 
-    // Consulta para buscar os alunos de acordo com a turma escolhida
-    let query = `
-      SELECT 
-        p.nome AS NomeAluno, 
-        MIN(ci.emailInstitucional) AS EmailInstitucional
-      FROM 
-        mydb.Aluno a
-      JOIN 
-        mydb.Pessoa p ON a.Pessoa_idPessoa = p.idPessoa
-      JOIN 
-        mydb.Aluno_has_Turma at ON a.idAluno = at.Aluno_idAluno
-      JOIN 
-        mydb.Turma t ON at.Turma_idTurma = t.idTurma
-      JOIN 
-        mydb.Contato c ON p.idPessoa = c.Pessoa_idPessoa
-      JOIN 
-        mydb.ContatoInstitucional ci ON c.Pessoa_idPessoa = p.idPessoa
-      WHERE 
-        t.idTurma IS NOT NULL
-    `;
+  if (!turmaId) {
+    return res.status(400).json({ error: 'Parâmetro turmaId é necessário' });
+  }
 
-    const params = [];
-
-    if (turma) {
-        query += ' AND t.nomeTurma = ?'; // Filtrar pela turma escolhida (use nomeTurma se for o nome)
-        params.push(turma);
+  db.query('SELECT * FROM Notas WHERE Turma_idTurma = ?', [turmaId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao buscar notas.' });
     }
-
-    query += ' GROUP BY p.nome'; // Agrupamos pelo nome do aluno para evitar duplicações
-
-    db.query(query, params, (err, results) => {
-        if (err) {
-            res.status(500).json({ error: 'Erro ao buscar alunos.' });
-            console.error('Erro ao buscar alunos:', err);
-        } else {
-            console.log('Resultados dos alunos:', results); // Log dos resultados
-            res.json(results);
-        }
-    });
+    res.json(results);
+  });
 });
 
-routerNotas.post('/adcnotas',async (req, res) => {
-    const {idAluno, nota} = req.body;
+// Rota para adicionar ou atualizar nota para uma turma
+routerNotas.post('/adcnotas', (req, res) => {
+  const { idTurma, idNota, nota } = req.body;
 
-    if(!idAluno || nota === undefined){
-        return res.status(400).json({message: 'Parametros Invalidos. Certifique-se de que alunoId e nota estão presentes'})
-    }
+  if (!idTurma || !nota) {
+    return res.status(400).json({ error: 'idTurma e nota são necessários.' });
+  }
 
-    const query = `
-        INSERT INTO mydb.Notas (Aluno_idAluno, nota)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE nota = VALUES(nota);
+  // Verifica se o idTurma é um número válido
+  if (isNaN(idTurma) || isNaN(nota)) {
+    return res.status(400).json({ error: 'idTurma e nota devem ser números válidos.' });
+  }
+
+  if (idNota) {
+    // Atualiza a nota existente
+    const updateQuery = `
+      UPDATE Notas
+      SET nota = ?
+      WHERE idNota = ?
     `;
+    db.query(updateQuery, [nota, idNota], (err, result) => {
+      if (err) {
+        console.error('Erro ao atualizar nota:', err);
+        return res.status(500).json({ error: 'Erro ao atualizar nota' });
+      }
+      res.json({ message: 'Nota atualizada com sucesso' });
+    });
+  } else {
+    // Adiciona uma nova nota
+    const insertQuery = `
+      INSERT INTO Notas (Turma_idTurma, nota)
+      VALUES (?, ?)
+    `;
+    db.query(insertQuery, [idTurma, nota], (err, result) => {
+      if (err) {
+        console.error('Erro ao adicionar nota:', err);
+        return res.status(500).json({ error: 'Erro ao adicionar nota' });
+      }
+      res.json({ message: 'Nota adicionada com sucesso' });
+    });
+  }
+});
 
-    try {
-        await db.execute(query, [idAluno, nota]);
-        res.status(200).json({ message: 'Nota adicionada ou atualizada com sucesso.' });
-    } catch (error) {
-        console.error('Erro ao adicionar nota:', error);
-        res.status(500).json({ message: 'Erro ao adicionar nota', error });
+// Rota para excluir uma nota
+routerNotas.delete('/deletenota', (req, res) => {
+  const { notaId } = req.query;
+
+  if (!notaId) {
+    return res.status(400).json({ error: 'Parâmetro notaId é necessário' });
+  }
+
+  db.query('DELETE FROM Notas WHERE idNota = ?', [notaId], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao excluir nota.' });
     }
-
+    res.json({ message: 'Nota excluída com sucesso.' });
+  });
 });
 
 module.exports = routerNotas;

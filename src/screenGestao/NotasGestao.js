@@ -1,160 +1,162 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity, Modal, Image, TextInput, Button } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import axios from 'axios';
 
-const NotasGestao = () => {
+const NotasGetao = () => {
+  const [notasData, setNotasData] = useState([]);
+  const [novaNota, setNovaNota] = useState('');
+  const [turmaSelecionada, setTurmaSelecionada] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [turmaSelecionada, setTurmaSelecionada] = useState('Todas');
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
   const [turmas, setTurmas] = useState([]);
-  const [alunos, setAlunos] = useState([]);
-  const [nota, setNota] = useState('');
-  const [alunoSelecionado, setAlunoSelecionado] = useState(null);
-  const [modalTurmaVisible, setModalTurmaVisible] = useState(false);
-
-  // Função para buscar as turmas do banco de dados
-  const fetchTurmas = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/getturmasnotas');
-      setTurmas(response.data); // Armazena as turmas no estado
-    } catch (error) {
-      console.error('Erro ao buscar turmas:', error);
-    }
-  };
-
-  // Função para buscar todos os alunos ou alunos filtrados por turma
-  const fetchAlunos = async (turma) => {
-    try {
-      const response = await axios.get(`http://localhost:3000/getalunosnotas?turma=${turma}`); // Certifique-se de que 'turma' seja o parâmetro correto
-      setAlunos(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar alunos:', error);
-    }
-  };
 
   useEffect(() => {
-    fetchTurmas(); // Chama a função ao montar o componente
-    fetchAlunos(''); // Busca todos os alunos ao carregar a página
+    getTurmas();
+    getNotas();
   }, []);
 
-  useEffect(() => {
-    if (turmaSelecionada === 'Todas') {
-      fetchAlunos(''); // Busque todos os alunos
-    } else {
-      fetchAlunos(turmaSelecionada);
-    }
-  }, [turmaSelecionada]);
-
-  const renderAlunoItem = ({ item }) => (
-    <TouchableOpacity style={styles.itemContainer} onPress={() => handleAlunoSelect(item)}>
-      <Image
-        source={require('../../assets/FotosPerfil/Foto-perfil-Anonima.jpg')}
-        style={styles.avatar}
-      />
-      <View style={styles.textContainer}>
-        <Text style={styles.alunoNome}>{item.NomeAluno || 'Nome não disponível'}</Text>
-        <Text style={styles.alunoEmail}>{item.EmailInstitucional || 'Email não disponível'}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const handleAlunoSelect = (aluno) => {
-    setAlunoSelecionado(aluno);
-    setNota(''); // Limpa a nota ao selecionar um aluno
-    setModalVisible(true); // Abre o modal para inserir/editar nota
-  };
-
-  const handleNotaSubmit = async () => {
+  const getTurmas = async () => {
     try {
-      await axios.post('http://localhost:3000/adicionarNota', {
-        alunoId: alunoSelecionado.id, // Ajuste conforme sua estrutura de dados
-        nota: nota,
-      });
-      setModalVisible(false); // Fecha o modal após salvar a nota
-      fetchAlunos(turmaSelecionada); // Atualiza a lista de alunos
+      const response = await axios.get('http://localhost:3000/getturmasnotas'); // Link atualizado
+      setTurmas(response.data);
     } catch (error) {
-      console.error('Erro ao adicionar nota:', error);
+      console.error(error);
     }
   };
+
+  const getNotas = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/getnotasturma', { // Link atualizado
+        params: { turmaId: turmaSelecionada },
+      });
+      setNotasData(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSendNota = async () => {
+    if (!novaNota || !turmaSelecionada) {
+      Alert.alert('Erro', 'Por favor, selecione uma turma e escreva uma nota.');
+      return;
+    }
+
+    try {
+      if (isEditing) {
+        await axios.put('http://localhost:3000/adcnotas', { // Link atualizado
+          idNota: currentId,
+          nota: novaNota,
+        });
+      } else {
+        await axios.post('http://localhost:3000/adcnotas', { // Link atualizado
+          idTurma: turmaSelecionada,
+          nota: novaNota,
+        });
+      }
+      getNotas();
+      resetFields();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteNota = async (notaId) => {
+    try {
+      await axios.delete('http://localhost:3000/deletenota', { // Link atualizado
+        params: { notaId },
+      });
+      getNotas();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleEditNota = async (item) => {
+    setTurmaSelecionada(item.Turma_idTurma);
+    setNovaNota(item.nota);
+    setCurrentId(item.idNota);
+    setIsEditing(true);
+  };
+
+  const resetFields = () => {
+    setNovaNota('');
+    setTurmaSelecionada('');
+    setModalVisible(false);
+    setIsEditing(false);
+    setCurrentId(null);
+  };
+
+  const renderNotaItem = ({ item }) => (
+    <View style={styles.notaContainer}>
+      <Text style={styles.turma}>{item.Turma_idTurma}</Text>
+      <Text style={styles.nota}>{item.nota}</Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.editButton} onPress={() => handleEditNota(item)}>
+          <Text style={styles.buttonText}>Editar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDeleteNota(item.idNota)}
+        >
+          <Text style={styles.buttonText}>Excluir</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.botaoFiltro}
-        onPress={() => setModalTurmaVisible(true)} // Abre o modal de seleção de turma
-      >
-        <Text style={styles.textoBotao}>Filtrar por Turma: {turmaSelecionada}</Text>
+      <Text style={styles.title}>Notas Enviadas</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Digite a nota..."
+        value={novaNota}
+        onChangeText={setNovaNota}
+      />
+      <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
+        <Text style={styles.turmaSelecionada}>{turmaSelecionada || 'Selecione a turma'}</Text>
       </TouchableOpacity>
-
-      <ScrollView style={styles.scrollContainer}>
-        <Text style={styles.titulo}>Emails dos Alunos:</Text>
-        <View style={styles.listaContainer}>
-          <FlatList
-            data={alunos}
-            renderItem={renderAlunoItem}
-            keyExtractor={item => item.id}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      </ScrollView>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(!modalVisible)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitulo}>Adicionar Nota para {alunoSelecionado?.NomeAluno}</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite a nota"
-              value={nota}
-              onChangeText={setNota}
-              keyboardType="numeric"
-            />
-            <Button title="Salvar Nota" onPress={handleNotaSubmit} />
-            <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalVisible(false)}>
-              <Text style={styles.textoBotaoFechar}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal para seleção de turmas */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalTurmaVisible}
-        onRequestClose={() => setModalTurmaVisible(!modalTurmaVisible)}
-      >
+      <TouchableOpacity style={styles.sendButton} onPress={handleSendNota}>
+        <Text style={styles.buttonText}>{isEditing ? 'Atualizar Nota' : 'Enviar Nota'}</Text>
+      </TouchableOpacity>
+      <FlatList
+        data={notasData}
+        renderItem={renderNotaItem}
+        keyExtractor={item => item.idNota.toString()}
+      />
+      <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitulo}>Selecionar Turma</Text>
-            <ScrollView style={styles.turmaScroll}>
-              <TouchableOpacity
-                style={styles.turmaButton}
-                onPress={() => {
-                  setTurmaSelecionada('Todas'); // A opção "Todas"
-                  setModalTurmaVisible(false);
-                }}
-              >
-                <Text style={styles.textoTurma}>Todas as Turmas</Text>
-              </TouchableOpacity>
-              {turmas.map((turma) => (
+            <ScrollView>
+              {turmas.map((turma, index) => (
                 <TouchableOpacity
-                  key={turma.idTurma} // Use o ID da turma como chave
+                  key={index}
                   style={styles.turmaButton}
                   onPress={() => {
-                    setTurmaSelecionada(turma.nomeTurma); // Acesse o nome da turma
-                    setModalTurmaVisible(false);
+                    setTurmaSelecionada(turma.idTurma);
+                    setModalVisible(false);
                   }}
                 >
                   <Text style={styles.textoTurma}>{turma.nomeTurma}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalTurmaVisible(false)}>
+            <TouchableOpacity
+              style={styles.botaoFechar}
+              onPress={() => setModalVisible(false)}
+            >
               <Text style={styles.textoBotaoFechar}>Fechar</Text>
             </TouchableOpacity>
           </View>
@@ -170,37 +172,34 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f9f9f9',
   },
-  botaoFiltro: {
-    backgroundColor: '#ff6400',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 20,
-  },
-  textoBotao: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-  },
-  titulo: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 15,
     color: '#333',
   },
-  listaContainer: {
-    backgroundColor: '#dddddd',
-    borderRadius: 8,
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
     padding: 10,
+    marginBottom: 15,
   },
-  itemContainer: {
-    flexDirection: 'row',
+  turmaSelecionada: {
+    fontSize: 16,
+    color: '#555',
+  },
+  sendButton: {
+    backgroundColor: '#ff6400',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
     alignItems: 'center',
+  },
+  notaContainer: {
     backgroundColor: '#ffffff',
-    borderRadius: 8,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#dddddd',
     padding: 15,
@@ -210,24 +209,31 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#e0e0e0',
-    marginRight: 15,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  alunoNome: {
+  turma: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: 'bold',
   },
-  alunoEmail: {
+  nota: {
     fontSize: 14,
-    color: '#666',
+    marginVertical: 5,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  editButton: {
+    backgroundColor: '#00527C',
+    padding: 10,
+    borderRadius: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#ff6400',
+    padding: 10,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: '#fff',
   },
   modalContainer: {
     flex: 1,
@@ -236,52 +242,43 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '85%',
+    width: '80%',
+    maxHeight: '70%',
     backgroundColor: '#dddddd',
     borderRadius: 10,
     padding: 20,
     alignItems: 'center',
   },
   modalTitulo: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 15,
     color: '#333',
   },
-  turmaScroll: {
-    maxHeight: 300,
-    width: '100%',
-  },
   turmaButton: {
-    backgroundColor: '#ff6400',
-    padding: 15,
-    borderRadius: 8,
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    width: '100%',
     alignItems: 'center',
-    marginBottom: 10,
   },
   textoTurma: {
-    color: '#ffffff',
     fontSize: 16,
+    color: '#333',
   },
   botaoFechar: {
     backgroundColor: '#ff6400',
-    padding: 10,
-    borderRadius: 5,
+    padding: 15,
+    borderRadius: 10,
     marginTop: 15,
+    alignItems: 'center',
   },
   textoBotaoFechar: {
-    color: '#ffffff',
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  input: {
-    width: '100%',
-    borderColor: '#cccccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 15,
-  },
 });
 
-export default NotasGestao;
+export default NotasGetao;
