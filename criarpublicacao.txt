@@ -4,10 +4,12 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
+// Componente de Avatar
 const Avatar = () => (
   <Image source={fotoPerfilAnonima} style={styles.avatarImage} />
 );
 
+// Componente de Usuário
 const Usuario = ({ nome, cargo }) => (
   <View style={styles.informacoesPublicacao}>
     <Text>{nome}</Text>
@@ -15,6 +17,7 @@ const Usuario = ({ nome, cargo }) => (
   </View> 
 );
 
+// Componente de Botão de Comentar
 const BotaoComentar = ({ onPress, comentarioCount }) => (
   <View style={styles.containerBotao}>
     <TouchableOpacity onPress={onPress} style={styles.botao}>
@@ -23,6 +26,7 @@ const BotaoComentar = ({ onPress, comentarioCount }) => (
   </View>
 );
 
+// Componente de Curtir
 const Curtir = ({ count, liked, onPress }) => (
   <View style={styles.containerCurtir}>
     <TouchableOpacity onPress={onPress}>
@@ -32,24 +36,38 @@ const Curtir = ({ count, liked, onPress }) => (
   </View>
 );
 
+const CurtirComentario = ({ count, liked, onPress }) => (
+  <View style={styles.containerCurtir}>
+    <TouchableOpacity onPress={onPress}>
+      <Icon name="heart" size={24} color={liked ? '#FF0000' : '#000'} />
+    </TouchableOpacity>
+    <Text style={styles.curtidasTexto}>{count}</Text>
+  </View>
+);
+
+// Componente Modal de Comentários
 const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId }) => {
   const [textoComentario, setTextoComentario] = useState('');
 
   const handleSendComment = async () => {
     if (textoComentario.trim()) {
         try {
+            // Faz uma requisição para buscar os dados do usuário com ID 21
             const response = await axios.get(`http://localhost:3000/getusuario/21`);
-            const usuario = response.data; // Ajuste conforme a estrutura da resposta
-            const nomeUsuario = usuario.nome;
+            const usuario = response.data; // Supondo que a resposta contenha as informações do usuário
+            const nomeUsuario = usuario.nome; // Ajuste conforme a estrutura de retorno da sua API
 
+            // Envia o comentário com o ID fixo do usuário 21
             await axios.post('http://localhost:3000/postcomentario', {
                 text: textoComentario,
                 Publicacao_idPublicacao: publicacaoId,
-                Pessoa_id: 21,
+                Pessoa_id: 21, // ID do usuário logado
             });
 
+            // Atualiza a lista de comentários na tela com o nome correto do usuário
             onCommentAdded({ texto: textoComentario, nome_comentador: nomeUsuario, num_likes: 0 });
-            setTextoComentario('');
+            
+            setTextoComentario(''); // Limpa o campo de texto após enviar
         } catch (error) {
             console.error('Erro ao enviar comentário:', error);
             Alert.alert('Erro', 'Falha ao enviar o comentário.');
@@ -57,54 +75,64 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
     } else {
         Alert.alert('Atenção', 'Por favor, insira um comentário.');
     }
-  };
+};
 
-  const handleLikeComment = async (commentId) => {
+const handleLikeComment = async (commentId) => {  
     const isLiked = comments.find(comment => comment.idComentario === commentId).liked || false;
-    const userId = 21;
-
+    const userId = 21; // Substitua isso pelo ID do usuário logado dinamicamente
+  
     try {
       const response = await axios.post('http://localhost:3000/likecomentario', {
         idComentario: commentId,
         liked: !isLiked,
         userId: userId,
       });
-
+  
       const newCount = response.data.newCount;
 
-      setSelectedComments((prevComments) =>
-        prevComments.map(comment =>
-          comment.idComentario === commentId ? { ...comment, num_likes: newCount, liked: !isLiked } : comment
-        )
-      );
-    } catch (error) {
-      console.error('Erro ao curtir comentário:', error);
-      Alert.alert('Erro', 'Falha ao curtir o comentário. Tente novamente.');
-    }
-  };
+    // Atualizar a contagem de curtidas localmente
+    setSelectedComments((prevComments) =>
+      prevComments.map(comment =>
+        comment.idComentario === commentId ? { ...comment, num_likes: newCount, liked: !isLiked } : comment
+      )
+    );
+  } catch (error) {
+    console.error('Erro ao curtir comentário:', error);
+    Alert.alert('Erro', 'Falha ao curtir o comentário. Tente novamente.');
+  }
+};
 
   return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Comentários</Text>
           <ScrollView style={styles.comentariosContainer}>
-            {Array.isArray(comments) && comments.map((comment) => (
+          {Array.isArray(comments) && comments.map((comment) => (
               <View key={comment.idComentario} style={styles.comentarioContainer}>
                 <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
                   <Text style={styles.nomeAutor}>{comment.nome_comentador}</Text>
                   <Text style={styles.comentarioTexto}>{comment.texto}</Text>
                 </View>
-                <Curtir count={comment.num_likes} liked={comment.liked} onPress={() => handleLikeComment(comment.idComentario)} />
+                <CurtirComentario
+                  count={comment.num_likes}
+                  liked={comment.liked}
+                  onPress={() => handleLikeComment(comment.idComentario)}
+                />
               </View>
             ))}
           </ScrollView>
           <TextInput 
             style={styles.input} 
             placeholder="Escreva um comentário..." 
-            value={textoComentario} 
-            onChangeText={setTextoComentario} 
+            value={textoComentario}
+            onChangeText={setTextoComentario}
           />
           <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
             <Text style={styles.sendButtonText}>Enviar</Text>
@@ -118,14 +146,16 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
   );
 };
 
+// Componente principal HomeScreenGestao
 const HomeScreenGestao = () => {
   const [publicacoes, setPublicacoes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComments, setSelectedComments] = useState([]);
   const [newPostText, setNewPostText] = useState('');
   const [likes, setLikes] = useState({});
-
-  const userId = 21;
+  const [currentPostId, setCurrentPostId] = useState(null);
+  
+  const userId = 21; // User ID should be dynamic based on login context
 
   const fetchPublicacoes = async () => {
     try {
@@ -139,7 +169,7 @@ const HomeScreenGestao = () => {
   const fetchComments = async (postId) => {
     try {
       const response = await axios.get(`http://localhost:3000/getcomentarios/${postId}`);
-      setSelectedComments(response.data);
+      setSelectedComments(response.data); // Atualiza o estado com os comentários
     } catch (error) {
       console.error('Erro ao buscar comentários:', error);
       Alert.alert('Erro', 'Não foi possível carregar os comentários.');
@@ -162,10 +192,12 @@ const HomeScreenGestao = () => {
       });
 
       const newCount = response.data.newCount;
-      setPublicacoes((prev) => prev.map(pub => pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub));
+      setPublicacoes((prev) => prev.map(pub => 
+        pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub
+      ));
     } catch (error) {
       console.error('Erro ao curtir a publicação:', error);
-      setLikes((prev) => ({ ...prev, [postId]: isLiked }));
+      setLikes((prev) => ({ ...prev, [postId]: isLiked })); // Reverte o like em caso de erro
       Alert.alert('Erro', 'Falha ao curtir a publicação. Tente novamente.');
     }
   };
@@ -179,11 +211,11 @@ const HomeScreenGestao = () => {
       try {
         const response = await axios.post('http://localhost:3000/postpublicacao', {
           descricao: newPostText,
-          Pessoa_idPessoa: userId
+          Pessoa_idPessoa: userId // Você pode substituir pelo ID real do usuário logado
         });
         console.log('Resposta do servidor:', response.data); 
         setNewPostText('');
-        fetchPublicacoes();
+        fetchPublicacoes(); // Atualiza a lista de publicações
       } catch (error) {
         console.error('Erro ao criar a publicação:', error);
         Alert.alert('Erro', 'Falha ao criar a publicação.');
@@ -200,20 +232,36 @@ const HomeScreenGestao = () => {
         <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} />
       </View>
       <Text>{pub.publicacao_descricao}</Text>
-      <Curtir count={pub.quantidade_curtidas} liked={likes[pub.idPublicacao]} onPress={() => handleLike(pub.idPublicacao)} />
-      <BotaoComentar onPress={() => { setModalVisible(true); fetchComments(pub.idPublicacao); }} comentarioCount={pub.quantidade_comentarios} />
-      <CommentModal visible={modalVisible} onClose={() => setModalVisible(false)} comments={selectedComments} onCommentAdded={handleCommentUpdate} publicacaoId={pub.idPublicacao} />
+      <Curtir
+        count={pub.quantidade_curtidas}
+        liked={likes[pub.idPublicacao]}
+        onPress={() => handleLike(pub.idPublicacao)}
+      />
+      <BotaoComentar onPress={async () => { 
+        await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
+        setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
+        setModalVisible(true);
+      }} comentarioCount={pub.quantidade_comentarios} />
     </View>
   );
 
+
   return (
-    <ScrollView style={styles.feedContainer}>
-      {publicacoes.map(renderPublicacao)}
-      <TextInput style={styles.inputPost} placeholder="Escreva uma publicação..." value={newPostText} onChangeText={setNewPostText} />
-      <TouchableOpacity style={styles.sendPostButton} onPress={handleCreatePost}>
-        <Text style={styles.sendPostButtonText}>Publicar</Text>
+    <View style={styles.container}>
+      <ScrollView>
+        {publicacoes.map(renderPublicacao)}
+      </ScrollView>
+      <TouchableOpacity onPress={handleCreatePost} style={styles.createPostButton}>
+        <Text style={styles.createPostButtonText}>Criar Publicação</Text>
       </TouchableOpacity>
-    </ScrollView>
+      <CommentModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        comments={selectedComments}
+        onCommentAdded={handleCommentUpdate}
+        publicacaoId={currentPostId}
+      />
+    </View>
   );
 };
 
