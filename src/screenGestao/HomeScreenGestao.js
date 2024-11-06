@@ -209,17 +209,19 @@ const HomeScreenGestao = () => {
   const handleCreatePost = async () => {
     if (newPostText.trim()) {
       try {
-        await axios.post('http://localhost:3000/postpublicacao', {
-          text: newPostText,
-          userId: 21
+        const response = await axios.post('http://localhost:3000/postpublicacao', {
+          descricao: newPostText,
+          Pessoa_idPessoa: userId // Você pode substituir pelo ID real do usuário logado
         });
+        console.log('Resposta do servidor:', response.data); 
         setNewPostText('');
-        Alert.alert('Sucesso', 'Publicação criada com sucesso!');
-        fetchPublicacoes(); // Refresh publicações after creating a new post
+        fetchPublicacoes(); // Atualiza a lista de publicações
       } catch (error) {
-        console.error('Erro ao criar publicação:', error);
-        Alert.alert('Erro', 'Falha ao criar publicação.');
+        console.error('Erro ao criar a publicação:', error);
+        Alert.alert('Erro', 'Falha ao criar a publicação.');
       }
+    } else {
+      Alert.alert('Atenção', 'Digite algo para criar uma publicação.');
     }
   };
 
@@ -449,27 +451,26 @@ const styles = StyleSheet.create({
     right: 30,
     width: 60,
     height: 60,
+    backgroundColor: '#007BFF',
     borderRadius: 30,
-    backgroundColor: '#00527C',
     justifyContent: 'center',
     alignItems: 'center',
   },
   floatingButtonText: {
     color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 30,
   },
   createPostButton: {
     backgroundColor: '#00527C',
     borderRadius: 10,
     paddingVertical: 10,
+    marginBottom: 10,
     alignItems: 'center',
-    marginVertical: 20,
   },
   createPostButtonText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 16,
-  }
+  },
 });
 
 export default HomeScreenGestao;

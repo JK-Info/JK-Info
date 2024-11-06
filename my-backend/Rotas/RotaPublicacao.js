@@ -46,56 +46,51 @@ router.get('/getpublicacao', async (req, res) => {
   });   
 
 // Rota para criar nova publicação
-router.post('/postpublicacoes', [
-  body('descricao').notEmpty().withMessage('Descrição é obrigatória.'),
-  body('Pessoa_idPessoa').notEmpty().withMessage('ID da pessoa é obrigatório.')
-], async (req, res) => {
-  console.log('Rota POST /postpublicacao chamada com body:', req.body); // Log quando a rota é chamada
+router.post(
+  '/postpublicacao',
+  [
+    body('descricao').notEmpty().withMessage('A descrição é obrigatória.'),
+    body('Pessoa_idPessoa').isInt().withMessage('ID da pessoa deve ser um número inteiro.')
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log('Erros de validação:', errors.array());
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-      console.error('Erros de validação:', errors.array());
-      return res.status(400).json({ success: false, errors: errors.array() });
+    // Extrai os dados do corpo da requisição
+    const { descricao, imagem, Pessoa_idPessoa } = req.body;
+    console.log('Recebendo dados para criar publicação:', { descricao, imagem, Pessoa_idPessoa });
+
+    try {
+      // Insere a nova publicação no banco de dados
+      const query = `
+        INSERT INTO Publicacao (descricao, imagem, Pessoa_idPessoa)
+        VALUES (?, ?, ?)
+      `;
+      const values = [descricao, imagem || null, Pessoa_idPessoa];
+
+      // Executa a query para inserir a publicação no banco de dados
+      db.query(query, values, (err, result) => {
+        if (err) {
+          console.error('Erro ao inserir publicação no banco de dados:', err);
+          return res.status(500).json({ message: 'Erro ao criar a publicação.' });
+        }
+
+        console.log('Publicação criada com sucesso, ID:', result.insertId);
+
+        // Resposta de sucesso com o ID da nova publicação
+        res.status(201).json({
+          message: 'Publicação criada com sucesso!',
+          publicacaoId: result.insertId
+        });
+      });
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ message: 'Erro no servidor ao criar a publicação.' });
+    }
   }
-
-  const { descricao, imagem = null, Pessoa_idPessoa } = req.body; // Define imagem como null se não for fornecida
-  const query = 'INSERT INTO Publicacao (descricao, imagem, Pessoa_idPessoa) VALUES (?, ?, ?)';
-
-  try {
-      const results = await db.query(query, [descricao, imagem, Pessoa_idPessoa]);
-      console.log('Publicação criada com sucesso, ID:', results.insertId); // Log de sucesso
-      res.status(201).json({ success: true, idPublicacao: results.insertId });
-  } catch (error) {
-      console.error('Erro ao criar publicação:', error); // Log de erro
-      res.status(500).json({ success: false, error: 'Erro ao criar publicação.' });
-  }
-});
-
-// Rota para excluir uma publicação
-router.delete('/deletepublicacao/:id', async (req, res) => {
-  const id = req.params.id;
-
-  // Verifica se o ID é um número
-  if (isNaN(id)) {
-      return res.status(400).json({ success: false, error: 'ID deve ser um número.' });
-  }
-
-  console.log('Rota DELETE /deletepublicacao chamada para id:', id); // Log quando a rota é chamada
-  const query = 'DELETE FROM Publicacao WHERE idPublicacao = ?';
-
-  try {
-      const results = await db.query(query, [id]);
-      if (results.affectedRows === 0) {
-          console.warn('Nenhuma publicação encontrada para o ID:', id);
-          return res.status(404).json({ success: false, error: 'Publicação não encontrada.' });
-      }
-
-      console.log('Publicação excluída com sucesso, ID:', id); // Log de sucesso
-      res.status(200).json({ success: true, message: 'Publicação excluída com sucesso.' });
-  } catch (error) {
-      console.error('Erro ao excluir publicação:', error); // Log de erro
-      res.status(500).json({ success: false, error: 'Erro ao excluir publicação.' });
-  }
-});
+);
 
 module.exports = router;
