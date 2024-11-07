@@ -12,7 +12,7 @@ const Usuario = ({ nome, cargo }) => (
   <View style={styles.informacoesPublicacao}>
     <Text>{nome}</Text>
     <Text style={{ fontSize: 11 }}>{cargo}</Text>
-  </View> 
+  </View>
 );
 
 const BotaoComentar = ({ onPress, comentarioCount }) => (
@@ -100,11 +100,11 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
               </View>
             ))}
           </ScrollView>
-          <TextInput 
-            style={styles.input} 
-            placeholder="Escreva um comentário..." 
-            value={textoComentario} 
-            onChangeText={setTextoComentario} 
+          <TextInput
+            style={styles.inputComentario}  // Usando o estilo exclusivo para o campo de comentário
+            placeholder="Escreva um comentário..."
+            value={textoComentario}
+            onChangeText={setTextoComentario}
           />
           <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
             <Text style={styles.sendButtonText}>Enviar</Text>
@@ -124,6 +124,7 @@ const HomeScreenGestao = () => {
   const [selectedComments, setSelectedComments] = useState([]);
   const [newPostText, setNewPostText] = useState('');
   const [likes, setLikes] = useState({});
+  const [modalPostVisible, setModalPostVisible] = useState(false);
 
   const userId = 21;
 
@@ -181,9 +182,10 @@ const HomeScreenGestao = () => {
           descricao: newPostText,
           Pessoa_idPessoa: userId
         });
-        console.log('Resposta do servidor:', response.data); 
-        setNewPostText('');
-        fetchPublicacoes();
+        console.log('Resposta do servidor:', response.data);
+        setNewPostText(''); // Limpa o campo de texto
+        fetchPublicacoes(); // Atualiza a lista de publicações
+        setModalPostVisible(false); // Fecha o modal após a publicação
       } catch (error) {
         console.error('Erro ao criar a publicação:', error);
         Alert.alert('Erro', 'Falha ao criar a publicação.');
@@ -207,12 +209,35 @@ const HomeScreenGestao = () => {
   );
 
   return (
-    <ScrollView style={styles.feedContainer}>
+    <ScrollView style={styles.container}>
       {publicacoes.map(renderPublicacao)}
-      <TextInput style={styles.inputPost} placeholder="Escreva uma publicação..." value={newPostText} onChangeText={setNewPostText} />
-      <TouchableOpacity style={styles.sendPostButton} onPress={handleCreatePost}>
-        <Text style={styles.sendPostButtonText}>Publicar</Text>
+
+      {/* Botão Flutuante */}
+      <TouchableOpacity style={styles.floatingButton} onPress={() => setModalPostVisible(true)}>
+        <Text style={styles.floatingButtonText}>+</Text>
       </TouchableOpacity>
+
+      {/* Modal de Nova Publicação */}
+      <Modal
+        visible={modalPostVisible}
+        animationType="slide"
+        onRequestClose={() => setModalPostVisible(false)}
+      >
+        <View style={styles.modalPostContainer}>
+          <TextInput
+            style={styles.inputPost}
+            value={newPostText}
+            onChangeText={setNewPostText}
+            placeholder="Escreva sua publicação"
+          />
+          <TouchableOpacity onPress={handleCreatePost} style={styles.sendButton}>
+            <Text style={styles.sendButtonText}>Publicar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setModalPostVisible(false)} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Fechar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -397,31 +422,92 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 5,
   },
-  floatingButton: {
+   floatingButton: {
     position: 'absolute',
     bottom: 30,
     right: 30,
     width: 60,
     height: 60,
-    backgroundColor: '#007BFF',
-    borderRadius: 30,
+    backgroundColor: '#FF6400',  // Cor de fundo do botão
+    borderRadius: 30,  // Forma arredondada
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 5,  // Sombra para o botão flutuante
   },
   floatingButtonText: {
     color: 'white',
     fontSize: 30,
+    fontWeight: 'bold',
   },
-  createPostButton: {
+
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+    height: 50,  // Aumenta a altura do input para mais conforto
+    textAlignVertical: 'center', // Para o texto começar no topo do campo
+  },
+  sendButton: {
     backgroundColor: '#00527C',
     borderRadius: 10,
     paddingVertical: 10,
+    alignItems: 'center',
     marginBottom: 10,
+  },
+  sendButtonText: {
+    color: 'white',
+  },
+  closeButton: {
+    backgroundColor: '#FF6400',
+    borderRadius: 10,
+    paddingVertical: 10,
     alignItems: 'center',
   },
-  createPostButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  closeButtonText: {
+    color: 'white',
+  },
+  inputComentario: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+    height: 50,  // Altura ajustada para o conforto do texto
+    textAlignVertical: 'top',  // Garantir que o texto comece no topo
+  },
+  // Estilo de envio de comentário
+  sendButton: {
+    backgroundColor: '#00527C',
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  boxPubli: {
+    backgroundColor: 'white',
+    marginBottom: 15,
+    padding: 10,
+    borderRadius: 8,
+    elevation: 3,
   },
 });
 
