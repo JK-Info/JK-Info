@@ -55,6 +55,18 @@ routerNotas.delete('/notas/:id', (res,req) => {
       res.send({ mensagem: 'Nota excluída com sucesso!' });
     }
   });
+});
+
+routerNotas.get('/turmas', (res,req) =>{
+  const query = 'SELECT idTurma, nomeTurma FROM turmas';
+  db.query(query, (err,results)=> {
+    if(err){
+      console.error('Erro ao buscar Turmas', err)
+      res.status(500).send({mensagem: 'Erro ao buscar Turmas'});
+    }else{
+      res.json(results);
+    }
+  })
 })
 
 module.exports = routerNotas;

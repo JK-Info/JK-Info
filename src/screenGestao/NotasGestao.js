@@ -1,19 +1,28 @@
+import { text } from 'body-parser';
+import { id } from 'date-fns/locale';
+import { response } from 'express';
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
+import { Picker } from 'react-native-web';
 
 const NotasGestao = () => {
   const [notas, setNotas] = useState([]);
   const [turmaSelecionada, setTurmaSelecionada] = useState('');
   const [nota, setNota] = useState('');
+  const [turmas, setTurmas] = useState('');
+  const [editando, setEditando] = useState(false);
+  const [notaEditar, setNotaEditar] = useState({});
 
   useEffect(() => {
-    fetch('http://localhost:3000/notas')
+    fetch('http://localhost:3000/turmas')
       .then((response) => response.json())
-      .then((data) =>{ 
-        console.log(data);
-        setNotas(data);
-      })
+      .then((data) => setTurmas(data))
       .catch((error) => console.error('Erro ao buscar notas:', error));
+
+    fetch('http:localhost:3000/notas')
+      .then((response) => response.json())
+      .then((data) => setNota(data))
+      .catch((error)=> console.error('Erro ao buscar notas:', error));
   }, []);
 
   const handleSendNota = () => {
@@ -33,16 +42,18 @@ const NotasGestao = () => {
   };
 
   const handleEditNota = (item) => {
-    fetch(`http://localhost:3000/notas/${item.idNota}`, {
+    fetch(`http://localhost:3000/notas/${notaEditar.idNota}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ nota: item.nota }),
+      body: JSON.stringify({ nota, turmaId: turmaSelecionada }),
     })
       .then((response) => response.json())
       .then((data) => {
-        setNotas(notas.map((nota) => (nota.idNota === item.idNota ? data : nota)));
+        setNotas(notas.map((nota) => (nota.idNota === notaEditar.idNota ? data : nota)));
+        setNota('');
+        setEditando(false);
       })
       .catch((error) => console.error('Erro ao editar nota:', error));
   };
@@ -53,35 +64,55 @@ const NotasGestao = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        setNotas(notas.filter((nota) => nota.idNota !== item.idNota));
+        setNotas(notas.filter((nota) => nota.idNota !== id));
       })
       .catch((error) => console.error('Erro ao excluir nota:', error));
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Notas</Text>
-      <FlatList
-        data={notas}
-        renderItem={({ item }) => (
-          <View style={styles.notaContainer}>
-            <Text style={styles.nota}>{item.nota}</Text>
-            <Text style={styles.turma}>{item.Turma?.nomeTurma}</Text>
-            <View style={styles.buttonContainer}>
-              <Button title="Editar" onPress={() => handleEditNota(item)} />
-              <Button title="Excluir" onPress={() => handleDeleteNota(item)} />
-            </View>
-          </View>
+      <Text>Selecione a Turma:</Text>
+      <Picker
+        selectedValue={turmaSelecionada}
+        onValueChange={(itemValue) => setTurmaSelecionada(itemValue)}>
+          {turmas.map((turma) => (
+            <Picker.item
+            label={turma.nomeTurma}
+            value={turma.idTurma}
+            key={turma.idTurma}/>
+            ))}
+        </Picker>
+        <TextInput
+          placeholder="Digite a Nota"
+          value={nota}
+          onChangeText={(text) => setNota(text)}
+        />
+        {editando ? (
+          <Button title="Editar"
+          onPress={handleEditNota} />
+        ) : (
+          <Button title="Enviar"
+          onPress={handleSendNota} />
         )}
-        keyExtractor={(item) => item.idNota.toString()}
-      />
-      <TextInput
-        placeholder="Digite a nota"
-        value={nota}
-        onChangeText={(text) => setNota(text)}
-        style={styles.input}
-      />
-      <Button title="Enviar" onPress={handleSendNota} />
+        <Text>Notas:</Text>
+        {notas.map((nota) => (
+          <View key={nota.idNota}>
+            <Text>{nota.nota} - {nota.Turma.idTurma}</Text>
+            <Button
+              title="Editar"
+              onPress={() => {
+                setEditando(true);
+                setNotaEditar(nota);
+                setNota(nota.nota);
+                setTurmaSelecionada(nota.Turma.idTurma);
+              }}
+              />
+              <Button title="Excluir"
+              onPress={() => 
+                handleDeleteNota(nota.idNota)} />
+                </View>
+        ))}
+      
     </View>
   );
 };
