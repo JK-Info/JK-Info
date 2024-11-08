@@ -93,4 +93,48 @@ router.post(
   }
 );
 
+// Rota DELETE para excluir uma publicação
+router.delete('/deletepublicacao/:id', (req, res) => {
+  const { id } = req.params;
+
+  console.log(`Rota DELETE /deletepublicacao chamada para excluir a publicação com id: ${id}`);
+
+  // Verificar se há curtidas na publicação
+  const checkLikesQuery = 'SELECT * FROM CurtidaPublicacao WHERE Publicacao_idPublicacao = ?';
+  db.query(checkLikesQuery, [id], (err, result) => {
+    if (err) {
+      console.error('Erro ao verificar curtidas:', err);
+      return res.status(500).json({ message: 'Erro ao verificar curtidas.' });
+    }
+
+    console.log(`Verificação de curtidas para a publicação ${id} retornou:`, result);
+
+    if (result.length > 0) {
+      console.log(`A publicação ${id} possui curtidas associadas. Não pode ser excluída.`);
+      return res.status(400).json({ message: 'Não é possível excluir a publicação, pois há curtidas associadas.' });
+    }
+
+    console.log(`Nenhuma curtida associada encontrada para a publicação ${id}. Prosseguindo com a exclusão.`);
+
+    // Agora excluir a publicação
+    const deletePostQuery = 'DELETE FROM Publicacao WHERE idPublicacao = ?';
+    db.query(deletePostQuery, [id], (err, result) => {
+      if (err) {
+        console.error('Erro ao excluir a publicação:', err);
+        return res.status(500).json({ message: 'Erro ao excluir publicação.' });
+      }
+
+      console.log(`Resultado da exclusão da publicação ${id}:`, result);
+
+      if (result.affectedRows > 0) {
+        console.log(`Publicação ${id} excluída com sucesso.`);
+        return res.status(200).json({ message: 'Publicação excluída com sucesso.' });
+      } else {
+        console.log(`Publicação ${id} não encontrada.`);
+        return res.status(404).json({ message: 'Publicação não encontrada.' });
+      }
+    });
+  });
+});
+
 module.exports = router;

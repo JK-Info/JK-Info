@@ -26,6 +26,14 @@ const BotaoComentar = ({ onPress, comentarioCount }) => (
   </View>
 );
 
+const BotaoExcluir = ({ onPress }) => (
+  <View style={styles.containerBotaoExcluir}>
+    <TouchableOpacity onPress={onPress} style={styles.botaoExcluir}>
+      <Text style={styles.botaoTexto}>Excluir</Text>
+    </TouchableOpacity>
+  </View>
+);
+
 // Componente de Curtir
 const Curtir = ({ count, liked, onPress }) => (
   <View style={styles.containerCurtir}>
@@ -206,12 +214,30 @@ const HomeScreenGestao = () => {
     setSelectedComments(prev => [...prev, newComment]);
   };
 
+  // Função para excluir publicação
+  const handleDeletePost = async (id) => {
+    try {
+      const response = await axios.delete(`http://localhost:3000/deletepublicacao/${id}`);
+      if (response.status === 200) {
+        console.log('Publicação excluída com sucesso.');
+        // Remove a publicação do estado local
+        setPublicacoes((prevPublicacoes) => 
+          prevPublicacoes.filter((pub) => pub.idPublicacao !== id)
+        );
+      }
+    } catch (error) {
+      console.error('Erro ao excluir publicação:', error);
+      Alert.alert('Erro', 'Falha ao excluir a publicação. Tente novamente.');
+    }
+  };
+  
+
   const handleCreatePost = async () => {
     if (newPostText.trim()) {
       try {
         const response = await axios.post('http://localhost:3000/postpublicacao', {
           descricao: newPostText,
-          Pessoa_idPessoa: userId // Você pode substituir pelo ID real do usuário logado
+          Pessoa_idPessoa: 21 // Você pode substituir pelo ID real do usuário logado
         });
         console.log('Resposta do servidor:', response.data); 
         setNewPostText('');
@@ -241,7 +267,9 @@ const HomeScreenGestao = () => {
         await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
         setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
         setModalVisible(true);
-      }} comentarioCount={pub.quantidade_comentarios} />
+      }} comentarioCount={pub.quantidade_comentarios} 
+      />
+      <BotaoExcluir onPress={() => handleDeletePost(pub.idPublicacao)} />
     </View>
   );
 
@@ -338,12 +366,26 @@ const styles = StyleSheet.create({
   containerBotao: {
     flex: 1,
     alignItems: 'flex-end',
+    justifyContent: 'start'
+  },
+  containerBotaoExcluir: {
+    flex: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'start'
   },
   botao: {
     paddingVertical: 5,
     paddingHorizontal: 10,
     backgroundColor: '#00527C',
     borderRadius: 20,
+    margin: 5,
+  },
+  botaoExcluir: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#ff6400',
+    borderRadius: 20,
+    margin: 5,
   },
   botaoTexto: {
     color: '#fff',
