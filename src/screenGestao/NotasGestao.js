@@ -1,143 +1,87 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, Alert, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
 
-const NotasGetao = () => {
-  const [notasData, setNotasData] = useState([]);
-  const [novaNota, setNovaNota] = useState('');
+const NotasGestao = () => {
+  const [notas, setNotas] = useState([]);
   const [turmaSelecionada, setTurmaSelecionada] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentId, setCurrentId] = useState(null);
+  const [nota, setNota] = useState('');
 
-  const turmas = [
-    '1 módulo - Administração - Tarde', 
-    '2 módulo - Administração - Tarde', 
-    '3 módulo - Administração - Tarde',
-    '1 módulo - Desenvolvimento de Sistema - Tarde',
-    '2 módulo - Desenvolvimento de Sistema - Tarde',
-    '3 módulo - Desenvolvimento de Sistema - Tarde',
-    '1 módulo - Logistica - Tarde',
-    '2 módulo - Logistica - Tarde',
-    '3 módulo - Logistica - Tarde',
-    '1 módulo - Administração - Noite', 
-    '2 módulo - Administração - Noite', 
-    '3 módulo - Administração - Noite',
-    '1 módulo - Desenvolvimento de Sistema - Noite',
-    '2 módulo - Desenvolvimento de Sistema - Noite',
-    '3 módulo - Desenvolvimento de Sistema - Noite',
-    '1 módulo - Logistica - Noite',
-    '2 módulo - Logistica - Noite',
-    '3 módulo - Logistica - Noite',
-  ];
+  useEffect(() => {
+    fetch('http://localhost:3000/notas')
+      .then((response) => response.json())
+      .then((data) =>{ 
+        console.log(data);
+        setNotas(data);
+      })
+      .catch((error) => console.error('Erro ao buscar notas:', error));
+  }, []);
 
   const handleSendNota = () => {
-    if (!novaNota || !turmaSelecionada) {
-      Alert.alert('Erro', 'Por favor, selecione uma turma e escreva uma nota.');
-      return;
-    }
-
-    const newNota = {
-      id: isEditing ? currentId : (notasData.length + 1).toString(),
-      turma: turmaSelecionada,
-      nota: novaNota,
-    };
-
-    if (isEditing) {
-      setNotasData(notasData.map(item => (item.id === currentId ? newNota : item)));
-      setIsEditing(false);
-    } else {
-      setNotasData([...notasData, newNota]);
-    }
-
-    resetFields();
-  };
-
-  const resetFields = () => {
-    setNovaNota('');
-    setTurmaSelecionada('');
-    setModalVisible(false);
+    fetch('http://localhost:3000/notas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nota, turmaId: turmaSelecionada }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setNotas([...notas, data]);
+        setNota('');
+      })
+      .catch((error) => console.error('Erro ao criar nota:', error));
   };
 
   const handleEditNota = (item) => {
-    setTurmaSelecionada(item.turma);
-    setNovaNota(item.nota);
-    setCurrentId(item.id);
-    setIsEditing(true);
+    fetch(`http://localhost:3000/notas/${item.idNota}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nota: item.nota }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setNotas(notas.map((nota) => (nota.idNota === item.idNota ? data : nota)));
+      })
+      .catch((error) => console.error('Erro ao editar nota:', error));
   };
 
-  const handleDeleteNota = (id) => {
-    setNotasData(notasData.filter(item => item.id !== id));
+  const handleDeleteNota = (item) => {
+    fetch(`http://localhost:3000/notas/${item.idNota}`, {
+      method: 'DELETE',
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setNotas(notas.filter((nota) => nota.idNota !== item.idNota));
+      })
+      .catch((error) => console.error('Erro ao excluir nota:', error));
   };
-
-  const renderNotaItem = ({ item }) => (
-    <View style={styles.notaContainer}>
-      <Text style={styles.turma}>{item.turma}</Text>
-      <Text style={styles.nota}>{item.nota}</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.editButton} onPress={() => handleEditNota(item)}>
-          <Text style={styles.buttonText}>Editar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteNota(item.id)}>
-          <Text style={styles.buttonText}>Excluir</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Notas Enviadas</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Digite a nota..."
-        value={novaNota}
-        onChangeText={setNovaNota}
-      />
-
-      <TouchableOpacity style={styles.input} onPress={() => setModalVisible(true)}>
-        <Text style={styles.turmaSelecionada}>{turmaSelecionada || 'Selecione a turma'}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.sendButton} onPress={handleSendNota}>
-        <Text style={styles.buttonText}>{isEditing ? 'Atualizar Nota' : 'Enviar Nota'}</Text>
-      </TouchableOpacity>
-
+      <Text style={styles.title}>Notas</Text>
       <FlatList
-        data={notasData}
-        renderItem={renderNotaItem}
-        keyExtractor={item => item.id}
-      />
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitulo}>Selecionar Turma</Text>
-            <ScrollView>
-              {turmas.map((turma, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.turmaButton}
-                  onPress={() => {
-                    setTurmaSelecionada(turma);
-                    setModalVisible(false);
-                  }}
-                >
-                  <Text style={styles.textoTurma}>{turma}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalVisible(false)}>
-              <Text style={styles.textoBotaoFechar}>Fechar</Text>
-            </TouchableOpacity>
+        data={notas}
+        renderItem={({ item }) => (
+          <View style={styles.notaContainer}>
+            <Text style={styles.nota}>{item.nota}</Text>
+            <Text style={styles.turma}>{item.Turma?.nomeTurma}</Text>
+            <View style={styles.buttonContainer}>
+              <Button title="Editar" onPress={() => handleEditNota(item)} />
+              <Button title="Excluir" onPress={() => handleDeleteNota(item)} />
+            </View>
           </View>
-        </View>
-      </Modal>
+        )}
+        keyExtractor={(item) => item.idNota.toString()}
+      />
+      <TextInput
+        placeholder="Digite a nota"
+        value={nota}
+        onChangeText={(text) => setNota(text)}
+        style={styles.input}
+      />
+      <Button title="Enviar" onPress={handleSendNota} />
     </View>
   );
 };
@@ -154,28 +98,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#333',
   },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: 10, // Borda arredondada
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 15,
-  },
-  turmaSelecionada: {
-    fontSize: 16,
-    color: '#555',
-  },
-  sendButton: {
-    backgroundColor: '#ff6400',
-    padding: 15,
-    borderRadius: 10, // Borda arredondada
-    marginBottom: 20,
-    alignItems: 'center',
-  },
   notaContainer: {
     backgroundColor: '#ffffff',
-    borderRadius: 10, // Borda arredondada
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#dddddd',
     padding: 15,
@@ -185,76 +110,27 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
-  turma: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
   nota: {
-    fontSize: 14,
+    fontSize: 16,
     marginVertical: 5,
+  },
+  turma: {
+    fontSize: 14,
+    color: '#555',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  editButton: {
-    backgroundColor: '#00527C',
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
     padding: 10,
-    borderRadius: 10, // Borda arredondada
-  },
-  deleteButton: {
-    backgroundColor: '#ff6400',
-    padding: 10,
-    borderRadius: 10, // Borda arredondada
-  },
-  buttonText: {
-    color: '#fff',
-  },
-  modalContainer: {
-    flex: 1,  
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    width: '80%',
-    maxHeight: '70%',
-    backgroundColor: '#dddddd',
-    borderRadius: 10, // Borda arredondada
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalTitulo: {
-    fontSize: 18,
-    fontWeight: 'bold',
     marginBottom: 15,
-    color: '#333',
-  },
-  turmaButton: {
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10, // Borda arredondada
-    width: '100%',
-    alignItems: 'center',
-  },
-  textoTurma: {
-    fontSize: 16,
-    color: '#333',
-  },
-  botaoFechar: {
-    backgroundColor: '#ff6400',
-    padding: 15,
-    borderRadius: 10, // Borda arredondada
-    marginTop: 15,
-    alignItems: 'center',
-  },
-  textoBotaoFechar: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 
-export default NotasGetao;
+export default NotasGestao;

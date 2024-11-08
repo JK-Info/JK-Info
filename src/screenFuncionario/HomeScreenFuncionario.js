@@ -33,41 +33,22 @@ const Curtir = ({ count, liked, onPress }) => (
 
 const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   const [comentario, setComentario] = useState('');
-  const currentUserName = 'Aluno'; // Identificador do usuário atual
 
   const handleSendComment = () => {
     if (comentario.trim()) {
       const newComment = {
         text: comentario,
-        author: { name: currentUserName, photo: fotoPerfilAnonima },
+        author: {
+          name: 'User',
+          photo: fotoPerfilAnonima,
+        },
         liked: false,
         likeCount: 0,
       };
       onSendComment([...comments, newComment]);
       setComentario('');
       onClose();
-    } else {
-      Alert.alert("Erro", "O comentário não pode estar vazio!");
     }
-  };
-
-  const handleLongPressComment = (comment) => {
-    if (comment.author.name === currentUserName) {
-      Alert.alert(
-        'Excluir Comentário',
-        'Você deseja excluir este comentário?',
-        [
-          { text: 'Cancelar', onPress: () => console.log('Cancelado') },
-          { text: 'Excluir', onPress: () => excluirComment(comment) },
-        ],
-        { cancelable: true }
-      );
-    }
-  };
-
-  const excluirComment = (commentToRemove) => {
-    const updatedComments = comments.filter(comment => comment !== commentToRemove);
-    onSendComment(updatedComments);
   };
 
   const handleLikeComment = (index) => {
@@ -77,17 +58,38 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
     onSendComment(updatedComments);
   };
 
+  const handleLongPressComment = (index) => {
+    Alert.alert(
+      'Excluir Comentário',
+      'Você deseja excluir este comentário?',
+      [
+        { text: 'Cancelar', onPress: () => console.log('Cancelado') },
+        { text: 'Excluir', onPress: () => {
+          const updatedComments = comments.filter((_, i) => i !== index);
+          onSendComment(updatedComments);
+        }},
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Comentários</Text>
+
           <ScrollView style={styles.comentariosContainer}>
             {comments.map((comment, index) => (
               <TouchableOpacity 
                 key={index} 
-                style={styles.comentarioContainer} 
-                onLongPress={() => handleLongPressComment(comment)}
+                onLongPress={() => handleLongPressComment(index)} 
+                style={styles.comentarioContainer}
               >
                 <Image source={comment.author.photo} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
@@ -121,7 +123,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   );
 };
 
-const Post = ({ text, comments, onCommentPress, date }) => {
+const Post = ({ text, comments, onCommentPress, onDelete, date }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
@@ -130,25 +132,35 @@ const Post = ({ text, comments, onCommentPress, date }) => {
     setLikeCount(liked ? likeCount - 1 : likeCount + 1);
   };
 
+  const handleCommentPress = () => {
+    onCommentPress(comments); // Passa os comentários ao modal
+  };
+
   return (
     <View style={styles.boxPubli}>
       <View style={styles.indent}>
         <Avatar />
         <Usuario nome="Diretor" cargo="Diretor(a)" />
       </View>
+
       <View style={styles.boxFeed}>
         <Text style={styles.textoPubli}>{text}</Text>
-        <Text style={styles.dateText}>{date}</Text>
+        <Text style={styles.dateText}>{date}</Text> {/* Exibir a data aqui */}
       </View>
+      
       <View style={styles.bottons}>
         <Curtir count={likeCount} liked={liked} onPress={handleLikePost} />
-        <BotaoComentar onPress={onCommentPress} comentarioCount={comments.length} />
+        <BotaoComentar onPress={handleCommentPress} comentarioCount={comments.length} />
+        
+        <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+          <Text style={styles.deleteButtonText}>Excluir</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-const HomeScreen = () => {
+const HomeScreenFuncionario = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [comments, setComments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -159,13 +171,19 @@ const HomeScreen = () => {
       comments: [
         {
           text: 'Muito legal! Ansioso para usar.',
-          author: { name: 'Ana', photo: fotoPerfilAnonima },
+          author: {
+            name: 'Ana',
+            photo: fotoPerfilAnonima,
+          },
           liked: false,
           likeCount: 2,
         },
         {
           text: 'Parabéns pela novidade!',
-          author: { name: 'Carlos', photo: fotoPerfilAnonima },
+          author: {
+            name: 'Carlos',
+            photo: fotoPerfilAnonima,
+          },
           liked: true,
           likeCount: 1,
         },
@@ -177,7 +195,10 @@ const HomeScreen = () => {
       comments: [
         {
           text: 'Adorei as melhorias!',
-          author: { name: 'Juliana', photo: fotoPerfilAnonima },
+          author: {
+            name: 'Juliana',
+            photo: fotoPerfilAnonima,
+          },
           liked: false,
           likeCount: 0,
         },
@@ -189,7 +210,10 @@ const HomeScreen = () => {
       comments: [
         {
           text: 'Isso é ótimo!',
-          author: { name: 'Lucas', photo: fotoPerfilAnonima },
+          author: {
+            name: 'Lucas',
+            photo: fotoPerfilAnonima,
+          },
           liked: true,
           likeCount: 3,
         },
@@ -197,40 +221,124 @@ const HomeScreen = () => {
     },
   ]);
 
+  const [newPostText, setNewPostText] = useState('');
+  const [newPostImage, setNewPostImage] = useState('');
+  const [createPostModalVisible, setCreatePostModalVisible] = useState(false);
+
   const toggleModal = () => setModalVisible(!modalVisible);
+  const toggleCreatePostModal = () => setCreatePostModalVisible(!createPostModalVisible);
+
+  const handleCommentUpdate = (index, newComments) => {
+    const updatedPosts = [...posts];
+    updatedPosts[index].comments = newComments;
+    setPosts(updatedPosts);
+  };
+
+  const handleCreatePost = () => {
+    if (newPostText.trim() || newPostImage) {
+      const newPost = {
+        text: newPostText,
+        image: newPostImage,
+        comments: [],
+      };
+      setPosts([newPost, ...posts]); // Adiciona novo post no topo
+      setNewPostText('');
+      setNewPostImage('');
+      toggleCreatePostModal(); // Fecha o modal após criar o post
+    }
+  };
+  
+  const handleDeletePost = (index) => {
+    Alert.alert(
+      'Excluir Publicação',
+      'Você deseja excluir esta publicação?',
+      [
+        { text: 'Cancelar', onPress: () => console.log('Cancelado') },
+        { text: 'Excluir', onPress: () => {
+          const updatedPosts = posts.filter((_, i) => i !== index);
+          setPosts(updatedPosts);
+        }},
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const filteredPosts = posts.filter(post =>
+    post.text.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
-      <TextInput 
-        style={styles.searchInput} 
-        placeholder="Buscar posts..." 
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Pesquisar..."
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
-      <ScrollView>
-        {posts.filter(post => post.text.toLowerCase().includes(searchQuery.toLowerCase())).map((post, index) => (
-          <Post 
-            key={index}
-            text={post.text}
-            image={post.image}
-            comments={post.comments}
-            date={post.date}
-            onCommentPress={() => {
-              setComments(post.comments);
-              toggleModal();
-            }}
-          />
-        ))}
+
+      <ScrollView style={styles.scrollView}>
+      {filteredPosts.map((post, index) => (
+        <Post 
+          key={index}
+          text={post.text}
+          image={post.image}
+          date={post.date} // Passando a data
+          comments={post.comments}
+          onCommentPress={() => {
+            setComments(post.comments);
+            toggleModal();
+          }}
+          onDelete={() => handleDeletePost(index)}
+        />
+      ))}
       </ScrollView>
+
       <CommentModal 
         visible={modalVisible} 
         onClose={toggleModal} 
         comments={comments} 
         onSendComment={(newComments) => {
           setComments(newComments);
-          // Update the posts array with the new comments if necessary
+          const postIndex = posts.findIndex(post => post.comments === comments);
+          if (postIndex !== -1) {
+            handleCommentUpdate(postIndex, newComments);
+          }
         }} 
       />
+      <TouchableOpacity 
+        style={styles.floatingButton} 
+        onPress={toggleCreatePostModal} // Abre o modal de criação de publicação
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>+</Text>
+      </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={createPostModalVisible}
+        onRequestClose={toggleCreatePostModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Criar Publicação</Text>
+
+            <TextInput
+              style={styles.newPostInput}
+              placeholder="Digite sua publicação..."
+              value={newPostText}
+              onChangeText={setNewPostText}
+            />
+
+            <TouchableOpacity onPress={handleCreatePost} style={styles.sendButton}>
+              <Text style={styles.sendButtonText}>Publicar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={toggleCreatePostModal} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -248,6 +356,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 10,
     marginVertical: 10,
+  },
+  scrollView: {
+    flex: 1,
   },
   boxPubli: {
     marginVertical: 10,
@@ -361,19 +472,47 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 10,
     alignItems: 'center',
+    marginBottom: 10,
   },
   sendButtonText: {
-    color: '#fff',
+    color: 'white',
   },
   closeButton: {
-    marginTop: 10,
     backgroundColor: '#ff6400',
     borderRadius: 10,
     paddingVertical: 10,
     alignItems: 'center',
   },
   closeButtonText: {
-    color: '#fff',
+    color: 'white',
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    backgroundColor: '#ff6400',
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+  },
+  newPostInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  deleteButton: {
+    padding: 5,
+    backgroundColor: '#ff4d4d',
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: 'white',
   },
   dateText: {
     fontSize: 12,
@@ -382,4 +521,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default HomeScreenFuncionario;

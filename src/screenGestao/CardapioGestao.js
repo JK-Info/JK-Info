@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Modal, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { format, getISOWeek } from 'date-fns';
+import axios from 'axios';
 
 const CardapioGestao = () => {
   const [cardapio, setCardapio] = useState([
@@ -26,11 +27,27 @@ const CardapioGestao = () => {
     setModalVisible(true);
   };
 
-  const salvarAlteracoes = () => {
+  const salvarAlteracoes = async () => {
     const novoCardapio = [...cardapio];
     novoCardapio[diaSelecionado].pratos = pratos;
     novoCardapio[diaSelecionado].sobremesa = sobremesa;
-    setCardapio(novoCardapio);
+
+    try {
+      setCardapio(novoCardapio);
+
+      await axios.put('http://localhost:3000/putCardapio', {
+        dia: diaSelecionado,
+        prato: pratos,
+        sobremesa: sobremesa
+      });
+
+      setModalVisible(false);
+      Alert.alert('Sucesso', 'Cardápio atualizado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao atualizar cardápio:', error);
+      Alert.alert('Erro', 'Falha ao atualizar o cardápio.');
+    }
+
     setModalVisible(false);
     Alert.alert('Sucesso', 'Cardápio atualizado com sucesso!');
   };

@@ -31,8 +31,7 @@ const membrosDaEquipe = [
     funcao: 'Programador Back-End',
     contatos: [
       { plataforma: 'Github', link: 'https://github.com/PabloHenrique1533' },
-      { plataforma: 'Linkedin', link: 'url_linkedin_membro_3' },
-      { plataforma: 'Instagram', link: 'https://instagram.com/guigozt' },
+      { plataforma: 'Instagram', link: 'https://instagram.com/_phenrique.03' },
     ],
     foto: fotoPablo,
   },

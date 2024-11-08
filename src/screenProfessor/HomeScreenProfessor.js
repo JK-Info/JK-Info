@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput } from 'react-native';
+import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
@@ -39,7 +39,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
       const newComment = {
         text: comentario,
         author: {
-          name: 'Professor',
+          name: 'User',
           photo: fotoPerfilAnonima,
         },
         liked: false,
@@ -58,6 +58,21 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
     onSendComment(updatedComments);
   };
 
+  const handleLongPressComment = (index) => {
+    Alert.alert(
+      'Excluir Comentário',
+      'Você deseja excluir este comentário?',
+      [
+        { text: 'Cancelar', onPress: () => console.log('Cancelado') },
+        { text: 'Excluir', onPress: () => {
+          const updatedComments = comments.filter((_, i) => i !== index);
+          onSendComment(updatedComments);
+        }},
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -71,7 +86,11 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
 
           <ScrollView style={styles.comentariosContainer}>
             {comments.map((comment, index) => (
-              <View key={index} style={styles.comentarioContainer}>
+              <TouchableOpacity 
+                key={index} 
+                onLongPress={() => handleLongPressComment(index)} 
+                style={styles.comentarioContainer}
+              >
                 <Image source={comment.author.photo} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
                   <Text style={styles.nomeAutor}>{comment.author.name}</Text>
@@ -82,7 +101,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
                   liked={comment.liked} 
                   onPress={() => handleLikeComment(index)} 
                 />
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
 
@@ -104,7 +123,7 @@ const CommentModal = ({ visible, onClose, comments, onSendComment }) => {
   );
 };
 
-const Post = ({ text, image, comments, onCommentPress, onCommentUpdate }) => {
+const Post = ({ text, comments, onCommentPress, onDelete, date }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
 
@@ -126,12 +145,16 @@ const Post = ({ text, image, comments, onCommentPress, onCommentUpdate }) => {
 
       <View style={styles.boxFeed}>
         <Text style={styles.textoPubli}>{text}</Text>
-        {image && <Image source={{ uri: image }} style={styles.postImage} />}
+        <Text style={styles.dateText}>{date}</Text> {/* Exibir a data aqui */}
       </View>
       
       <View style={styles.bottons}>
         <Curtir count={likeCount} liked={liked} onPress={handleLikePost} />
         <BotaoComentar onPress={handleCommentPress} comentarioCount={comments.length} />
+        
+        <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+          <Text style={styles.deleteButtonText}>Excluir</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -143,15 +166,59 @@ const HomeScreenProfessor = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [posts, setPosts] = useState([
     {
-      text: "O Club de Regatas Vasco da Gama, mais conhecido como Vasco da Gama, é uma entidade sócio-poliesportiva brasileira.",
-      image: null,
-      comments: [],
+      text: 'Bem-vindo à nossa nova plataforma de gestão!',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Muito legal! Ansioso para usar.',
+          author: {
+            name: 'Ana',
+            photo: fotoPerfilAnonima,
+          },
+          liked: false,
+          likeCount: 2,
+        },
+        {
+          text: 'Parabéns pela novidade!',
+          author: {
+            name: 'Carlos',
+            photo: fotoPerfilAnonima,
+          },
+          liked: true,
+          likeCount: 1,
+        },
+      ],
     },
     {
-      text: "A National Basketball Association (NBA) é a principal liga de basquetebol profissional da América do Norte.",
-      image: "https://de2.sportal365images.com/process/smp-betway-images/betway.com/28072023/e7737cea-2040-48fd-a041-c6ec11f367a6.jpg",
-      comments: [],
-    }
+      text: 'Confira as novas funcionalidades do sistema.',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Adorei as melhorias!',
+          author: {
+            name: 'Juliana',
+            photo: fotoPerfilAnonima,
+          },
+          liked: false,
+          likeCount: 0,
+        },
+      ],
+    },
+    {
+      text: 'Estamos comprometidos em melhorar cada vez mais!',
+      date: new Date().toLocaleString(),
+      comments: [
+        {
+          text: 'Isso é ótimo!',
+          author: {
+            name: 'Lucas',
+            photo: fotoPerfilAnonima,
+          },
+          liked: true,
+          likeCount: 3,
+        },
+      ],
+    },
   ]);
 
   const [newPostText, setNewPostText] = useState('');
@@ -180,6 +247,21 @@ const HomeScreenProfessor = () => {
       toggleCreatePostModal(); // Fecha o modal após criar o post
     }
   };
+  
+  const handleDeletePost = (index) => {
+    Alert.alert(
+      'Excluir Publicação',
+      'Você deseja excluir esta publicação?',
+      [
+        { text: 'Cancelar', onPress: () => console.log('Cancelado') },
+        { text: 'Excluir', onPress: () => {
+          const updatedPosts = posts.filter((_, i) => i !== index);
+          setPosts(updatedPosts);
+        }},
+      ],
+      { cancelable: true }
+    );
+  };
 
   const filteredPosts = posts.filter(post =>
     post.text.toLowerCase().includes(searchQuery.toLowerCase())
@@ -195,19 +277,20 @@ const HomeScreenProfessor = () => {
       />
 
       <ScrollView style={styles.scrollView}>
-        {filteredPosts.map((post, index) => (
-          <Post 
-            key={index}
-            text={post.text}
-            image={post.image}
-            comments={post.comments} // Passando os comentários para o Post
-            onCommentPress={() => {
-              setComments(post.comments); // Passa os comentários do post específico para o modal
-              toggleModal(); // Abre o modal
-            }}
-            onCommentUpdate={(newComments) => handleCommentUpdate(index, newComments)} // Atualiza os comentários
-          />
-        ))}
+      {filteredPosts.map((post, index) => (
+        <Post 
+          key={index}
+          text={post.text}
+          image={post.image}
+          date={post.date} // Passando a data
+          comments={post.comments}
+          onCommentPress={() => {
+            setComments(post.comments);
+            toggleModal();
+          }}
+          onDelete={() => handleDeletePost(index)}
+        />
+      ))}
       </ScrollView>
 
       <CommentModal 
@@ -216,22 +299,19 @@ const HomeScreenProfessor = () => {
         comments={comments} 
         onSendComment={(newComments) => {
           setComments(newComments);
-          // Atualiza os comentários no post atual
           const postIndex = posts.findIndex(post => post.comments === comments);
           if (postIndex !== -1) {
             handleCommentUpdate(postIndex, newComments);
           }
         }} 
       />
-       {/* Botão flutuante para criar publicação */}
-       <TouchableOpacity 
+      <TouchableOpacity 
         style={styles.floatingButton} 
         onPress={toggleCreatePostModal} // Abre o modal de criação de publicação
       >
         <Text style={{ color: 'white', fontWeight: 'bold' }}>+</Text>
       </TouchableOpacity>
 
-      {/* Modal para criação de nova publicação */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -244,19 +324,15 @@ const HomeScreenProfessor = () => {
 
             <TextInput
               style={styles.newPostInput}
-              placeholder="Digite o texto da publicação"
+              placeholder="Digite sua publicação..."
               value={newPostText}
               onChangeText={setNewPostText}
             />
-            <TextInput
-              style={styles.newPostInput}
-              placeholder="URL da imagem (opcional)"
-              value={newPostImage}
-              onChangeText={setNewPostImage}
-            />
+
             <TouchableOpacity onPress={handleCreatePost} style={styles.sendButton}>
-              <Text style={styles.sendButtonText}>Criar Publicação</Text>
+              <Text style={styles.sendButtonText}>Publicar</Text>
             </TouchableOpacity>
+
             <TouchableOpacity onPress={toggleCreatePostModal} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>Fechar</Text>
             </TouchableOpacity>
@@ -306,7 +382,7 @@ const styles = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    height: 200,
+    height: 500,
     borderRadius: 10,
   },
   bottons: {
@@ -412,67 +488,36 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#FF6347',
-    borderRadius: 50,
-    padding: 15,
-    elevation: 3,
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    backgroundColor: '#ff6400',
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
   },
   newPostInput: {
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 10,
-    paddingHorizontal: 10,
+    padding: 10,
     marginBottom: 10,
   },
-  createPostButton: {
-    backgroundColor: '#007BFF',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    alignItems: 'center',
-    marginBottom: 10,
+  deleteButton: {
+    padding: 5,
+    backgroundColor: '#ff4d4d',
+    borderRadius: 5,
   },
-  createPostButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  postButton: {
-    backgroundColor: '#007BFF',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  postButtonText: {
+  deleteButtonText: {
     color: 'white',
-    textAlign: 'center',
   },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#FF6347',
-    borderRadius: 50,
-    padding: 15,
-    elevation: 3,
-  },
-  newPostInput: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  createPostButton: {
-    backgroundColor: '#00527C', // A mesma cor que o botão de comentar
-    borderRadius: 20,
-    paddingVertical: 10,
-    alignItems: 'center',
-    marginBottom: 10,
+  dateText: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 5,
   },
 });
 
