@@ -256,12 +256,16 @@
     ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE CurtidaPublicacao (
+CREATE TABLE IF NOT EXISTS CurtidaPublicacao (
     idCurtidaPublicacao INT AUTO_INCREMENT PRIMARY KEY,
     Publicacao_idPublicacao INT,
     userId INT,
-    FOREIGN KEY (Publicacao_idPublicacao) REFERENCES Publicacao(idPublicacao),
-    FOREIGN KEY (userId) REFERENCES Pessoa(idPessoa)
+    FOREIGN KEY (Publicacao_idPublicacao) 
+        REFERENCES Publicacao(idPublicacao) 
+        ON DELETE CASCADE,
+    FOREIGN KEY (userId) 
+        REFERENCES Pessoa(idPessoa) 
+        ON DELETE CASCADE
 );
 
 	-- -----------------------------------------------------
@@ -286,18 +290,18 @@ CREATE TABLE CurtidaPublicacao (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS `CurtidaComentario` (
-    `idCurtidaComentario` INT NOT NULL AUTO_INCREMENT,
-    `Comentario_idComentario` INT NOT NULL,
-    `Pessoa_idPessoa` INT NOT NULL,
-    PRIMARY KEY (`idCurtidaComentario`),
-    CONSTRAINT `fk_CurtidaComentario_Comentario`
-        FOREIGN KEY (`Comentario_idComentario`)
-        REFERENCES `Comentario` (`idComentario`)
+CREATE TABLE IF NOT EXISTS CurtidaComentario (
+    idCurtidaComentario INT NOT NULL AUTO_INCREMENT,
+    Comentario_idComentario INT NOT NULL,
+    Pessoa_idPessoa INT NOT NULL,
+    PRIMARY KEY (idCurtidaComentario),
+    CONSTRAINT fk_CurtidaComentario_Comentario
+        FOREIGN KEY (Comentario_idComentario)
+        REFERENCES Comentario(idComentario)
         ON DELETE CASCADE,
-    CONSTRAINT `fk_CurtidaComentario_Pessoa`
-        FOREIGN KEY (`Pessoa_idPessoa`)
-        REFERENCES `Pessoa` (`idPessoa`)
+    CONSTRAINT fk_CurtidaComentario_Pessoa
+        FOREIGN KEY (Pessoa_idPessoa)
+        REFERENCES Pessoa(idPessoa)
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
