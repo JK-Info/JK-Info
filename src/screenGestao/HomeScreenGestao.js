@@ -4,17 +4,20 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 
+// Componente de Avatar
 const Avatar = () => (
   <Image source={fotoPerfilAnonima} style={styles.avatarImage} />
 );
 
+// Componente de Usuário
 const Usuario = ({ nome, cargo }) => (
   <View style={styles.informacoesPublicacao}>
     <Text>{nome}</Text>
     <Text style={{ fontSize: 11 }}>{cargo}</Text>
-  </View>
+  </View> 
 );
 
+// Componente de Botão de Comentar
 const BotaoComentar = ({ onPress, comentarioCount }) => (
   <View style={styles.containerBotao}>
     <TouchableOpacity onPress={onPress} style={styles.botao}>
@@ -23,6 +26,7 @@ const BotaoComentar = ({ onPress, comentarioCount }) => (
   </View>
 );
 
+// Componente de Curtir
 const Curtir = ({ count, liked, onPress }) => (
   <View style={styles.containerCurtir}>
     <TouchableOpacity onPress={onPress}>
@@ -32,24 +36,38 @@ const Curtir = ({ count, liked, onPress }) => (
   </View>
 );
 
+const CurtirComentario = ({ count, liked, onPress }) => (
+  <View style={styles.containerCurtir}>
+    <TouchableOpacity onPress={onPress}>
+      <Icon name="heart" size={24} color={liked ? '#FF0000' : '#000'} />
+    </TouchableOpacity>
+    <Text style={styles.curtidasTexto}>{count}</Text>
+  </View>
+);
+
+// Componente Modal de Comentários
 const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId }) => {
   const [textoComentario, setTextoComentario] = useState('');
 
   const handleSendComment = async () => {
     if (textoComentario.trim()) {
         try {
+            // Faz uma requisição para buscar os dados do usuário com ID 21
             const response = await axios.get(`http://localhost:3000/getusuario/21`);
-            const usuario = response.data; // Ajuste conforme a estrutura da resposta
-            const nomeUsuario = usuario.nome;
+            const usuario = response.data; // Supondo que a resposta contenha as informações do usuário
+            const nomeUsuario = usuario.nome; // Ajuste conforme a estrutura de retorno da sua API
 
+            // Envia o comentário com o ID fixo do usuário 21
             await axios.post('http://localhost:3000/postcomentario', {
                 text: textoComentario,
                 Publicacao_idPublicacao: publicacaoId,
-                Pessoa_id: 21,
+                Pessoa_id: 21, // ID do usuário logado
             });
 
+            // Atualiza a lista de comentários na tela com o nome correto do usuário
             onCommentAdded({ texto: textoComentario, nome_comentador: nomeUsuario, num_likes: 0 });
-            setTextoComentario('');
+            
+            setTextoComentario(''); // Limpa o campo de texto após enviar
         } catch (error) {
             console.error('Erro ao enviar comentário:', error);
             Alert.alert('Erro', 'Falha ao enviar o comentário.');
@@ -57,52 +75,62 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
     } else {
         Alert.alert('Atenção', 'Por favor, insira um comentário.');
     }
-  };
+};
 
-  const handleLikeComment = async (commentId) => {
+const handleLikeComment = async (commentId) => {  
     const isLiked = comments.find(comment => comment.idComentario === commentId).liked || false;
-    const userId = 21;
-
+    const userId = 21; // Substitua isso pelo ID do usuário logado dinamicamente
+  
     try {
       const response = await axios.post('http://localhost:3000/likecomentario', {
         idComentario: commentId,
         liked: !isLiked,
         userId: userId,
       });
-
+  
       const newCount = response.data.newCount;
 
-      setSelectedComments((prevComments) =>
-        prevComments.map(comment =>
-          comment.idComentario === commentId ? { ...comment, num_likes: newCount, liked: !isLiked } : comment
-        )
-      );
-    } catch (error) {
-      console.error('Erro ao curtir comentário:', error);
-      Alert.alert('Erro', 'Falha ao curtir o comentário. Tente novamente.');
-    }
-  };
+    // Atualizar a contagem de curtidas localmente
+    setSelectedComments((prevComments) =>
+      prevComments.map(comment =>
+        comment.idComentario === commentId ? { ...comment, num_likes: newCount, liked: !isLiked } : comment
+      )
+    );
+  } catch (error) {
+    console.error('Erro ao curtir comentário:', error);
+    Alert.alert('Erro', 'Falha ao curtir o comentário. Tente novamente.');
+  }
+};
 
   return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>Comentários</Text>
           <ScrollView style={styles.comentariosContainer}>
-            {Array.isArray(comments) && comments.map((comment) => (
+          {Array.isArray(comments) && comments.map((comment) => (
               <View key={comment.idComentario} style={styles.comentarioContainer}>
                 <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
                   <Text style={styles.nomeAutor}>{comment.nome_comentador}</Text>
                   <Text style={styles.comentarioTexto}>{comment.texto}</Text>
                 </View>
-                <Curtir count={comment.num_likes} liked={comment.liked} onPress={() => handleLikeComment(comment.idComentario)} />
+                <CurtirComentario
+                  count={comment.num_likes}
+                  liked={comment.liked}
+                  onPress={() => handleLikeComment(comment.idComentario)}
+                />
               </View>
             ))}
           </ScrollView>
-          <TextInput
-            style={styles.inputComentario}  // Usando o estilo exclusivo para o campo de comentário
-            placeholder="Escreva um comentário..."
+          <TextInput 
+            style={styles.input} 
+            placeholder="Escreva um comentário..." 
             value={textoComentario}
             onChangeText={setTextoComentario}
           />
@@ -118,15 +146,16 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
   );
 };
 
+// Componente principal HomeScreenGestao
 const HomeScreenGestao = () => {
   const [publicacoes, setPublicacoes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComments, setSelectedComments] = useState([]);
   const [newPostText, setNewPostText] = useState('');
   const [likes, setLikes] = useState({});
-  const [modalPostVisible, setModalPostVisible] = useState(false);
-
-  const userId = 21;
+  const [currentPostId, setCurrentPostId] = useState(null);
+  
+  const userId = 21; // User ID should be dynamic based on login context
 
   const fetchPublicacoes = async () => {
     try {
@@ -140,7 +169,7 @@ const HomeScreenGestao = () => {
   const fetchComments = async (postId) => {
     try {
       const response = await axios.get(`http://localhost:3000/getcomentarios/${postId}`);
-      setSelectedComments(response.data);
+      setSelectedComments(response.data); // Atualiza o estado com os comentários
     } catch (error) {
       console.error('Erro ao buscar comentários:', error);
       Alert.alert('Erro', 'Não foi possível carregar os comentários.');
@@ -163,10 +192,12 @@ const HomeScreenGestao = () => {
       });
 
       const newCount = response.data.newCount;
-      setPublicacoes((prev) => prev.map(pub => pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub));
+      setPublicacoes((prev) => prev.map(pub => 
+        pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub
+      ));
     } catch (error) {
       console.error('Erro ao curtir a publicação:', error);
-      setLikes((prev) => ({ ...prev, [postId]: isLiked }));
+      setLikes((prev) => ({ ...prev, [postId]: isLiked })); // Reverte o like em caso de erro
       Alert.alert('Erro', 'Falha ao curtir a publicação. Tente novamente.');
     }
   };
@@ -180,12 +211,11 @@ const HomeScreenGestao = () => {
       try {
         const response = await axios.post('http://localhost:3000/postpublicacao', {
           descricao: newPostText,
-          Pessoa_idPessoa: userId
+          Pessoa_idPessoa: userId // Você pode substituir pelo ID real do usuário logado
         });
-        console.log('Resposta do servidor:', response.data);
-        setNewPostText(''); // Limpa o campo de texto
+        console.log('Resposta do servidor:', response.data); 
+        setNewPostText('');
         fetchPublicacoes(); // Atualiza a lista de publicações
-        setModalPostVisible(false); // Fecha o modal após a publicação
       } catch (error) {
         console.error('Erro ao criar a publicação:', error);
         Alert.alert('Erro', 'Falha ao criar a publicação.');
@@ -202,44 +232,51 @@ const HomeScreenGestao = () => {
         <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} />
       </View>
       <Text>{pub.publicacao_descricao}</Text>
-      <Curtir count={pub.quantidade_curtidas} liked={likes[pub.idPublicacao]} onPress={() => handleLike(pub.idPublicacao)} />
-      <BotaoComentar onPress={() => { setModalVisible(true); fetchComments(pub.idPublicacao); }} comentarioCount={pub.quantidade_comentarios} />
-      <CommentModal visible={modalVisible} onClose={() => setModalVisible(false)} comments={selectedComments} onCommentAdded={handleCommentUpdate} publicacaoId={pub.idPublicacao} />
+      <Curtir
+        count={pub.quantidade_curtidas}
+        liked={likes[pub.idPublicacao]}
+        onPress={() => handleLike(pub.idPublicacao)}
+      />
+      <BotaoComentar onPress={async () => { 
+        await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
+        setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
+        setModalVisible(true);
+      }} comentarioCount={pub.quantidade_comentarios} />
     </View>
   );
 
+
   return (
-    <ScrollView style={styles.container}>
-      {publicacoes.map(renderPublicacao)}
-
-      {/* Botão Flutuante */}
-      <TouchableOpacity style={styles.floatingButton} onPress={() => setModalPostVisible(true)}>
-        <Text style={styles.floatingButtonText}>+</Text>
-      </TouchableOpacity>
-
-      {/* Modal de Nova Publicação */}
-      <Modal
-        visible={modalPostVisible}
-        animationType="slide"
-        onRequestClose={() => setModalPostVisible(false)}
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }} // Ajuste o padding para a altura da área de criação de publicações
       >
-        <View style={styles.modalPostContainer}>
-          <TextInput
-            style={styles.inputPost}
-            value={newPostText}
-            onChangeText={setNewPostText}
-            placeholder="Escreva sua publicação"
-          />
-          <TouchableOpacity onPress={handleCreatePost} style={styles.sendButton}>
-            <Text style={styles.sendButtonText}>Publicar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setModalPostVisible(false)} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
-    </ScrollView>
+        {publicacoes.map(renderPublicacao)}
+      </ScrollView>
+  
+      {/* Fixa a área de criação de publicações na parte inferior */}
+      <View style={styles.fixedFooter}>
+        <TextInput
+          style={styles.inputPost}
+          placeholder="Escreva uma publicação..."
+          value={newPostText}
+          onChangeText={setNewPostText}
+        />
+        <TouchableOpacity style={styles.sendPostButton} onPress={handleCreatePost}>
+          <Text style={styles.sendPostButtonText}>Publicar</Text>
+        </TouchableOpacity>
+      </View>
+  
+      <CommentModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        comments={selectedComments}
+        onCommentAdded={handleCommentUpdate}
+        publicacaoId={currentPostId}
+      />
+    </View>
   );
+  
 };
 
 const styles = StyleSheet.create({
@@ -362,15 +399,27 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 10,
-    borderRadius: 5,
+    borderRadius: 5, // Remove duplicate borderRadius property
+    padding: 10,
+    marginBottom: 10,
+  },
+  inputPost:{
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5, // Remove duplicate borderRadius property
     padding: 10,
     marginBottom: 10,
   },
   sendButton: {
     backgroundColor: '#00527C',
-    borderRadius: 10,
-    borderRadius: 5,
+    borderRadius: 5, // Remove duplicate borderRadius property
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sendPostButton:{
+    backgroundColor: '#00527C',
+    borderRadius: 5, // Remove duplicate borderRadius property
     paddingVertical: 10,
     alignItems: 'center',
     marginBottom: 10,
@@ -378,6 +427,21 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: 'white',
     color: '#fff',
+  },
+  sendPostButtonText:{
+    color: 'white',
+    color: '#fff',
+  },
+  fixedFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+    zIndex: 1, // Para garantir que fique acima de outros elementos
   },
   closeButton: {
     backgroundColor: '#ff6400',
@@ -422,92 +486,31 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 5,
   },
-   floatingButton: {
+  floatingButton: {
     position: 'absolute',
     bottom: 30,
     right: 30,
     width: 60,
     height: 60,
-    backgroundColor: '#FF6400',  // Cor de fundo do botão
-    borderRadius: 30,  // Forma arredondada
+    backgroundColor: '#007BFF',
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,  // Sombra para o botão flutuante
   },
   floatingButtonText: {
     color: 'white',
     fontSize: 30,
-    fontWeight: 'bold',
   },
-
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContainer: {
-    width: '80%',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-    height: 50,  // Aumenta a altura do input para mais conforto
-    textAlignVertical: 'center', // Para o texto começar no topo do campo
-  },
-  sendButton: {
+  createPostButton: {
     backgroundColor: '#00527C',
     borderRadius: 10,
     paddingVertical: 10,
-    alignItems: 'center',
     marginBottom: 10,
-  },
-  sendButtonText: {
-    color: 'white',
-  },
-  closeButton: {
-    backgroundColor: '#FF6400',
-    borderRadius: 10,
-    paddingVertical: 10,
     alignItems: 'center',
   },
-  closeButtonText: {
-    color: 'white',
-  },
-  inputComentario: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-    height: 50,  // Altura ajustada para o conforto do texto
-    textAlignVertical: 'top',  // Garantir que o texto comece no topo
-  },
-  // Estilo de envio de comentário
-  sendButton: {
-    backgroundColor: '#00527C',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  boxPubli: {
-    backgroundColor: 'white',
-    marginBottom: 15,
-    padding: 10,
-    borderRadius: 8,
-    elevation: 3,
+  createPostButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 
