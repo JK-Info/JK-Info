@@ -93,48 +93,68 @@ router.post(
   }
 );
 
-// Rota DELETE para excluir uma publicação
+// Rota DELETE para excluir uma publicação e seus dependentes (comentários e curtidas)
 router.delete('/deletepublicacao/:id', (req, res) => {
   const { id } = req.params;
+  const idPessoa = 21;  // ID do usuário que pode excluir suas próprias publicações
 
-  console.log(`Rota DELETE /deletepublicacao chamada para excluir a publicação com id: ${id}`);
+  console.log(`Rota DELETE /deletepublicacao chamada para excluir a publicação com id: ${id} pelo usuário ${idPessoa}`);
 
-  // Verificar se há curtidas na publicação
-  const checkLikesQuery = 'SELECT * FROM CurtidaPublicacao WHERE Publicacao_idPublicacao = ?';
-  db.query(checkLikesQuery, [id], (err, result) => {
+  // Verificar se a publicação pertence ao usuário com idPessoa = 21
+  const checkOwnerQuery = 'SELECT * FROM Publicacao WHERE idPublicacao = ? AND Pessoa_idPessoa = ?';
+  db.query(checkOwnerQuery, [id, idPessoa], (err, result) => {
     if (err) {
-      console.error('Erro ao verificar curtidas:', err);
-      return res.status(500).json({ message: 'Erro ao verificar curtidas.' });
+      console.error('Erro ao verificar o dono da publicação:', err);
+      return res.status(500).json({ message: 'Erro ao verificar o dono da publicação.' });
     }
 
-    console.log(`Verificação de curtidas para a publicação ${id} retornou:`, result);
-
-    if (result.length > 0) {
-      console.log(`A publicação ${id} possui curtidas associadas. Não pode ser excluída.`);
-      return res.status(400).json({ message: 'Não é possível excluir a publicação, pois há curtidas associadas.' });
+    if (result.length === 0) {
+      console.log(`Publicação ${id} não pertence ao usuário ${idPessoa}.`);
+      return res.status(403).json({ message: 'Você não tem permissão para excluir esta publicação.' });
     }
 
-    console.log(`Nenhuma curtida associada encontrada para a publicação ${id}. Prosseguindo com a exclusão.`);
+    console.log(`Publicação ${id} pertence ao usuário ${idPessoa}. Prosseguindo com a exclusão.`);
 
-    // Agora excluir a publicação
-    const deletePostQuery = 'DELETE FROM Publicacao WHERE idPublicacao = ?';
-    db.query(deletePostQuery, [id], (err, result) => {
+    // Excluir curtidas associadas à publicação
+    const deleteLikesQuery = 'DELETE FROM CurtidaPublicacao WHERE Publicacao_idPublicacao = ?';
+    db.query(deleteLikesQuery, [id], (err, result) => {
       if (err) {
-        console.error('Erro ao excluir a publicação:', err);
-        return res.status(500).json({ message: 'Erro ao excluir publicação.' });
+        console.error('Erro ao excluir curtidas associadas à publicação:', err);
+        return res.status(500).json({ message: 'Erro ao excluir curtidas.' });
       }
+      console.log(`Curtidas associadas à publicação ${id} excluídas.`);
 
-      console.log(`Resultado da exclusão da publicação ${id}:`, result);
+      // Excluir comentários associados à publicação
+      const deleteCommentsQuery = 'DELETE FROM Comentario WHERE Publicacao_idPublicacao = ?';
+      db.query(deleteCommentsQuery, [id], (err, result) => {
+        if (err) {
+          console.error('Erro ao excluir comentários associados à publicação:', err);
+          return res.status(500).json({ message: 'Erro ao excluir comentários.' });
+        }
+        console.log(`Comentários associados à publicação ${id} excluídos.`);
 
-      if (result.affectedRows > 0) {
-        console.log(`Publicação ${id} excluída com sucesso.`);
-        return res.status(200).json({ message: 'Publicação excluída com sucesso.' });
-      } else {
-        console.log(`Publicação ${id} não encontrada.`);
-        return res.status(404).json({ message: 'Publicação não encontrada.' });
-      }
+        // Excluir a publicação
+        const deletePostQuery = 'DELETE FROM Publicacao WHERE idPublicacao = ?';
+        db.query(deletePostQuery, [id], (err, result) => {
+          if (err) {
+            console.error('Erro ao excluir a publicação:', err);
+            return res.status(500).json({ message: 'Erro ao excluir a publicação.' });
+          }
+
+          console.log(`Resultado da exclusão da publicação ${id}:`, result);
+
+          if (result.affectedRows > 0) {
+            console.log(`Publicação ${id} excluída com sucesso.`);
+            return res.status(200).json({ message: 'Publicação e dependências excluídas com sucesso.' });
+          } else {
+            console.log(`Publicação ${id} não encontrada.`);
+            return res.status(404).json({ message: 'Publicação não encontrada.' });
+          }
+        });
+      });
     });
   });
 });
+
 
 module.exports = router;

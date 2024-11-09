@@ -110,48 +110,48 @@ const handleLikeComment = async (commentId) => {
   }
 };
 
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Comentários</Text>
-          <ScrollView style={styles.comentariosContainer}>
+return (
+  <Modal
+    animationType="slide"
+    transparent={true}
+    visible={visible}
+    onRequestClose={onClose}
+  >
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContainer}>
+        <Text style={styles.modalTitle}>Comentários</Text>
+        <ScrollView style={styles.comentariosContainer}>
           {Array.isArray(comments) && comments.map((comment) => (
-              <View key={comment.idComentario} style={styles.comentarioContainer}>
-                <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
-                <View style={styles.comentarioTextoContainer}>
-                  <Text style={styles.nomeAutor}>{comment.nome_comentador}</Text>
-                  <Text style={styles.comentarioTexto}>{comment.texto}</Text>
-                </View>
-                <CurtirComentario
-                  count={comment.num_likes}
-                  liked={comment.liked}
-                  onPress={() => handleLikeComment(comment.idComentario)}
-                />
+            <View key={comment.idComentario} style={styles.comentarioContainer}>
+              <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
+              <View style={styles.comentarioTextoContainer}>
+                <Text style={styles.nomeAutor}>{comment.nome_comentador}</Text>
+                <Text style={styles.comentarioTexto}>{comment.texto}</Text>
               </View>
-            ))}
-          </ScrollView>
-          <TextInput 
-            style={styles.input} 
-            placeholder="Escreva um comentário..." 
-            value={textoComentario}
-            onChangeText={setTextoComentario}
-          />
-          <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
-            <Text style={styles.sendButtonText}>Enviar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
+              <CurtirComentario
+                count={comment.num_likes}
+                liked={comment.liked}
+                onPress={() => handleLikeComment(comment.idComentario)}
+              />
+            </View>
+          ))}
+        </ScrollView>
+        <TextInput 
+          style={styles.input} 
+          placeholder="Escreva um comentário..." 
+          value={textoComentario}
+          onChangeText={setTextoComentario}
+        />
+        <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
+          <Text style={styles.sendButtonText}>Enviar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <Text style={styles.closeButtonText}>Fechar</Text>
+        </TouchableOpacity>
       </View>
-    </Modal>
-  );
+    </View>
+  </Modal>
+);
 };
 
 // Componente principal HomeScreenGestao
@@ -258,21 +258,26 @@ const HomeScreenGestao = () => {
         <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} />
       </View>
       <Text>{pub.publicacao_descricao}</Text>
-      <Curtir
-        count={pub.quantidade_curtidas}
-        liked={likes[pub.idPublicacao]}
-        onPress={() => handleLike(pub.idPublicacao)}
-      />
-      <BotaoComentar onPress={async () => { 
-        await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
-        setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
-        setModalVisible(true);
-      }} comentarioCount={pub.quantidade_comentarios} 
-      />
-      <BotaoExcluir onPress={() => handleDeletePost(pub.idPublicacao)} />
+      <View style={styles.actionsRow}>
+        <Curtir
+          count={pub.quantidade_curtidas}
+          liked={likes[pub.idPublicacao]}
+          onPress={() => handleLike(pub.idPublicacao)}
+        />
+        <View style={styles.commentDeleteRow}>
+          <BotaoComentar
+            onPress={async () => {
+              await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
+              setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
+              setModalVisible(true);
+            }}
+            comentarioCount={pub.quantidade_comentarios}
+          />
+          <BotaoExcluir onPress={() => handleDeletePost(pub.idPublicacao)} />
+        </View>
+      </View>
     </View>
   );
-
 
   return (
     <View style={styles.container}>
@@ -304,7 +309,6 @@ const HomeScreenGestao = () => {
       />
     </View>
   );
-  
 };
 
 const styles = StyleSheet.create({
@@ -320,6 +324,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 10,
     marginVertical: 10,
+  },
+  actionsRow: {
+    flexDirection: 'row',   // Alinha os componentes em uma linha
+    justifyContent: 'space-between',  // Distribui os itens igualmente
+    alignItems: 'center',   // Alinha verticalmente no centro
+    marginTop: 10,    // Ajuste de margem para dar espaço acima
+  },
+  commentDeleteRow: {
+    flexDirection: 'row',   // Alinha comentar e excluir na mesma linha
+    alignItems: 'center',   // Alinha verticalmente no centro
+    marginLeft: 10,         // Opcional: ajusta o espaço em relação ao botão Curtir
   },
   scrollView: {
     flex: 1,
@@ -379,6 +394,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#00527C',
     borderRadius: 20,
     margin: 5,
+    maxWidth: 100,
+    minWidth: 110
   },
   botaoExcluir: {
     paddingVertical: 5,

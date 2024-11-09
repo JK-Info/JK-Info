@@ -14,7 +14,7 @@ const PerfilGestao = () => {
     // Função para buscar dados do perfil
     const fetchProfileData = async () => {
         try {
-            const idPessoa = '7'; // Exemplo de ID
+            const idPessoa = '21'; // Exemplo de ID
             const response = await fetch(`http://localhost:3000/perfil/${idPessoa}`);
 
             if (response.ok) {
@@ -48,7 +48,7 @@ const PerfilGestao = () => {
     };
 
     const updateProfileData = async () => {
-        const idPessoa = '1';
+        const idPessoa = '21';
 
         if (!emailPessoal || !numeroCelular) {
             alert('Por favor, insira um email e número pessoal antes de salvar.');
@@ -98,7 +98,7 @@ const PerfilGestao = () => {
                 <>
                     <TouchableOpacity onPress={editing ? selecaoImagem : null}>
                         <Image
-                            source={profileImage ? { uri: profileImage } : require('../../assets/FotosSobrenos/Pablo-henrique.jpeg')}
+                            source={profileImage ? { uri: profileImage } : require('../../assets/FotosPerfil/Foto-perfil-Anonima.jpg')}
                             style={styles.profileImage}
                         />
                     </TouchableOpacity>

@@ -650,17 +650,20 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
 	-- CRIANDO PUBLICAÇÕES -------------------------------------------
 
 	INSERT INTO `Publicacao` (descricao, imagem, Pessoa_idPessoa) 
-	VALUES ('Primeira publicação de teste', NULL, 21);
+	VALUES ('Obrigado por utilizar o JK Info!', NULL, 23);
 
 	INSERT INTO `Publicacao` (descricao, imagem, Pessoa_idPessoa) 
-	VALUES ('Segunda publicação de teste', NULL, 21);
+	VALUES ('Sejam bem vindos ao JK Info!', NULL, 29);
+    
+    INSERT INTO `Publicacao` (descricao, imagem, Pessoa_idPessoa) 
+	VALUES ('Ótima ferramenta para a Instituição', NULL, 25);
     
     -- INSERINDO COMENTÁRIOS NAS PUBLICAÇÕES --------------------------
     
     INSERT INTO Comentario (texto, Publicacao_idPublicacao, Pessoa_idPessoa)
 	VALUES 
     ('Ótima publicação! Adorei o conteúdo.', 1, 1), 
-    ('Acho que podemos explorar mais esse tópico.', 2, 2);
+    ('Acho que podemos explorar mais esse tópico.', 3, 2);
 
 
 -- COMENTÁRIOS NA PUBLICAÇÃO ----------------------------------
@@ -706,5 +709,5 @@ LIMIT 0, 1000;
 	ORDER BY 
 		p.dataPublicacao DESC
 	LIMIT 0, 1000;
-    
 
+    
