@@ -1,15 +1,11 @@
-import { text } from 'body-parser';
-import { id } from 'date-fns/locale';
-import { response } from 'express';
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
-import { Picker } from 'react-native-web';
+import { View, Text, FlatList, TextInput, Button, StyleSheet, Picker } from 'react-native';
 
 const NotasGestao = () => {
   const [notas, setNotas] = useState([]);
   const [turmaSelecionada, setTurmaSelecionada] = useState('');
   const [nota, setNota] = useState('');
-  const [turmas, setTurmas] = useState('');
+  const [turmas, setTurmas] = useState([]);
   const [editando, setEditando] = useState(false);
   const [notaEditar, setNotaEditar] = useState({});
 
@@ -17,12 +13,12 @@ const NotasGestao = () => {
     fetch('http://localhost:3000/turmas')
       .then((response) => response.json())
       .then((data) => setTurmas(data))
-      .catch((error) => console.error('Erro ao buscar notas:', error));
+      .catch((error) => console.error('Erro ao buscar turmas:', error));
 
-    fetch('http:localhost:3000/notas')
+    fetch('http://localhost:3000/notas')
       .then((response) => response.json())
-      .then((data) => setNota(data))
-      .catch((error)=> console.error('Erro ao buscar notas:', error));
+      .then((data) => setNotas(data))
+      .catch((error) => console.error('Erro ao buscar notas:', error));
   }, []);
 
   const handleSendNota = () => {
@@ -42,7 +38,7 @@ const NotasGestao = () => {
   };
 
   const handleEditNota = (item) => {
-    fetch(`http://localhost:3000/notas/${notaEditar.idNota}`, {
+    fetch(`http://localhost:3000/notas/${item.idNota}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -51,68 +47,75 @@ const NotasGestao = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        setNotas(notas.map((nota) => (nota.idNota === notaEditar.idNota ? data : nota)));
+        setNotas(notas.map((nota) => (nota.idNota === item.idNota ? data : nota)));
         setNota('');
         setEditando(false);
       })
       .catch((error) => console.error('Erro ao editar nota:', error));
   };
 
-  const handleDeleteNota = (item) => {
-    fetch(`http://localhost:3000/notas/${item.idNota}`, {
+  const handleDeleteNota = (nota) => {
+    fetch(`http://localhost:3000/notas/${nota.idNota}`, {
       method: 'DELETE',
     })
       .then((response) => response.json())
       .then((data) => {
-        setNotas(notas.filter((nota) => nota.idNota !== id));
+        setNotas(notas.filter((nota) => nota.idNota !== nota.idNota));
       })
       .catch((error) => console.error('Erro ao excluir nota:', error));
   };
 
   return (
     <View style={styles.container}>
-      <Text>Selecione a Turma:</Text>
+      <Text style={styles.title}>Selecione a Turma:</Text>
       <Picker
         selectedValue={turmaSelecionada}
-        onValueChange={(itemValue) => setTurmaSelecionada(itemValue)}>
-          {turmas.map((turma) => (
-            <Picker.item
-            label={turma.nomeTurma}
-            value={turma.idTurma}
-            key={turma.idTurma}/>
-            ))}
-        </Picker>
-        <TextInput
-          placeholder="Digite a Nota"
-          value={nota}
-          onChangeText={(text) => setNota(text)}
-        />
-        {editando ? (
-          <Button title="Editar"
-          onPress={handleEditNota} />
-        ) : (
-          <Button title="Enviar"
-          onPress={handleSendNota} />
-        )}
-        <Text>Notas:</Text>
-        {notas.map((nota) => (
-          <View key={nota.idNota}>
-            <Text>{nota.nota} - {nota.Turma.idTurma}</Text>
-            <Button
-              title="Editar"
-              onPress={() => {
-                setEditando(true);
-                setNotaEditar(nota);
-                setNota(nota.nota);
-                setTurmaSelecionada(nota.Turma.idTurma);
-              }}
-              />
-              <Button title="Excluir"
-              onPress={() => 
-                handleDeleteNota(nota.idNota)} />
-                </View>
+        onValueChange={(itemValue) => setTurmaSelecionada(itemValue)}
+        style={styles.picker}
+      >
+        {turmas.map((turma) => (
+          <Picker.Item label={turma.nomeTurma} value={turma.idTurma} key={turma.idTurma} />
         ))}
-      
+      </Picker>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Digite a Nota"
+        value={nota}
+        onChangeText={(text) => setNota(text)}
+        keyboardType="numeric"
+      />
+
+      {editando ? (
+        <Button title="Editar" onPress={() => handleEditNota(notaEditar)} />
+      ) : (
+        <Button title="Enviar" onPress={handleSendNota} />
+      )}
+
+      <Text style={styles.subtitle}>Notas:</Text>
+      <FlatList
+        data={notas}
+        renderItem={({ item }) => (
+          <View style={styles.notaContainer} key={item.idNota}>
+            <Text style={styles.nota}>
+              {item.nota} - Turma {item.Turma.idTurma}
+            </Text>
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Editar"
+                onPress={() => {
+                  setEditando(true);
+                  setNotaEditar(item);
+                  setNota(item.nota);
+                  setTurmaSelecionada(item.Turma.idTurma);
+                }}
+              />
+              <Button title="Excluir" onPress={() => handleDeleteNota(item)} />
+            </View>
+          </View>
+        )}
+        keyExtractor={(item) => item.idNota.toString()}
+      />
     </View>
   );
 };
@@ -124,16 +127,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 15,
     color: '#333',
   },
-  notaContainer: {
-    backgroundColor: '#ffffff',
+  subtitle: {
+    fontSize: 18,
+    marginVertical: 15,
+    color: '#555',
+  },
+  input: {
+    backgroundColor: '#fff',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#dddddd',
+    borderColor: '#ccc',
+    padding: 10,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  picker: {
+    height: 50,
+    marginBottom: 15,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingLeft: 10,
+  },
+  notaContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
     padding: 15,
     marginBottom: 15,
     shadowColor: '#000',
@@ -143,24 +168,12 @@ const styles = StyleSheet.create({
   },
   nota: {
     fontSize: 16,
-    marginVertical: 5,
-  },
-  turma: {
-    fontSize: 14,
-    color: '#555',
+    marginBottom: 10,
+    color: '#333',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 15,
   },
 });
 

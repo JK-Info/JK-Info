@@ -305,6 +305,25 @@ CREATE TABLE IF NOT EXISTS CurtidaComentario (
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- -----------------------------------------------------
+-- Table `mydb`.`Notas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
+  `idNota` INT NOT NULL AUTO_INCREMENT,
+  `nota` DECIMAL(5,2) NOT NULL,  -- A nota pode ser um número decimal (por exemplo, 9.5)
+  `descricao` VARCHAR(255) NOT NULL,  -- Descrição da nota, como "Lembrete" ou "Aviso"
+  `dataCriacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Data de criação da nota
+  `Turma_idTurma` INT NOT NULL,  -- Chave estrangeira que referencia a tabela Turma
+  PRIMARY KEY (`idNota`),
+  INDEX `fk_Notas_Turma_idx` (`Turma_idTurma`),
+  CONSTRAINT `fk_Notas_Turma`
+    FOREIGN KEY (`Turma_idTurma`)
+    REFERENCES `mydb`.`Turma` (`idTurma`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+
 	SET SQL_MODE=@OLD_SQL_MODE;
 	SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 	SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
@@ -687,3 +706,5 @@ LIMIT 0, 1000;
 	ORDER BY 
 		p.dataPublicacao DESC
 	LIMIT 0, 1000;
+    
+

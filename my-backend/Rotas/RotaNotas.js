@@ -10,7 +10,7 @@ routerNotas.get('/notas', (req, res)=>{
       console.error('Erro ao Buscar Notas:', err);
       res.status(500).send({mensagem: 'Erro ao Buscar Notas'});
     }else{
-      res.send(results);
+      return res.json(results);
     }
   });
 });
@@ -31,7 +31,7 @@ routerNotas.post('/notas', (req,res)=>{
 
 routerNotas.put('/notas/:id', (req,res)=>{
   const {id} = req.params;
-  const {nota} = req.params;
+  const {nota} = req.body;
   const query = 'UPDATE notas Set nota = ? WHERE idNota = ?';
 
   db.query(query, [nota, id], (err, results)=> {
@@ -44,7 +44,7 @@ routerNotas.put('/notas/:id', (req,res)=>{
   });
 });
 
-routerNotas.delete('/notas/:id', (res,req) => {
+routerNotas.delete('/notas/:id', (req, res) => {
   const { id } = req.params;
   const query = 'DELETE FROM notas WHERE idNota = ?';
   db.query(query, [id], (err, results) => {
