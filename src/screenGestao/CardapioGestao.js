@@ -33,23 +33,41 @@ const CardapioGestao = () => {
     novoCardapio[diaSelecionado].sobremesa = sobremesa;
 
     try {
-      setCardapio(novoCardapio);
-
-      await axios.put('http://localhost:3000/putCardapio', {
+      const response = await axios.put('http://localhost:3000/putCardapio', {
         dia: diaSelecionado,
         prato: pratos,
         sobremesa: sobremesa
       });
 
-      setModalVisible(false);
-      Alert.alert('Sucesso', 'Cardápio atualizado com sucesso!');
+      if (response.status === 200) {
+        setCardapio(novoCardapio);
+        setModalVisible(false);
+        Alert.alert('Sucesso', 'Cardápio atualizado com sucesso');
+
+        obterCardapioAtualizado();
+      } else {
+        throw new Error('Falha ao atualizar o cardápio');
+      }
     } catch (error) {
       console.error('Erro ao atualizar cardápio:', error);
-      Alert.alert('Erro', 'Falha ao atualizar o cardápio.');
+      setModalVisible(false);
+      Alert.alert('Erro', 'Falha ao atualizar o cardápio. Tente novamente');
     }
+  };
 
-    setModalVisible(false);
-    Alert.alert('Sucesso', 'Cardápio atualizado com sucesso!');
+  const obterCardapioAtualizado = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/getCardapio');
+
+      if (response.status === 200) {
+        setCardapio(response.data);
+      } else {
+        Alert.alert('Aviso', 'Cardápio não encontrado');
+      }
+    } catch (error) {
+      console.error('Erro ao obter cardápio:'. error);
+      Alert.alert('Erro', 'Falha ao obter o cardápio. Tente novamente');
+    }
   };
 
   return (

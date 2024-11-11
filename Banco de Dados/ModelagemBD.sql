@@ -308,6 +308,14 @@ CREATE TABLE IF NOT EXISTS CurtidaComentario (
 -- -----------------------------------------------------
 -- Table `mydb`.`Notas`
 -- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Cardapio` (
+diaSemana VARCHAR(20) NOT NULL PRIMARY KEY,
+prato VARCHAR(30) NOT NULL,
+complemento VARCHAR(30),
+sobremesa VARCHAR(30)
+) ENGINE=InnoDB;
+
+-- --------------------- Table `mydb`.`Cardapio`-------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
   `idNota` INT NOT NULL AUTO_INCREMENT,
   `nota` DECIMAL(5,2) NOT NULL,  -- A nota pode ser um número decimal (por exemplo, 9.5)
@@ -327,6 +335,15 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
 	SET SQL_MODE=@OLD_SQL_MODE;
 	SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 	SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+	-- INSERINDO CARDAPIO ---------------------------------
+    
+    INSERT INTO `mydb`.`Cardapio` (`diaSemana`) VALUES
+    ('Seguda'),
+    ('Terça'),
+    ('Quarta'),
+    ('Quinta'),
+    ('Sexta');
 
 	-- INSERINDO TURMAS -----------------------------------
 
