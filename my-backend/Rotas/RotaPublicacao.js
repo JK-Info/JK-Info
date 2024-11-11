@@ -156,5 +156,52 @@ router.delete('/deletepublicacao/:id', (req, res) => {
   });
 });
 
+router.get('/getpublicacaousuario/:idPessoa', async (req, res) => {
+  const { idPessoa } = req.params; // Pegando o idPessoa da URL
+
+  console.log(`Buscando publicações para o usuário com ID: ${idPessoa}`);
+
+  const query = `
+    SELECT 
+          p.idPublicacao,
+          p.descricao AS publicacao_descricao,
+          pes.nome AS nome_pessoa,
+          c.nomeCargo AS cargo,
+          p.dataPublicacao,
+          COUNT(DISTINCT cur.idCurtidaPublicacao) AS quantidade_likes,
+          COUNT(DISTINCT com.idComentario) AS quantidade_comentarios
+      FROM 
+          Publicacao p
+      JOIN 
+          Pessoa pes ON p.Pessoa_idPessoa = pes.idPessoa
+      JOIN 
+          Funcionario f ON pes.idPessoa = f.Pessoa_idPessoa
+      JOIN 
+          Cargo c ON f.Cargo_idCargo = c.idCargo
+      LEFT JOIN 
+          CurtidaPublicacao cur ON p.idPublicacao = cur.Publicacao_idPublicacao
+      LEFT JOIN 
+          Comentario com ON p.idPublicacao = com.Publicacao_idPublicacao
+      WHERE
+          pes.idPessoa = ?  -- Usando parâmetro dinâmico
+      GROUP BY 
+          p.idPublicacao, pes.nome, c.nomeCargo, p.dataPublicacao
+      ORDER BY 
+          p.dataPublicacao DESC
+      LIMIT 0, 1000;
+  `;
+
+  try {
+    const [results] = await db.promise().query(query, [idPessoa]);
+
+    console.log(`Consultados ${results.length} resultados`); // Log de quantidade de resultados encontrados
+
+    res.json({ success: true, data: results });
+  } catch (error) {
+    console.error('Erro ao buscar publicações:', error); // Log do erro
+    res.status(500).json({ success: false, error: 'Erro ao buscar publicações.' });
+  }
+});
+
 
 module.exports = router;

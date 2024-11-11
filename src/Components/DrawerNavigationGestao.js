@@ -8,6 +8,7 @@ import TabNavigatorGestor from './TabNavigatorGestor';
 import PerfilGestao from '../screenGestao/PerfilGestao';
 import RedeGestor from '../screenGestao/RedeGestao';
 import NotasGestao from '../screenGestao/NotasGestao';
+import PublicacoesGestao from '../screenGestao/PublicacoesGestao';
 
 const Drawer = createDrawerNavigator();
 
@@ -28,6 +29,7 @@ const DrawerNavigatorGestao = ( )=> (
   >
     <Drawer.Screen name="Home" component={TabNavigatorGestor} />
     <Drawer.Screen name="Perfil" component={PerfilGestao} />
+    <Drawer.Screen name="Minhas Publicações" component={PublicacoesGestao} />
     <Drawer.Screen name="Rede" component={RedeGestor} />
     <Drawer.Screen name="Notas" component={NotasGestao} />
     <Drawer.Screen name="Cardápio" component={CardapioGestao} />
