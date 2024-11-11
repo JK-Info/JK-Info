@@ -12,10 +12,14 @@ import DrawerNavigatorGestor from './src/Components/DrawerNavigationGestao.js';
 import DrawerNavigatorFuncionario from './src/Components/DrawerNavigationFuncionario.js';
 import TabNavigatorFuncionario from './src/Components/TabNavigatorFuncionario.js';
 import axios from 'axios';
+import { JWT_SECRET_KEY } from '@env';
+
+
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  console.log(JWT_SECRET_KEY);  // Isso vai imprimir a chave do JWT
   const [alunos, setAlunos] = useState([]);
 
   useEffect(() => {

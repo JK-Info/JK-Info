@@ -1,47 +1,20 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TextInput, View, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { storeUserData, getUserData, clearUserData } from './SessionStorage'; // Certifique-se de que essas funções estão corretamente definidas
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !senha) {
-      Alert.alert('Erro', 'Por favor, insira seu e-mail e senha.');
-      return;
-    }
-
-    setLoading(true);
-    
-    try {
-      const response = await axios.post('http://localhost:3000/login', { email, senha });
-      if (response.data.success) {
-        const userType = response.data.userType;
-
-        // Armazenar os dados do usuário
-        await storeUserData(email, userType);
-        navigation.navigate('LoadingScreen'); // Navegue para uma tela de carregamento ou diretamente para a tela principal
-      } else {
-        Alert.alert('Erro', 'E-mail ou senha incorretos.');
-      }
-    } catch (error) {
-      console.error('Login failed: ', error);
-      Alert.alert('Erro', 'Ocorreu um erro durante o login. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Verificar se o usuário já está logado
   useEffect(() => {
-    const checkUserSession = async () => {
-      const userData = await getUserData();
-      if (userData) {
-        // Navegar para a tela correspondente com base no tipo de usuário
-        switch (userData.userType) {
+    const checkLoggedIn = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      if (token) {
+        const userType = await AsyncStorage.getItem('userType');
+        switch (userType) {
           case 'aluno':
             navigation.navigate('DrawerNavigatorAluno');
             break;
@@ -55,21 +28,65 @@ const LoginScreen = ({ navigation }) => {
             navigation.navigate('DrawerNavigatorGestao');
             break;
           default:
-            clearUserData(); // Limpa dados se tipo de usuário inválido
-            navigation.navigate('LoginScreen'); // Redireciona para login
+            Alert.alert('Erro', 'Tipo de usuário inválido.');
+            break;
         }
-      } else {
-        navigation.navigate('LoginScreen'); // Redireciona para login se não estiver logado
       }
     };
-
-    checkUserSession();
+    checkLoggedIn();
   }, [navigation]);
+
+  const handleLogin = async () => {
+    if (!email || !senha) {
+      Alert.alert('Erro', 'Por favor, insira seu e-mail e senha.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post('http://localhost:3000/login', { email, senha });
+
+      if (response.data.success) {
+        const { token, userType } = response.data;
+
+        // Armazenar os dados do usuário (token e tipo de usuário)
+        await AsyncStorage.setItem('userToken', token);
+        await AsyncStorage.setItem('userType', userType);
+
+        // Navegar para a tela inicial do usuário
+        switch (userType) {
+          case 'aluno':
+            navigation.navigate('DrawerNavigatorAluno');
+            break;
+          case 'professor':
+            navigation.navigate('DrawerNavigatorProfessor');
+            break;
+          case 'funcionario':
+            navigation.navigate('DrawerNavigatorFuncionario');
+            break;
+          case 'gestao':
+            navigation.navigate('DrawerNavigatorGestao');
+            break;
+          default:
+            Alert.alert('Erro', 'Tipo de usuário inválido.');
+            break;
+        }
+      } else {
+        Alert.alert('Erro', response.data.message || 'E-mail ou senha incorretos.');
+      }
+    } catch (error) {
+      console.error('Login failed: ', error);
+      Alert.alert('Erro', 'Ocorreu um erro durante o login. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return <ActivityIndicator size="large" color="#00527C" />;
   }
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>

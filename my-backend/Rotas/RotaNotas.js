@@ -24,7 +24,7 @@ routerNotas.post('/notas', (req,res)=>{
       console.error('Erro ao Criar nota:', err);
       res.status(500).send({mensagem: 'Erro ao criar nota'});
     }else{
-      res.send({mensagem: 'Nota Criada Cm Sucesso!'});
+      res.send({ idNota: results.insertId, nota, Turma_idTurma: turmaId});
     }
   });
 });
@@ -57,8 +57,8 @@ routerNotas.delete('/notas/:id', (req, res) => {
   });
 });
 
-routerNotas.get('/turmas', (res,req) =>{
-  const query = 'SELECT idTurma, nomeTurma FROM turmas';
+routerNotas.get('/turmas', (req, res) =>{
+  const query = 'SELECT idTurma, nomeTurma FROM turma';
   db.query(query, (err,results)=> {
     if(err){
       console.error('Erro ao buscar Turmas', err)

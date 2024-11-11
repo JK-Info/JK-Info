@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TextInput, Button, StyleSheet, Picker } from 'react-native';
+import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
 const NotasGestao = () => {
   const [notas, setNotas] = useState([]);
@@ -8,18 +9,36 @@ const NotasGestao = () => {
   const [turmas, setTurmas] = useState([]);
   const [editando, setEditando] = useState(false);
   const [notaEditar, setNotaEditar] = useState({});
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    Promise.all([
     fetch('http://localhost:3000/turmas')
       .then((response) => response.json())
-      .then((data) => setTurmas(data))
-      .catch((error) => console.error('Erro ao buscar turmas:', error));
-
+      .then((data) => {
+        console.log('Turmas:', data);
+        setTurmas(data);
+      })
+      .catch((error) => {
+        console.error('Erro ao buscar turmas:', error);
+        setError('Erro ao Carregar Turmas');
+      }),
+  
     fetch('http://localhost:3000/notas')
       .then((response) => response.json())
-      .then((data) => setNotas(data))
-      .catch((error) => console.error('Erro ao buscar notas:', error));
+      .then((data) => {
+        console.log('Notas:', data);
+        setNotas(data);
+      })
+      .catch((error) => {
+        console.error('Erro ao buscar notas:', error);
+        setError('Erro ao Carregar Notas');
+      }),
+
+    ]).finally(() => setIsLoading(false)); 
   }, []);
+  
 
   const handleSendNota = () => {
     fetch('http://localhost:3000/notas', {
@@ -54,20 +73,30 @@ const NotasGestao = () => {
       .catch((error) => console.error('Erro ao editar nota:', error));
   };
 
-  const handleDeleteNota = (nota) => {
-    fetch(`http://localhost:3000/notas/${nota.idNota}`, {
+  const handleDeleteNota = (item) => {
+    fetch(`http://localhost:3000/notas/${item.idNota}`, {
       method: 'DELETE',
     })
-      .then((response) => response.json())
-      .then((data) => {
-        setNotas(notas.filter((nota) => nota.idNota !== nota.idNota));
+      .then(() => {
+        const notasAtualizadas = notas.filter((n) => n.idNota !== item.idNota);
+        setNotas(notasAtualizadas);
       })
       .catch((error) => console.error('Erro ao excluir nota:', error));
   };
 
+  if(isLoading) {
+    return <Text>Carregando Dados...</Text>
+}
+
+  if (error) {
+    return <Text>{error}</Text>
+  }
+  
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Selecione a Turma:</Text>
+      <Text style={styles.title}>Gerenciamento de Notas</Text>
+
+      <Text style={styles.label}>Selecione a Turma:</Text>
       <Picker
         selectedValue={turmaSelecionada}
         onValueChange={(itemValue) => setTurmaSelecionada(itemValue)}
@@ -87,18 +116,18 @@ const NotasGestao = () => {
       />
 
       {editando ? (
-        <Button title="Editar" onPress={() => handleEditNota(notaEditar)} />
+        <Button title="Salvar Edição" onPress={() => handleEditNota(notaEditar)} />
       ) : (
-        <Button title="Enviar" onPress={handleSendNota} />
+        <Button title="Adicionar Nota" onPress={handleSendNota} />
       )}
 
-      <Text style={styles.subtitle}>Notas:</Text>
+      <Text style={styles.subtitle}>Notas Cadastradas:</Text>
       <FlatList
         data={notas}
         renderItem={({ item }) => (
           <View style={styles.notaContainer} key={item.idNota}>
             <Text style={styles.nota}>
-              {item.nota} - Turma {item.Turma.idTurma}
+              Nota: {item.nota} - Turma {item.Turma_idTurma}
             </Text>
             <View style={styles.buttonContainer}>
               <Button
@@ -107,7 +136,7 @@ const NotasGestao = () => {
                   setEditando(true);
                   setNotaEditar(item);
                   setNota(item.nota);
-                  setTurmaSelecionada(item.Turma.idTurma);
+                  setTurmaSelecionada(item.Turma_idTurma);
                 }}
               />
               <Button title="Excluir" onPress={() => handleDeleteNota(item)} />
@@ -127,54 +156,61 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   title: {
-    fontSize: 22,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#333',
+    marginBottom: 20,
+    color: '#2c3e50',
+    textAlign: 'center',
   },
-  subtitle: {
+  label: {
     fontSize: 18,
-    marginVertical: 15,
-    color: '#555',
-  },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 15,
-    fontSize: 16,
+    color: '#7f8c8d',
+    marginBottom: 10,
   },
   picker: {
     height: 50,
-    marginBottom: 15,
-    borderColor: '#ccc',
+    width: '100%',
+    borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 10,
-    paddingLeft: 10,
+    marginBottom: 20,
+  },
+  input: {
+    height: 50,
+    backgroundColor: '#fff',
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingLeft: 15,
+    marginBottom: 20,
+    fontSize: 18,
+  },
+  subtitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#34495e',
+    marginVertical: 15,
   },
   notaContainer: {
     backgroundColor: '#fff',
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
     padding: 15,
     marginBottom: 15,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 2,
+    elevation: 3,
   },
   nota: {
-    fontSize: 16,
+    fontSize: 18,
+    color: '#7f8c8d',
     marginBottom: 10,
-    color: '#333',
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
 });
+
 
 export default NotasGestao;
