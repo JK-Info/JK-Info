@@ -1,6 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, View, Text, Button, ActivityIndicator, StyleSheet, TextInput, Image } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
+
 
 const PerfilGestao = () => {
     const [profileData, setProfileData] = useState(null);
@@ -13,9 +15,15 @@ const PerfilGestao = () => {
 
     // Função para buscar dados do perfil
     const fetchProfileData = async () => {
+        setLoading(true);
         try {
-            const idPessoa = '21'; // Exemplo de ID
-            const response = await fetch(`http://localhost:3000/perfil/${idPessoa}`);
+            const token = await AsyncStorage.getItem('userToken');
+            console.log('[INFO] Token JWT:', token);
+            const response = await fetch(`http://localhost:3000/perfil`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+            });
 
             if (response.ok) {
                 const data = await response.json();
@@ -35,6 +43,26 @@ const PerfilGestao = () => {
         }
     };
 
+    const updateProfileData = async () => {
+        const token = await AsyncStorage.getItem('userToken');
+        try {
+            const response = await fetch('http://localhost:3000/perfil', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`, // Corrigido para template literal
+                },
+                body: JSON.stringify({ emailPessoal, numeroCelular, profileImage }),
+            });
+    
+            if (!response.ok) throw new Error('Erro ao atualizar perfil');
+            alert('Perfil atualizado com sucesso!');
+            setEditing(false);
+        } catch (error) {
+            alert('Erro ao atualizar perfil: ' + error.message);
+        }
+    };
+
     const selecaoImagem = () => {
         launchImageLibrary({ mediaType: 'photo' }, (response) => {
             if (!response.didCancel && response.assets) {
@@ -47,28 +75,6 @@ const PerfilGestao = () => {
         });
     };
 
-    const updateProfileData = async () => {
-        const idPessoa = '21';
-
-        if (!emailPessoal || !numeroCelular) {
-            alert('Por favor, insira um email e número pessoal antes de salvar.');
-            return;
-        }
-
-        try {
-            const response = await fetch(`http://localhost:3000/perfil/${idPessoa}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ emailPessoal, numeroCelular, profileImage }),
-            });
-            if (!response.ok) throw new Error('Erro ao atualizar perfil');
-            alert('Perfil atualizado com sucesso!');
-            setEditing(false); // Encerra a edição após a atualização
-        } catch (error) {
-            console.error('[ERRO] Erro ao atualizar perfil:', error);
-            alert('Erro ao atualizar perfil: ' + error.message);
-        }
-    };
 
     useEffect(() => {
         fetchProfileData();

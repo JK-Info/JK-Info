@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { StyleSheet, Text, TextInput, View, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -48,11 +48,16 @@ const LoginScreen = ({ navigation }) => {
       const response = await axios.post('http://localhost:3000/login', { email, senha });
 
       if (response.data.success) {
-        const { token, userType } = response.data;
+        const { token, userType, userID, userName, userEmailPessoal, userEmailInstitucional } = response.data;
 
         // Armazenar os dados do usuário (token e tipo de usuário)
         await AsyncStorage.setItem('userToken', token);
         await AsyncStorage.setItem('userType', userType);
+        await AsyncStorage.setItem('userID', userID);
+        await AsyncStorage.setItem('userType', userType);
+        await AsyncStorage.setItem('userName', userName);
+        await AsyncStorage.setItem('userEmailInstitucional', userEmailInstitucional);
+        await AsyncStorage.setItem('userEmailPessoal', userEmailPessoal);
 
         // Navegar para a tela inicial do usuário
         switch (userType) {
