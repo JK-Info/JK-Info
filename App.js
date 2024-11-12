@@ -13,6 +13,7 @@ import DrawerNavigatorFuncionario from './src/Components/DrawerNavigationFuncion
 import TabNavigatorFuncionario from './src/Components/TabNavigatorFuncionario.js';
 import axios from 'axios';
 import { JWT_SECRET_KEY } from '@env';
+import {ThemeProvider, ThemeContext} from './src/Components/ThemeContext.js'
 
 
 
@@ -33,6 +34,7 @@ export default function App() {
   }, []);
 
   return (
+    <ThemeProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
@@ -87,5 +89,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </ThemeProvider>
   );
 }
