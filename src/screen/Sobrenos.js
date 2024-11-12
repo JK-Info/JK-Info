@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { ThemeContext } from '../Components/ThemeContext';  // Importe o ThemeContext
 import fotoGuilherme from '../../assets/FotosSobrenos/Guilherme-gomes.jpeg';
 import fotoLucas from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 import fotoPablo from '../../assets/FotosSobrenos/Pablo-henrique.jpeg';
 import fotoCaique from '../../assets/FotosSobrenos/Caique-tavares.jpeg';
-
 
 const membrosDaEquipe = [
   {
@@ -47,6 +47,66 @@ const membrosDaEquipe = [
 ];
 
 const Sobrenos = () => {
+  const { theme } = useContext(ThemeContext);  // Acesse o tema
+
+  // Define estilos dinâmicos com base no tema
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: theme === 'escuro' ? '#292929' : '#f5f5f5', // Altere o fundo conforme o tema
+    },
+    containerMembro: {
+      marginBottom: 20,
+      padding: 15,
+      backgroundColor: theme === 'escuro' ? '#444' : '#ffffff', // Fundo do membro
+      borderRadius: 10,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 2,
+      flexDirection: 'row',
+      alignItems: 'center', // Alinha os itens ao centro
+    },
+    foto: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      marginRight: 15,
+    },
+    textContainer: {
+      flex: 1,
+      justifyContent: 'center', // Centraliza verticalmente
+    },
+    nome: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 5,
+      color: theme === 'escuro' ? '#fff' : '#333', // Cor do nome
+    },
+    funcao: {
+      fontSize: 16,
+      marginBottom: 5,
+      color: theme === 'escuro' ? '#bbb' : '#555', // Cor da função
+    },
+    contato: {
+      fontSize: 14,
+      marginVertical: 2,
+      color: theme === 'escuro' ? '#bbb' : '#555', // Cor dos contatos
+    },
+    plataformaContato: {
+      fontWeight: 'bold',
+    },
+    linkContato: {
+      color: 'blue',
+      textDecorationLine: 'underline', // Adiciona um sublinhado aos links
+    },
+  });
+
   return (
     <ScrollView style={styles.container}>
       {membrosDaEquipe.map((membro, index) => (
@@ -69,59 +129,5 @@ const Sobrenos = () => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  containerMembro: {
-    marginBottom: 20,
-    padding: 15,
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
-    flexDirection: 'row',
-    alignItems: 'center', // Alinha os itens ao centro
-  },
-  foto: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginRight: 15,
-  },
-  textContainer: {
-    flex: 1,
-    justifyContent: 'center', // Centraliza verticalmente
-  },
-  nome: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  funcao: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  contato: {
-    fontSize: 14,
-    marginVertical: 2,
-  },
-  plataformaContato: {
-    fontWeight: 'bold',
-  },
-  linkContato: {
-    color: 'blue',
-    textDecorationLine: 'underline', // Adiciona um sublinhado aos links
-  },
-});
 
 export default Sobrenos;
