@@ -1,46 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Modal, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SwipeGestures from 'react-native-swipe-gestures';
 
+// Funções para interagir com a API
+const fetchReclamacoes = async (idPessoa) => {
+  try {
+    const response = await fetch(`http://localhost:3000/reclamacoes/${idPessoa}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar reclamações:', error);
+  }
+};
+
+const responderReclamacao = async (idReclamacao, resposta) => {
+  try {
+    const response = await fetch('http://localhost:3000/responder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idReclamacao, resposta }),
+    });
+    const data = await response.json();
+    Alert.alert('Sucesso', data.message);
+  } catch (error) {
+    console.error('Erro ao responder reclamação:', error);
+    Alert.alert('Erro', 'Ocorreu um erro ao responder a reclamação.');
+  }
+};
+
+const excluirReclamacao = async (idReclamacao) => {
+  try {
+    const response = await fetch(`http://localhost:3000/excluir/${idReclamacao}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    Alert.alert('Sucesso', data.message);
+  } catch (error) {
+    console.error('Erro ao excluir reclamação:', error);
+    Alert.alert('Erro', 'Ocorreu um erro ao excluir a reclamação.');
+  }
+};
+
 const ReclamacoesSugestGestao = () => {
   const navigation = useNavigation();
-
-  const [mensagens, setMensagens] = useState([
-    { id: '1', assunto: 'Problema com a plataforma', mensagem: 'Estou tendo dificuldades em acessar o sistema.', resposta: '' },
-    { id: '2', assunto: 'Sugestão de melhorias', mensagem: 'Seria bom ter uma funcionalidade de lembrete.', resposta: '' },
-  ]);
-
+  const [mensagens, setMensagens] = useState([]);
   const [resposta, setResposta] = useState('');
   const [mensagemSelecionada, setMensagemSelecionada] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const excluirMensagem = (id) => {
-    setMensagens(mensagens.filter(mensagem => mensagem.id !== id));
-    setModalVisible(false);
-    Alert.alert('Mensagem excluída', 'A mensagem foi excluída com sucesso!');
+  useEffect(() => {
+    const idPessoa = 21; // O ID da pessoa é fixo para este exemplo
+    fetchReclamacoes(idPessoa).then((data) => setMensagens(data));
+  }, []);
+
+  const abrirModal = (mensagem) => {
+    setMensagemSelecionada(mensagem);
+    setResposta(mensagem.resposta || '');
+    setModalVisible(true);
   };
 
-  const responderMensagem = (id) => {
+  const responderMensagem = (idReclamacao) => {
     if (!resposta) {
       Alert.alert('Erro', 'Por favor, escreva uma resposta antes de enviar.');
       return;
     }
-
-    const mensagensAtualizadas = mensagens.map(mensagem => 
-      mensagem.id === id ? { ...mensagem, resposta } : mensagem
-    );
-    
-    setMensagens(mensagensAtualizadas);
+    responderReclamacao(idReclamacao, resposta);
     setResposta('');
     setModalVisible(false);
-    Alert.alert('Sucesso', 'Resposta enviada com sucesso!');
   };
 
-  const abrirModal = (mensagem) => {
-    setMensagemSelecionada(mensagem);
-    setResposta(mensagem.resposta);
-    setModalVisible(true);
+  const excluirMensagem = (idReclamacao) => {
+    excluirReclamacao(idReclamacao);
+    setMensagens(mensagens.filter(m => m.id !== idReclamacao));
+    setModalVisible(false);
   };
 
   const onSwipeLeft = () => {
@@ -53,9 +86,7 @@ const ReclamacoesSugestGestao = () => {
       <Text style={styles.mensagemTexto}>
         {item.mensagem.length > 50 ? `${item.mensagem.substring(0, 50)}...` : item.mensagem}
       </Text>
-      {item.resposta !== '' && (
-        <Text style={styles.respostaTexto}>Resposta: {item.resposta}</Text>
-      )}
+      {item.resposta && <Text style={styles.respostaTexto}>Resposta: {item.resposta}</Text>}
     </TouchableOpacity>
   );
 

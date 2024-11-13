@@ -331,6 +331,44 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
+-- -----------------------------------------------------
+-- Tabela `Reclamacao`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Reclamacao_Enviada` (
+  `idReclamacao` INT NOT NULL AUTO_INCREMENT,      
+  `assunto` VARCHAR(255) NOT NULL,                  
+  `descricao` TEXT NOT NULL,                        
+  `dataReclamacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
+  `Pessoa_idPessoa` INT NOT NULL,                   
+  PRIMARY KEY (`idReclamacao`),
+  INDEX `fk_Reclamacao_Enviada_Pessoa_idx` (`Pessoa_idPessoa`),
+  CONSTRAINT `fk_Reclamacao_Enviada_Pessoa`
+    FOREIGN KEY (`Pessoa_idPessoa`)
+    REFERENCES `mydb`.`Pessoa` (`idPessoa`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`Reclamacao_Respondida` (
+  `idReclamacaoRespondida` INT NOT NULL AUTO_INCREMENT,     -- ID da reclamação respondida
+  `resposta` TEXT NOT NULL,                                  -- Resposta dada à reclamação
+  `dataResposta` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Data e hora da resposta
+  `Funcionario_idFuncionario` INT NOT NULL,                  -- ID do funcionário que respondeu
+  `idReclamacaoEnviada` INT NOT NULL,                        -- Chave estrangeira para a reclamação enviada
+  PRIMARY KEY (`idReclamacaoRespondida`),                    -- Chave primária
+  INDEX `fk_Reclamacao_Respondida_Funcionario_idx` (`Funcionario_idFuncionario`), -- Índice para o funcionário
+  INDEX `fk_Reclamacao_Respondida_ReclamacaoEnviada_idx` (`idReclamacaoEnviada`), -- Índice para a reclamação enviada
+  CONSTRAINT `fk_Reclamacao_Respondida_Funcionario`
+    FOREIGN KEY (`Funcionario_idFuncionario`)
+    REFERENCES `mydb`.`Funcionario` (`idFuncionario`)     -- Chave estrangeira para a tabela Funcionario
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Reclamacao_Respondida_ReclamacaoEnviada`
+    FOREIGN KEY (`idReclamacaoEnviada`)
+    REFERENCES `mydb`.`Reclamacao_Enviada` (`idReclamacao`) -- Chave estrangeira para a tabela Reclamacao_Enviada
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 	SET SQL_MODE=@OLD_SQL_MODE;
 	SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
@@ -726,5 +764,32 @@ LIMIT 0, 1000;
 	ORDER BY 
 		p.dataPublicacao DESC
 	LIMIT 0, 1000;
-
     
+    -- Inserção de uma reclamação nova (enviada)
+		INSERT INTO `mydb`.`Reclamacao_Enviada` (`assunto`, `descricao`, `Pessoa_idPessoa`)
+		VALUES ('Erro no sistema', 'O sistema está apresentando erro ao tentar logar.', 1);
+        
+        -- Inserção de uma reclamação respondida (movendo para a tabela de respondidas)
+
+select * from Reclamacao_Enviada;
+
+INSERT INTO `mydb`.`Reclamacao_Respondida` 
+  (`resposta`, `Funcionario_idFuncionario`, `idReclamacaoEnviada`)
+VALUES 
+  ('Agradecemos o seu feedback. Estamos trabalhando para corrigir o erro no sistema.', 1, 1);
+
+select * from Funcionario;
+
+SELECT 
+  re.idReclamacao AS idReclamacaoEnviada,
+  re.assunto AS assuntoEnviado,
+  re.descricao AS descricaoEnviada,
+  rr.idReclamacaoRespondida,
+  rr.resposta,
+  rr.dataResposta
+FROM 
+  `mydb`.`Reclamacao_Enviada` re
+JOIN 
+  `mydb`.`Reclamacao_Respondida` rr
+ON 
+  re.idReclamacao = rr.idReclamacaoEnviada;
