@@ -9,7 +9,7 @@ import fotoCaique from '../../assets/FotosSobrenos/Caique-tavares.jpeg';
 const membrosDaEquipe = [
   {
     nome: 'Guilherme Gomes da Silva',
-    funcao: 'Programador Full-Stack',
+    funcao: 'Desenvolvedor Full-Stack - Responsável por todo o layout e as interfaces de usuário, garantindo uma experiência intuitiva e responsiva. Implementei partes das funcionalidades do aplicativo, integrando-o com o banco de dados, o que permitiu a comunicação eficiente entre a aplicação e as informações armazenadas.',
     contatos: [
       { plataforma: 'Github', link: 'https://github.com/guigomes2616' },
       { plataforma: 'Linkedin', link: 'https://linkedin.com/in/guigomes2616' },
@@ -19,7 +19,7 @@ const membrosDaEquipe = [
   },
   {
     nome: 'Lucas Malone',
-    funcao: 'Programador Back-End',
+    funcao: 'Desenvolvedor - Responsável pela criação e organização das apresentações do TCC, estruturando o roteiro e os slides para garantir uma comunicação clara e eficiente dos conceitos. Além disso, ofereci suporte ao desenvolvimento, auxiliando na implementação de funcionalidades e na resolução de problemas técnicos, contribuindo para o alinhamento entre o desenvolvimento e as apresentações.',
     contatos: [
       { plataforma: 'Github', link: 'https://github.com/LucasMalone' },
       { plataforma: 'Instagram', link: 'https://instagram.com/malonekastel' },
@@ -28,7 +28,7 @@ const membrosDaEquipe = [
   },
   {
     nome: 'Pablo Henrique',
-    funcao: 'Programador Back-End',
+    funcao: 'Programador Back-End - Responsável pela camada de dados de um aplicativo em React Native, focando no back-end e na integração com o banco de dados. Projetei e gerenciei o banco de dados, criei APIs eficientes para comunicação entre o app e o servidor, e implementei soluções para garantir a integridade e sincronização dos dados, otimizando a experiência do usuário.',
     contatos: [
       { plataforma: 'Github', link: 'https://github.com/PabloHenrique1533' },
       { plataforma: 'Instagram', link: 'https://instagram.com/_phenrique.03' },
@@ -37,7 +37,7 @@ const membrosDaEquipe = [
   },
   {
     nome: 'Caique Rocha',
-    funcao: 'Programador Full-Stack',
+    funcao: 'Desenvolvedor - Responsável pelo desenvolvimento da parte escrita do TCC, organizando e redigindo capítulos importantes, como a fundamentação teórica e metodológica. Além disso, ofereci suporte às demandas do código, auxiliando na documentação técnica e na solução de problemas.',
     contatos: [
       { plataforma: 'Github', link: 'https://github.com/c9iqueee' },
       { plataforma: 'Instagram', link: 'https://instagram.com/kkjcaique' },
