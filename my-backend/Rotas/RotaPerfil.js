@@ -1,10 +1,8 @@
 const express = require('express');
-const jwt = require('jsonwebtoken'); // Import do JWT
+const jwt = require('jsonwebtoken');
 const routerPerfil = express.Router();
 const db = require('../ConexaoBD/conexaoBD');
-const bcrypt = require('bcryptjs');
-
-const jwtSecret = process.env.JWT_SECRET_KEY; // Defina a chave secreta do JWT
+const jwtSecret = process.env.JWT_SECRET_KEY;
 
 // Middleware para extrair o ID do usuário do token JWT
 function getIdFromToken(req) {
@@ -21,13 +19,13 @@ routerPerfil.get('/perfil', async (req, res) => {
         console.log(`[INFO] Iniciando busca do perfil para idPessoa: ${idPessoa}`);
 
         const query = `
-            SELECT p.idPessoa, p.nome, p.dataNascimento, p.sexo, p.RG, p.CPF,
-                   ci.emailInstitucional, ci.tipoUsuario, c.emailPessoal, c.numeroCelular 
+            SELECT p.idPessoa, p.nome, p.dataNascimento, ci.emailInstitucional, c.emailPessoal, c.numeroCelular
             FROM mydb.Pessoa p
             JOIN mydb.ContatoInstitucional ci ON p.ContatoInstitucional_idContatoInstitucional = ci.idContatoInstitucional
             LEFT JOIN mydb.Contato c ON p.idPessoa = c.Pessoa_idPessoa
-            WHERE p.idPessoa = ?;
+            WHERE ci.idContatoInstitucional = ?;
         `;
+        
         db.query(query, [idPessoa], (err, result) => {
             if (err) {
                 console.error(`[ERRO] Falha ao buscar informações do perfil: ${err}`);
@@ -59,7 +57,8 @@ routerPerfil.put('/perfil', (req, res) => {
         }
 
         const checkQuery = `SELECT * FROM Contato WHERE Pessoa_idPessoa = ?`;
-        db.query(checkQuery, [idPessoa], (err, results) => {
+        
+        db.query(checkQuery, [idPessoa, emailPessoal, numeroCelular], (err, results) => {
             if (err) {
                 console.error(`[ERRO] Falha ao verificar existência do contato:`, err);
                 return res.status(500).json({ message: 'Erro ao verificar informações do perfil', error: err });

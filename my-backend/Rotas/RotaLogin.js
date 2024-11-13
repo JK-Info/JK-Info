@@ -62,7 +62,7 @@ routerLogin.post('/login', async (req, res) => {
     }
 
     // Alteração aqui: usar o campo correto para o ID do usuário
-    const token = jwt.sign({ userId: user.idContatoInstitucional }, jwtSecret, { expiresIn: '1h' }); // Alterei para user.idContatoInstitucional
+    const token = jwt.sign({ userId: user.idContatoInstitucional }, jwtSecret, { expiresIn: '24h' }); // Alterei para user.idContatoInstitucional
 
     // Resposta com o token e o tipo de usuário
     res.status(200).json({

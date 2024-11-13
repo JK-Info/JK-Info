@@ -41,24 +41,22 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert('Erro', 'Por favor, insira seu e-mail e senha.');
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       const response = await axios.post('http://localhost:3000/login', { email, senha });
-
+  
       if (response.data.success) {
-        const { token, userType, userID, userName, userEmailPessoal, userEmailInstitucional } = response.data;
-
-        // Armazenar os dados do usuário (token e tipo de usuário)
-        await AsyncStorage.setItem('userToken', token);
-        await AsyncStorage.setItem('userType', userType);
-        await AsyncStorage.setItem('userID', userID);
+        const { token, userType, userName, userEmailInstitucional, userEmailPessoal } = response.data;
+  
+        // Armazenar o token e as informações do usuário
+        await AsyncStorage.setItem('jwtToken', token); // Armazena o token como jwtToken
         await AsyncStorage.setItem('userType', userType);
         await AsyncStorage.setItem('userName', userName);
         await AsyncStorage.setItem('userEmailInstitucional', userEmailInstitucional);
         await AsyncStorage.setItem('userEmailPessoal', userEmailPessoal);
-
+  
         // Navegar para a tela inicial do usuário
         switch (userType) {
           case 'aluno':
@@ -87,7 +85,7 @@ const LoginScreen = ({ navigation }) => {
       setLoading(false);
     }
   };
-
+  
   if (loading) {
     return <ActivityIndicator size="large" color="#00527C" />;
   }

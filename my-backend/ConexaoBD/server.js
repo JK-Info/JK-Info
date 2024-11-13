@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const RotaLogin = require('../Rotas/RotaLogin');
 const RotaPublicacao = require('../Rotas/RotaPublicacao');
 const RotaFiltrarTurma = require('../Rotas/RotaFIltrarTurma');
@@ -18,6 +19,9 @@ const PORT = 3000;
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use(bodyParser.json({ limit: '50mb' }));  // Aumenta o limite para 10MB
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));  // Para formulários com arquivos maiores
 
 // Adiciona as rotas
 app.use('/', RotaLogin); 
