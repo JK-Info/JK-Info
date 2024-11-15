@@ -28,7 +28,7 @@ const membrosDaEquipe = [
   },
   {
     nome: 'Pablo Henrique',
-    funcao: 'Programador Back-End - Responsável pela camada de dados de um aplicativo em React Native, focando no back-end e na integração com o banco de dados. Projetei e gerenciei o banco de dados, criei APIs eficientes para comunicação entre o app e o servidor, e implementei soluções para garantir a integridade e sincronização dos dados, otimizando a experiência do usuário.',
+    funcao: 'Desenvolvedor Back-End - Responsável pela camada de dados de um aplicativo em React Native, focando no back-end e na integração com o banco de dados. Projetei e gerenciei o banco de dados, criei APIs eficientes para comunicação entre o app e o servidor, e implementei soluções para garantir a integridade e sincronização dos dados, otimizando a experiência do usuário.',
     contatos: [
       { plataforma: 'Github', link: 'https://github.com/PabloHenrique1533' },
       { plataforma: 'Instagram', link: 'https://instagram.com/_phenrique.03' },
