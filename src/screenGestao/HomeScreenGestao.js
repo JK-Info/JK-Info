@@ -1,21 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, ScrollView, Image, Modal, TextInput, Alert } from 'react-native';
 import axios from 'axios';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Ionicons';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
+import { ThemeContext } from '../Components/ThemeContext';
 
 // Componente de Avatar
 const Avatar = () => (
   <Image source={fotoPerfilAnonima} style={styles.avatarImage} />
 );
 
-// Componente de Usuário
-const Usuario = ({ nome, cargo }) => (
-  <View style={styles.informacoesPublicacao}>
-    <Text>{nome}</Text>
-    <Text style={{ fontSize: 11 }}>{cargo}</Text>
-  </View> 
-);
+  // Componente de Usuário
+  const Usuario = ({ nome, cargo, theme }) => (
+    <View style={styles.informacoesPublicacao}>
+      <Text style={theme === 'escuro' ? styles.darkText : styles.lightText}>{nome}</Text>
+      <Text style={[{ fontSize: 11 }, theme === 'escuro' ? styles.darkText : styles.lightText]}>{cargo}</Text>
+    </View>
+  );
 
 // Componente de Botão de Comentar
 const BotaoComentar = ({ onPress, comentarioCount }) => (
@@ -34,28 +35,40 @@ const BotaoExcluir = ({ onPress }) => (
   </View>
 );
 
-// Componente de Curtir
-const Curtir = ({ count, liked, onPress }) => (
-  <View style={styles.containerCurtir}>
+const Curtir = ({ count, liked, onPress, theme }) => (
+  <View style={[styles.containerCurtir, theme === 'escuro' ? styles.darkText : styles.lightText]}>
     <TouchableOpacity onPress={onPress}>
-      <Icon name="heart" size={24} color={liked ? '#FF0000' : '#000'} />
+      <Icon
+        name={liked ? "heart" : "heart-outline"} // Alterna entre coração preenchido e contornado
+        size={24}
+        color={liked ? '#FF0000' : '#FF0000'} // Mantém a borda vermelha nos dois estados
+      />
     </TouchableOpacity>
-    <Text style={styles.curtidasTexto}>{count}</Text>
+    <Text style={[styles.curtidasTexto, theme === 'escuro' ? { color: '#FFFFFF' } : styles.lightText]}>
+      {count}
+    </Text>
   </View>
 );
 
-const CurtirComentario = ({ count, liked, onPress }) => (
-  <View style={styles.containerCurtir}>
+const CurtirComentario = ({ count, liked, onPress, theme }) => (
+  <View style={[styles.containerCurtir, theme === 'escuro' ? styles.darkText : styles.lightText]}>
     <TouchableOpacity onPress={onPress}>
-      <Icon name="heart" size={24} color={liked ? '#FF0000' : '#000'} />
+      <Icon
+        name={liked ? "heart" : "heart-outline"} // Alterna entre coração preenchido e coração com borda
+        size={24}
+        color={liked ? '#FF0000' : '#FF0000'} // O coração sempre terá a borda vermelha
+      />
     </TouchableOpacity>
-    <Text style={styles.curtidasTexto}>{count}</Text>
+    <Text style={[styles.curtidasTexto, theme === 'escuro' ? { color: '#FFFFFF' } : styles.lightText]}>
+      {count}
+    </Text>
   </View>
 );
 
 // Componente Modal de Comentários
 const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId }) => {
   const [textoComentario, setTextoComentario] = useState('');
+  const { theme } = useContext(ThemeContext);
 
   const handleSendComment = async () => {
     if (textoComentario.trim()) {
@@ -118,15 +131,15 @@ return (
     onRequestClose={onClose}
   >
     <View style={styles.modalOverlay}>
-      <View style={styles.modalContainer}>
-        <Text style={styles.modalTitle}>Comentários</Text>
-        <ScrollView style={styles.comentariosContainer}>
+      <View style={[styles.modalContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+        <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText]}>Comentários</Text>
+        <ScrollView style={[styles.comentariosContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
           {Array.isArray(comments) && comments.map((comment) => (
-            <View key={comment.idComentario} style={styles.comentarioContainer}>
+            <View key={comment.idComentario} style={[styles.comentarioContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
               <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
               <View style={styles.comentarioTextoContainer}>
-                <Text style={styles.nomeAutor}>{comment.nome_comentador}</Text>
-                <Text style={styles.comentarioTexto}>{comment.texto}</Text>
+                <Text style={[styles.nomeAutor, theme === 'escuro' ? styles.darkText : styles.lightText]}>{comment.nome_comentador}</Text>
+                <Text style={[styles.comentarioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>{comment.texto}</Text>
               </View>
               <CurtirComentario
                 count={comment.num_likes}
@@ -137,7 +150,7 @@ return (
           ))}
         </ScrollView>
         <TextInput 
-          style={styles.input} 
+          style={[styles.input, theme === 'escuro' ? styles.darkText : styles.lightText]} 
           placeholder="Escreva um comentário..." 
           value={textoComentario}
           onChangeText={setTextoComentario}
@@ -157,11 +170,15 @@ return (
 // Componente principal HomeScreenGestao
 const HomeScreenGestao = () => {
   const [publicacoes, setPublicacoes] = useState([]);
+  const [filteredPublicacoes, setFilteredPublicacoes] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedComments, setSelectedComments] = useState([]);
   const [newPostText, setNewPostText] = useState('');
   const [likes, setLikes] = useState({});
   const [currentPostId, setCurrentPostId] = useState(null);
+  const [searchText, setSearchText] = useState(''); // Estado para texto de busca
+  const { theme } = useContext(ThemeContext); // Pegando o tema do contexto
+
   
   const userId = 21; // User ID should be dynamic based on login context
 
@@ -184,9 +201,30 @@ const HomeScreenGestao = () => {
     }
   };
 
+  const handleSearch = (text) => {
+    setSearchText(text);
+    
+    // Se o campo de pesquisa estiver vazio, mostrar todas as publicações
+    if (text === '') {
+      setFilteredPublicacoes(publicacoes);
+    } else {
+      // Filtrar as publicações com base no texto inserido
+      const filtered = publicacoes.filter(pub => 
+        pub.publicacao_descricao.toLowerCase().includes(text.toLowerCase()) || 
+        pub.nome_pessoa.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredPublicacoes(filtered);
+    }
+  };
+  
   useEffect(() => {
     fetchPublicacoes();
   }, []);
+
+  useEffect(() => {
+    // Sempre que as publicações forem alteradas, resetar as publicações filtradas
+    setFilteredPublicacoes(publicacoes);
+  }, [publicacoes]);
 
   const handleLike = async (postId) => {
     const isLiked = likes[postId] || false;
@@ -252,12 +290,14 @@ const HomeScreenGestao = () => {
   };
 
   const renderPublicacao = (pub) => (
-    <View style={styles.boxPubli} key={pub.idPublicacao}>
+    <View style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]} key={pub.idPublicacao}>
       <View style={styles.indent}>
         <Avatar />
-        <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} />
+        <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} theme={theme} />
       </View>
-      <Text>{pub.publicacao_descricao}</Text>
+      <Text style={theme === 'escuro' ? styles.darkText : styles.lightText}>
+        {pub.publicacao_descricao}
+      </Text>
       <View style={styles.actionsRow}>
         <Curtir
           count={pub.quantidade_curtidas}
@@ -280,17 +320,27 @@ const HomeScreenGestao = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+      
+      {/* Barra de Pesquisa */}
+      <TextInput
+        style={[styles.searchBar, theme === 'escuro' ? styles.darkText : styles.lightText]}
+        placeholder="Pesquise por publicações ou autores..."
+        value={searchText}
+        onChangeText={handleSearch}
+      />
+      
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }} // Ajuste o padding para a altura da área de criação de publicações
       >
-        {publicacoes.map(renderPublicacao)}
+        {/* Renderiza as publicações filtradas */}
+        {filteredPublicacoes.map(renderPublicacao)}
       </ScrollView>
   
       {/* Fixa a área de criação de publicações na parte inferior */}
-      <View style={styles.fixedFooter}>
+      <View style={[styles.fixedFooter, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
         <TextInput
-          style={styles.inputPost}
+          style={[styles.inputPost, theme === 'escuro' ? styles.darkText : styles.lightText]}
           placeholder="Escreva uma publicação..."
           value={newPostText}
           onChangeText={setNewPostText}
@@ -305,7 +355,7 @@ const HomeScreenGestao = () => {
         onClose={() => setModalVisible(false)}
         comments={selectedComments}
         onCommentAdded={handleCommentUpdate}
-        publicacaoId={currentPostId}
+        publicacaoId={currentPostId} // Passa o ID da publicação atual
       />
     </View>
   );
@@ -316,6 +366,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f9f9f9',
     paddingHorizontal: 20,
+  },
+  searchBar: {
+    marginBottom: 16,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginTop: 16,
+    paddingHorizontal: 10,
+    marginVertical: 10,
+    
   },
   searchInput: {
     height: 40,
@@ -346,6 +407,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     backgroundColor: '#f9f9f9',
+  },
+  darkTheme: {
+    backgroundColor: '#292929', // Fundo escuro para o tema escuro
+  },
+  lightTheme: {
+    backgroundColor: '#f9f9f9', // Fundo claro para o tema claro
+  },
+  darkText: {
+    color: '#FFFFFF', // Texto claro para o tema escuro
+  },
+  lightText: {
+    color: '#000000', // Texto escuro para o tema claro
   },
   indent: {
     flexDirection: 'row',

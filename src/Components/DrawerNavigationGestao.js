@@ -27,7 +27,7 @@ const DrawerNavigatorGestao = ( )=> (
       headerTintColor: '#FFFFFF',  // Cor do texto do cabeçalho
     }}
   >
-    <Drawer.Screen name="Home" component={TabNavigatorGestor} />
+    <Drawer.Screen name="Home" component={TabNavigatorGestor}/>
     <Drawer.Screen name="Perfil" component={PerfilGestao} />
     <Drawer.Screen name="Minhas Publicações" component={PublicacoesGestao} />
     <Drawer.Screen name="Rede" component={RedeGestor} />
