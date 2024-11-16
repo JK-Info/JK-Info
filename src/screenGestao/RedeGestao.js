@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   darkTheme: {
-    backgroundColor: '#121212',
+    backgroundColor: '#292929',
   },
   lightTheme: {
     backgroundColor: '#f9f9f9',

@@ -54,7 +54,7 @@ const Sobrenos = () => {
     container: {
       flex: 1,
       padding: 20,
-      backgroundColor: theme === 'escuro' ? '#292929' : '#f5f5f5', // Altere o fundo conforme o tema
+      backgroundColor: theme === 'escuro' ? '#292929' : '#f9f9f9', // Altere o fundo conforme o tema
     },
     containerMembro: {
       marginBottom: 20,

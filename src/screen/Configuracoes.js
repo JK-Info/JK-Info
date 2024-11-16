@@ -23,7 +23,7 @@ const Configuracoes = () => {
     <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
 
       <View style={styles.fundoTitulo}>
-        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkText : styles.lightText]}>Tema do aplicativo:</Text>
+        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTexTitlet : styles.lightTextTitle]}>Tema do aplicativo:</Text>
       </View>
       <View style={styles.opcaoContainer}>
         <TouchableOpacity onPress={() => toggleTheme('claro')} style={styles.radioContainer}>
@@ -37,7 +37,7 @@ const Configuracoes = () => {
       </View>
 
       <View style={styles.fundoTitulo}>
-        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkText : styles.lightText]}>Tamanho da fonte:</Text>
+        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTextTitle : styles.lightTextTitle]}>Tamanho da fonte:</Text>
       </View>
       <View style={styles.opcaoContainer}>
         <TouchableOpacity onPress={() => setTamanhoFonte('pequena')} style={styles.radioContainer}>
@@ -55,7 +55,7 @@ const Configuracoes = () => {
       </View>
 
       <View style={styles.fundoTitulo}>
-        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkText : styles.lightText]}>Idioma do aplicativo:</Text>
+        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTextTitle : styles.lightTextTitle]}>Idioma do aplicativo:</Text>
       </View>
       <View style={styles.opcaoContainer}>
         <TouchableOpacity onPress={() => setIdioma('portugues')} style={styles.radioContainer}>
@@ -98,6 +98,9 @@ const styles = StyleSheet.create({
   },
   lightText: {
     color: '#000', // Texto escuro para o tema claro
+  },
+  darkTextTitle:{
+    color: '#000',
   },
   fundoTitulo: {
     backgroundColor: '#e0e0e0', // Cor de fundo leve (cinza claro)
