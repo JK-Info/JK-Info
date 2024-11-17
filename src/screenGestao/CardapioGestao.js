@@ -5,11 +5,11 @@ import axios from 'axios';
 
 const CardapioGestao = () => {
   const [cardapio, setCardapio] = useState([
-    { dia: 'Segunda-feira', prato: ['Arroz integral', 'Feijão', 'Carne suína', 'Salada'], sobremesa: '' },
-    { dia: 'Terça-feira', prato: ['Arroz integral', 'Feijão', 'Ovo'], sobremesa: 'Abacaxi' },
-    { dia: 'Quarta-feira', prato: ['Arroz', 'Feijão preto', 'Atum', 'Batata doce'], sobremesa: '' },
-    { dia: 'Quinta-feira', prato: ['Arroz integral', 'Feijão', 'Frango', 'Legumes'], sobremesa: '' },
-    { dia: 'Sexta-feira', prato: ['Arroz', 'Feijão preto', 'Peixe', 'Salada'], sobremesa: 'Pudim' },
+    { diaSemana: 'Segunda-feira', prato: ['Arroz integral', 'Feijão', 'Carne suína', 'Salada'], sobremesa: '' },
+    { diaSemana: 'Terça-feira', prato: ['Arroz integral', 'Feijão', 'Ovo'], sobremesa: 'Abacaxi' },
+    { diaSemana: 'Quarta-feira', prato: ['Arroz', 'Feijão preto', 'Atum', 'Batata doce'], sobremesa: '' },
+    { diaSemana: 'Quinta-feira', prato: ['Arroz integral', 'Feijão', 'Frango', 'Legumes'], sobremesa: '' },
+    { diaSemana: 'Sexta-feira', prato: ['Arroz', 'Feijão preto', 'Peixe', 'Salada'], sobremesa: 'Pudim' },
   ]);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -34,9 +34,9 @@ const CardapioGestao = () => {
   
     try {
       const response = await axios.put('http://localhost:3000/putCardapio', {
-        diaSemana: cardapio[diaSelecionado].dia,  // passando o nome do dia
-        prato: prato,
-        sobremesa: sobremesa
+        diaSemana: cardapio[diaSelecionado].diaSemana, // Dia da semana
+        prato: prato, // Array com os pratos
+        sobremesa: sobremesa // Sobremesa (pode ser vazio)
       });
   
       if (response.status === 200) {
@@ -44,7 +44,7 @@ const CardapioGestao = () => {
         setModalVisible(false);
         Alert.alert('Sucesso', 'Cardápio atualizado com sucesso');
   
-        obterCardapioAtualizado();
+        obterCardapioAtualizado(); // Atualiza o cardápio no front-end
       } else {
         throw new Error('Falha ao atualizar o cardápio');
       }
@@ -54,7 +54,6 @@ const CardapioGestao = () => {
       Alert.alert('Erro', 'Falha ao atualizar o cardápio. Tente novamente');
     }
   };
-  
 
   const obterCardapioAtualizado = async () => {
     try {
@@ -66,7 +65,7 @@ const CardapioGestao = () => {
         Alert.alert('Aviso', 'Cardápio não encontrado');
       }
     } catch (error) {
-      console.error('Erro ao obter cardápio:'. error);
+      console.error('Erro ao obter cardápio:', error);
       Alert.alert('Erro', 'Falha ao obter o cardápio. Tente novamente');
     }
   };
@@ -81,7 +80,7 @@ const CardapioGestao = () => {
       {cardapio.map((item, index) => (
         <View key={index} style={styles.weekDayContainer}>
           <View style={styles.fundoTitulo}>
-            <Text style={styles.weekDay}>{item.dia}</Text>
+            <Text style={styles.weekDay}>{item.diaSemana}</Text>
             <TouchableOpacity onPress={() => abrirModal(index)} style={styles.editButton}>
               <Text style={styles.editButtonText}>Editar</Text>
             </TouchableOpacity>
@@ -107,15 +106,15 @@ const CardapioGestao = () => {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Editar Cardápio</Text>
 
-              {prato.map((prato, index) => (
+              {prato.map((valor, index) => (
                 <TextInput
                   key={index}
                   style={styles.input}
-                  value={prato}
+                  value={valor}
                   onChangeText={(text) => {
-                    const novosprato = [...prato];
-                    novosprato[index] = text;
-                    setprato(novosprato);
+                    const novosPratos = [...prato]; // Cria uma cópia do array de pratos
+                    novosPratos[index] = text; // Atualiza o índice correto
+                    setprato(novosPratos); // Atualiza o estado
                   }}
                 />
               ))}
