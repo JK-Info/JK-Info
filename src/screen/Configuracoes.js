@@ -10,7 +10,7 @@ const Configuracoes = () => {
   const { theme, toggleTheme } = useContext(ThemeContext); // Correção na desestruturação do contexto
   const { language, changeLanguage } = useContext(LanguageContext); // Contexto de idioma
   const [tamanhoFonte, setTamanhoFonte] = useState('medio');
-
+  
   const handleSair = async () => {
     await clearUserData(); // Limpa os dados do usuário
     navigation.reset({
@@ -20,33 +20,23 @@ const Configuracoes = () => {
     Alert.alert('Logout', 'Você saiu com sucesso!'); // Opcional: alerta de sucesso
   };
 
-  // Função para alternar entre temas
-  const handleToggleTheme = (selectedTheme) => {
-    toggleTheme(selectedTheme);
-  };
-
-  // Função para alternar entre idiomas
-  const handleChangeLanguage = (selectedLanguage) => {
-    changeLanguage(selectedLanguage);
-  };
-
   return (
     <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
 
-      {/* Configuração de Tema */}
+      {/* Tema do aplicativo */}
       <View style={styles.fundoTitulo}>
-        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTextTitle : styles.lightTextTitle]}>
+        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTexTitlet : styles.lightTextTitle]}>
           {language === 'pt' ? 'Tema do aplicativo:' : 'App Theme:'}
         </Text>
       </View>
       <View style={styles.opcaoContainer}>
-        <TouchableOpacity onPress={() => handleToggleTheme('claro')} style={styles.radioContainer}>
+        <TouchableOpacity onPress={() => toggleTheme('claro')} style={styles.radioContainer}>
           <View style={[styles.radioSelecionado, theme === 'claro' && styles.radioSelecionadoActive]} />
           <Text style={[styles.radioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>
             {language === 'pt' ? 'Claro' : 'Light'}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleToggleTheme('escuro')} style={styles.radioContainer}>
+        <TouchableOpacity onPress={() => toggleTheme('escuro')} style={styles.radioContainer}>
           <View style={[styles.radioSelecionado, theme === 'escuro' && styles.radioSelecionadoActive]} />
           <Text style={[styles.radioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>
             {language === 'pt' ? 'Escuro' : 'Dark'}
@@ -54,7 +44,7 @@ const Configuracoes = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Configuração de Tamanho de Fonte */}
+      {/* Tamanho da fonte */}
       <View style={styles.fundoTitulo}>
         <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTextTitle : styles.lightTextTitle]}>
           {language === 'pt' ? 'Tamanho da fonte:' : 'Font Size:'}
@@ -81,20 +71,20 @@ const Configuracoes = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Configuração de Idioma */}
+      {/* Idioma do aplicativo */}
       <View style={styles.fundoTitulo}>
         <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTextTitle : styles.lightTextTitle]}>
           {language === 'pt' ? 'Idioma do aplicativo:' : 'App Language:'}
         </Text>
       </View>
       <View style={styles.opcaoContainer}>
-        <TouchableOpacity onPress={() => handleChangeLanguage('pt')} style={styles.radioContainer}>
+        <TouchableOpacity onPress={() => changeLanguage('pt')} style={styles.radioContainer}>
           <View style={[styles.radioSelecionado, language === 'pt' && styles.radioSelecionadoActive]} />
           <Text style={[styles.radioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>
             {language === 'pt' ? 'Português' : 'Portuguese'}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleChangeLanguage('en')} style={styles.radioContainer}>
+        <TouchableOpacity onPress={() => changeLanguage('en')} style={styles.radioContainer}>
           <View style={[styles.radioSelecionado, language === 'en' && styles.radioSelecionadoActive]} />
           <Text style={[styles.radioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>
             {language === 'pt' ? 'Inglês' : 'English'}
@@ -102,7 +92,7 @@ const Configuracoes = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Botão de Sair */}
+      {/* Botão de Logout */}
       <View style={styles.sairContainer}>
         <TouchableOpacity onPress={handleSair} style={styles.botaoSair}>
           <Text style={styles.textoSair}>
@@ -110,7 +100,6 @@ const Configuracoes = () => {
           </Text>
         </TouchableOpacity>
       </View>
-
     </View>
   );
 };

@@ -1,64 +1,43 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { AsyncStorage } from 'react-native'; // Certifique-se de que você tem o AsyncStorage instalado
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Textos em diferentes idiomas
-const translations = {
-  pt: {
-    appTheme: 'Tema do App',
-    lightTheme: 'Tema Claro',
-    darkTheme: 'Tema Escuro',
-    fontSize: 'Tamanho da Fonte',
-    small: 'Pequeno',
-    medium: 'Médio',
-    large: 'Grande',
-    appLanguage: 'Idioma do App',
-    portuguese: 'Português',
-    english: 'Inglês',
-    logout: 'Sair',
-    successLogout: 'Você saiu com sucesso!',
-  },
-  en: {
-    appTheme: 'App Theme',
-    lightTheme: 'Light Theme',
-    darkTheme: 'Dark Theme',
-    fontSize: 'Font Size',
-    small: 'Small',
-    medium: 'Medium',
-    large: 'Large',
-    appLanguage: 'App Language',
-    portuguese: 'Portuguese',
-    english: 'English',
-    logout: 'Logout',
-    successLogout: 'You have logged out successfully!',
-  },
-};
-
+// Criação do Contexto
 export const LanguageContext = createContext();
 
+// Provedor do Contexto
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('pt'); // Idioma padrão é português
+  const [language, setLanguage] = useState('pt'); // Valor padrão
 
+  // Função para alterar o idioma e salvar no AsyncStorage
+  const changeLanguage = async (selectedLanguage) => {
+    try {
+      console.log(`Salvando idioma: ${selectedLanguage}`); // Adiciona o log para depuração
+      await AsyncStorage.setItem('language', selectedLanguage); // Salva no AsyncStorage
+      setLanguage(selectedLanguage);
+    } catch (error) {
+      console.error('Erro ao salvar o idioma no AsyncStorage:', error);
+    }
+  };
+
+  // Recupera o idioma salvo do AsyncStorage quando o aplicativo for iniciado
   useEffect(() => {
     const loadLanguage = async () => {
-      const savedLanguage = await AsyncStorage.getItem('language');
-      if (savedLanguage) {
-        setLanguage(savedLanguage);
+      try {
+        const savedLanguage = await AsyncStorage.getItem('language');
+        console.log(`Idioma carregado: ${savedLanguage}`); // Log para depuração
+        if (savedLanguage) {
+          setLanguage(savedLanguage); // Carrega o idioma salvo, caso exista
+        }
+      } catch (error) {
+        console.error('Erro ao carregar o idioma do AsyncStorage:', error);
       }
     };
+
     loadLanguage();
   }, []);
 
-  const changeLanguage = async (lang) => {
-    setLanguage(lang);
-    await AsyncStorage.setItem('language', lang); // Salva a escolha do idioma no AsyncStorage
-  };
-
-  const translate = (key) => {
-    return translations[language][key] || key; // Retorna o texto traduzido ou o próprio chave caso não haja tradução
-  };
-
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage, translate }}>
+    <LanguageContext.Provider value={{ language, changeLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
