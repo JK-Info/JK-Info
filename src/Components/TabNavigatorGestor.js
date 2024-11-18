@@ -4,11 +4,13 @@ import ReclamacoesSugestGestao from '../screenGestao/ReclamacoesSugestGestao';
 import Notificacoes from '../screen/Notificacoes';
 import HomeScreenGestao from '../screenGestao/HomeScreenGestao';
 import { ThemeContext } from '../Components/ThemeContext'; // Importa o ThemeContext
+import { LanguageContext } from '../Components/LanguageContext'; // Importa o LanguageContext
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigatorGestor = () => {
   const { theme } = useContext(ThemeContext); // Acessa o tema atual do contexto
+  const { language } = useContext(LanguageContext); // Acessa o idioma do contexto
 
   return (
     <Tab.Navigator
@@ -24,12 +26,20 @@ const TabNavigatorGestor = () => {
         headerShown: false,  // Ocultar o cabeçalho em todas as telas do TabNavigator
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreenGestao} />
-      <Tab.Screen name="Reclamações" component={ReclamacoesSugestGestao} />
-      <Tab.Screen name="Notificações" component={Notificacoes} />
+      <Tab.Screen 
+        name={language === 'pt' ? 'Home' : 'Home'} 
+        component={HomeScreenGestao} 
+      />
+      <Tab.Screen 
+        name={language === 'pt' ? 'Reclamações' : 'Complaints'} 
+        component={ReclamacoesSugestGestao} 
+      />
+      <Tab.Screen 
+        name={language === 'pt' ? 'Notificações' : 'Notifications'} 
+        component={Notificacoes} 
+      />
     </Tab.Navigator>
   );
 };
 
 export default TabNavigatorGestor;
-
