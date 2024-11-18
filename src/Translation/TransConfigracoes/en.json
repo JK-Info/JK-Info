@@ -1,0 +1,15 @@
+{
+    "appTheme": "App Theme",
+    "fontSize": "Font Size",
+    "appLanguage": "App Language",
+    "lightTheme": "Light Theme",
+    "darkTheme": "Dark Theme",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "portuguese": "Portuguese",
+    "english": "English",
+    "logout": "Logout",
+    "successLogout": "You have logged out successfully!"
+  }
+  

@@ -11,11 +11,10 @@ import TabNavigatorGestao from './src/Components/TabNavigatorGestor.js';
 import DrawerNavigatorGestor from './src/Components/DrawerNavigationGestao.js';
 import DrawerNavigatorFuncionario from './src/Components/DrawerNavigationFuncionario.js';
 import TabNavigatorFuncionario from './src/Components/TabNavigatorFuncionario.js';
+import { LanguageProvider, LanguageContext } from './src/Components/LanguageContext.js';
 import axios from 'axios';
 import { JWT_SECRET_KEY } from '@env';
-import {ThemeProvider, ThemeContext} from './src/Components/ThemeContext.js'
-
-
+import {ThemeProvider, ThemeContext} from './src/Components/ThemeContext.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +33,7 @@ export default function App() {
   }, []);
 
   return (
+    <LanguageProvider>
     <ThemeProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
@@ -90,5 +90,6 @@ export default function App() {
       </Stack.Navigator>
     </NavigationContainer>
     </ThemeProvider>
+    </LanguageProvider>
   );
 }
