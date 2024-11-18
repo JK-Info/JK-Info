@@ -4,6 +4,7 @@ import axios from 'axios';
 import Icon from 'react-native-vector-icons/Ionicons';
 import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
 import { ThemeContext } from '../Components/ThemeContext';
+import { LanguageContext } from '../Components/LanguageContext';
 
 // Componente de Avatar
 const Avatar = () => (
@@ -19,21 +20,34 @@ const Avatar = () => (
   );
 
 // Componente de Botão de Comentar
-const BotaoComentar = ({ onPress, comentarioCount }) => (
-  <View style={styles.containerBotao}>
-    <TouchableOpacity onPress={onPress} style={styles.botao}>
-      <Text style={styles.botaoTexto}>Comentar ({comentarioCount})</Text>
-    </TouchableOpacity>
-  </View>
-);
+const BotaoComentar = ({ onPress, comentarioCount }) => {
+  const { language } = useContext(LanguageContext); // Acessa o contexto de idioma
 
-const BotaoExcluir = ({ onPress }) => (
-  <View style={styles.containerBotaoExcluir}>
-    <TouchableOpacity onPress={onPress} style={styles.botaoExcluir}>
-      <Text style={styles.botaoTexto}>Excluir</Text>
-    </TouchableOpacity>
-  </View>
-);
+  return (
+    <View style={styles.containerBotao}>
+      <TouchableOpacity onPress={onPress} style={styles.botao}>
+        <Text style={styles.botaoTexto}>
+          {language === 'pt' ? `Comentar (${comentarioCount})` : `Comment (${comentarioCount})`}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// Componente de Botão de Excluir
+const BotaoExcluir = ({ onPress }) => {
+  const { language } = useContext(LanguageContext); // Acessa o contexto de idioma
+
+  return (
+    <View style={styles.containerBotaoExcluir}>
+      <TouchableOpacity onPress={onPress} style={styles.botaoExcluir}>
+        <Text style={styles.botaoTexto}>
+          {language === 'pt' ? 'Excluir' : 'Delete'} {/* Troca do texto com base no idioma */}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const Curtir = ({ count, liked, onPress, theme }) => (
   <View style={[styles.containerCurtir, theme === 'escuro' ? styles.darkText : styles.lightText]}>
@@ -69,6 +83,7 @@ const CurtirComentario = ({ count, liked, onPress, theme }) => (
 const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId }) => {
   const [textoComentario, setTextoComentario] = useState('');
   const { theme } = useContext(ThemeContext);
+  const { language } = useContext(LanguageContext); // Acesse o idioma
 
   const handleSendComment = async () => {
     if (textoComentario.trim()) {
@@ -124,47 +139,57 @@ const handleLikeComment = async (commentId) => {
 };
 
 return (
-  <Modal
-    animationType="slide"
-    transparent={true}
-    visible={visible}
-    onRequestClose={onClose}
-  >
-    <View style={styles.modalOverlay}>
-      <View style={[styles.modalContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-        <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText]}>Comentários</Text>
-        <ScrollView style={[styles.comentariosContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-          {Array.isArray(comments) && comments.map((comment) => (
-            <View key={comment.idComentario} style={[styles.comentarioContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-              <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
-              <View style={styles.comentarioTextoContainer}>
-                <Text style={[styles.nomeAutor, theme === 'escuro' ? styles.darkText : styles.lightText]}>{comment.nome_comentador}</Text>
-                <Text style={[styles.comentarioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>{comment.texto}</Text>
+<Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+          <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+            {language === 'pt' ? 'Comentários' : 'Comments'} {/* Título do Modal */}
+          </Text>
+          <ScrollView style={[styles.comentariosContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+            {Array.isArray(comments) && comments.map((comment) => (
+              <View key={comment.idComentario} style={[styles.comentarioContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+                <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
+                <View style={styles.comentarioTextoContainer}>
+                  <Text style={[styles.nomeAutor, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+                    {comment.nome_comentador}
+                  </Text>
+                  <Text style={[styles.comentarioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+                    {comment.texto}
+                  </Text>
+                </View>
+                <CurtirComentario
+                  count={comment.num_likes}
+                  liked={comment.liked}
+                  onPress={() => handleLikeComment(comment.idComentario)}
+                />
               </View>
-              <CurtirComentario
-                count={comment.num_likes}
-                liked={comment.liked}
-                onPress={() => handleLikeComment(comment.idComentario)}
-              />
-            </View>
-          ))}
-        </ScrollView>
-        <TextInput 
-          style={[styles.input, theme === 'escuro' ? styles.darkText : styles.lightText]} 
-          placeholder="Escreva um comentário..." 
-          value={textoComentario}
-          onChangeText={setTextoComentario}
-        />
-        <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
-          <Text style={styles.sendButtonText}>Enviar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>Fechar</Text>
-        </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <TextInput 
+            style={[styles.input, theme === 'escuro' ? styles.darkText : styles.lightText]} 
+            placeholder={language === 'pt' ? 'Escreva um comentário...' : 'Write a comment...'}
+            value={textoComentario}
+            onChangeText={setTextoComentario}
+          />
+          <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
+            <Text style={styles.sendButtonText}>
+              {language === 'pt' ? 'Enviar' : 'Send'} {/* Texto do botão Enviar */}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>
+              {language === 'pt' ? 'Fechar' : 'Close'} {/* Texto do botão Fechar */}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  </Modal>
-);
+    </Modal>
+  );
 };
 
 // Componente principal HomeScreenGestao
@@ -178,7 +203,7 @@ const HomeScreenGestao = () => {
   const [currentPostId, setCurrentPostId] = useState(null);
   const [searchText, setSearchText] = useState(''); // Estado para texto de busca
   const { theme } = useContext(ThemeContext); // Pegando o tema do contexto
-
+  const { language } = useContext(LanguageContext); // Acessa o idioma do context
   
   const userId = 21; // User ID should be dynamic based on login context
 
@@ -290,7 +315,10 @@ const HomeScreenGestao = () => {
   };
 
   const renderPublicacao = (pub) => (
-    <View style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]} key={pub.idPublicacao}>
+    <View
+      style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}
+      key={pub.idPublicacao}
+    >
       <View style={styles.indent}>
         <Avatar />
         <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} theme={theme} />
@@ -321,43 +349,42 @@ const HomeScreenGestao = () => {
 
   return (
     <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+    {/* Barra de Pesquisa */}
+    <TextInput
+      style={[styles.searchBar, theme === 'escuro' ? styles.darkText : styles.lightText]}
+      placeholder={language === 'pt' ? 'Pesquise por publicações ou autores...' : 'Search for posts or authors...'} // Texto do placeholder
+      value={searchText}
+      onChangeText={handleSearch}
+    />
       
-      {/* Barra de Pesquisa */}
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }}> {/* Ajuste o padding para a altura da área de criação de publicações */}
+      {/* Renderiza as publicações filtradas */}
+      {filteredPublicacoes.map(renderPublicacao)}
+    </ScrollView>
+
+    {/* Fixa a área de criação de publicações na parte inferior */}
+    <View style={[styles.fixedFooter, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
       <TextInput
-        style={[styles.searchBar, theme === 'escuro' ? styles.darkText : styles.lightText]}
-        placeholder="Pesquise por publicações ou autores..."
-        value={searchText}
-        onChangeText={handleSearch}
+        style={[styles.inputPost, theme === 'escuro' ? styles.darkText : styles.lightText]}
+        placeholder={language === 'pt' ? 'Escreva uma publicação...' : 'Write a post...'} // Texto do placeholder
+        value={newPostText}
+        onChangeText={setNewPostText}
       />
-      
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }} // Ajuste o padding para a altura da área de criação de publicações
-      >
-        {/* Renderiza as publicações filtradas */}
-        {filteredPublicacoes.map(renderPublicacao)}
-      </ScrollView>
-  
-      {/* Fixa a área de criação de publicações na parte inferior */}
-      <View style={[styles.fixedFooter, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-        <TextInput
-          style={[styles.inputPost, theme === 'escuro' ? styles.darkText : styles.lightText]}
-          placeholder="Escreva uma publicação..."
-          value={newPostText}
-          onChangeText={setNewPostText}
-        />
-        <TouchableOpacity style={styles.sendPostButton} onPress={handleCreatePost}>
-          <Text style={styles.sendPostButtonText}>Publicar</Text>
-        </TouchableOpacity>
-      </View>
-  
-      <CommentModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        comments={selectedComments}
-        onCommentAdded={handleCommentUpdate}
-        publicacaoId={currentPostId} // Passa o ID da publicação atual
-      />
+      <TouchableOpacity style={styles.sendPostButton} onPress={handleCreatePost}>
+        <Text style={styles.sendPostButtonText}>
+          {language === 'pt' ? 'Publicar' : 'Post'} {/* Texto do botão de publicar */}
+        </Text>
+      </TouchableOpacity>
     </View>
+  
+    <CommentModal
+      visible={modalVisible}
+      onClose={() => setModalVisible(false)}
+      comments={selectedComments}
+      onCommentAdded={handleCommentUpdate}
+      publicacaoId={currentPostId} // Passa o ID da publicação atual
+    />
+  </View>
   );
 };
 
