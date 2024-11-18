@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity, Modal, Image } from 'react-native';
 import axios from 'axios';
 import { ThemeContext } from '../Components/ThemeContext';
+import { LanguageContext } from '../Components/LanguageContext';
 
 const RedeGestao = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -9,6 +10,7 @@ const RedeGestao = () => {
   const [turmas, setTurmas] = useState([]);
   const [alunos, setAlunos] = useState([]);
   const { theme } = useContext(ThemeContext); // Pegando o tema do contexto
+  const { language } = useContext(LanguageContext); // Acesse o idioma
 
   // Função para buscar as turmas
   const fetchTurmas = async () => {
@@ -51,10 +53,10 @@ const RedeGestao = () => {
       />
       <View style={styles.textContainer}>
         <Text style={[styles.alunoNome, theme === 'escuro' ? styles.darkText : styles.lightText]}>
-          {item.NomeAluno || 'Nome não disponível'}
+          {item.NomeAluno || (language === 'pt' ? 'Nome não disponível' : 'Name not available')}
         </Text>
         <Text style={[styles.alunoEmail, theme === 'escuro' ? styles.darkText : styles.lightText]}>
-          {item.EmailInstitucional || 'Email não disponível'}
+          {item.EmailInstitucional || (language === 'pt' ? 'Email não disponível' : 'Email not available')}
         </Text>
       </View>
     </View>
@@ -63,12 +65,14 @@ const RedeGestao = () => {
   return (
     <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
       <TouchableOpacity style={styles.botaoFiltro} onPress={() => setModalVisible(true)}>
-        <Text style={styles.textoBotao}>Filtrar por Turma: {turmaSelecionada}</Text>
+        <Text style={styles.textoBotao}>
+          {language === 'pt' ? `Filtrar por Turma: ${turmaSelecionada}` : `Filter by Class: ${turmaSelecionada}`}
+        </Text>
       </TouchableOpacity>
 
       <ScrollView style={styles.scrollContainer}>
         <Text style={[styles.titulo, theme === 'escuro' ? styles.darkText : styles.lightText]}>
-          Emails dos Alunos:
+          {language === 'pt' ? 'Emails dos Alunos:' : 'Students Emails:'}
         </Text>
         <View style={styles.listaContainer}>
           <FlatList
@@ -89,7 +93,7 @@ const RedeGestao = () => {
         <View style={styles.modalContainer}>
           <View style={[styles.modalContent, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
             <Text style={[styles.modalTitulo, theme === 'escuro' ? styles.darkText : styles.lightText]}>
-              Selecionar Turma
+              {language === 'pt' ? 'Selecionar Turma' : 'Select Class'}
             </Text>
             <ScrollView style={styles.turmaScroll}>
               <TouchableOpacity
@@ -99,7 +103,9 @@ const RedeGestao = () => {
                   setModalVisible(false);
                 }}
               >
-                <Text style={styles.textoTurma}>Todas as Turmas</Text>
+                <Text style={styles.textoTurma}>
+                  {language === 'pt' ? 'Todas as Turmas' : 'All Classes'}
+                </Text>
               </TouchableOpacity>
               {turmas.map((turma) => (
                 <TouchableOpacity
@@ -115,7 +121,9 @@ const RedeGestao = () => {
               ))}
             </ScrollView>
             <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalVisible(false)}>
-              <Text style={styles.textoBotaoFechar}>Fechar</Text>
+              <Text style={styles.textoBotaoFechar}>
+                {language === 'pt' ? 'Fechar' : 'Close'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -25,7 +25,7 @@ const Configuracoes = () => {
 
       {/* Tema do aplicativo */}
       <View style={styles.fundoTitulo}>
-        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTexTitlet : styles.lightTextTitle]}>
+        <Text style={[styles.opcaoTitulo, theme === 'escuro' ? styles.darkTextTitle : styles.lightTextTitle]}>
           {language === 'pt' ? 'Tema do aplicativo:' : 'App Theme:'}
         </Text>
       </View>
