@@ -4,6 +4,7 @@
   import fotoPerfilAnonima from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
   import { ThemeContext } from '../Components/ThemeContext';
   import Icon from 'react-native-vector-icons/Ionicons';
+  import { LanguageContext } from '../Components/LanguageContext';
 
   // Componente de Avatar
   const Avatar = () => (
@@ -18,22 +19,35 @@
     </View>
   );
 
-  // Componente de Botão de Comentar
-  const BotaoComentar = ({ onPress, comentarioCount }) => (
+// Componente de Botão de Comentar
+const BotaoComentar = ({ onPress, comentarioCount }) => {
+  const { language } = useContext(LanguageContext); // Acessa o contexto de idioma
+
+  return (
     <View style={styles.containerBotao}>
       <TouchableOpacity onPress={onPress} style={styles.botao}>
-        <Text style={styles.botaoTexto}>Comentar ({comentarioCount})</Text>
+        <Text style={styles.botaoTexto}>
+          {language === 'pt' ? `Comentar (${comentarioCount})` : `Comment (${comentarioCount})`}
+        </Text>
       </TouchableOpacity>
     </View>
   );
+};
 
-  const BotaoExcluir = ({ onPress }) => (
+// Componente de Botão de Excluir
+const BotaoExcluir = ({ onPress }) => {
+  const { language } = useContext(LanguageContext); // Acessa o contexto de idioma
+
+  return (
     <View style={styles.containerBotaoExcluir}>
       <TouchableOpacity onPress={onPress} style={styles.botaoExcluir}>
-        <Text style={styles.botaoTexto}>Excluir</Text>
+        <Text style={styles.botaoTexto}>
+          {language === 'pt' ? 'Excluir' : 'Delete'} {/* Troca do texto com base no idioma */}
+        </Text>
       </TouchableOpacity>
     </View>
   );
+};
 
   const Curtir = ({ count, liked, onPress, theme }) => (
     <View style={[styles.containerCurtir, theme === 'escuro' ? styles.darkText : styles.lightText]}>
@@ -70,6 +84,7 @@
   const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId }) => {
     const [textoComentario, setTextoComentario] = useState('');
     const { theme } = useContext(ThemeContext); // Acessando o valor do tema
+    const { language } = useContext(LanguageContext); // Acesse o idioma
 
     const handleSendComment = async () => {
       if (textoComentario.trim()) {
@@ -133,14 +148,20 @@
     >
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-          <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText]}>Comentários</Text>
+          <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+            {language === 'pt' ? 'Comentários' : 'Comments'} {/* Título do Modal */}
+          </Text>
           <ScrollView style={[styles.comentariosContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
             {Array.isArray(comments) && comments.map((comment) => (
               <View key={comment.idComentario} style={[styles.comentarioContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
                 <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
-                  <Text style={[styles.nomeAutor, theme === 'escuro' ? styles.darkText : styles.lightText]}>{comment.nome_comentador}</Text>
-                  <Text style={[styles.comentarioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>{comment.texto}</Text>
+                  <Text style={[styles.nomeAutor, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+                    {comment.nome_comentador}
+                  </Text>
+                  <Text style={[styles.comentarioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+                    {comment.texto}
+                  </Text>
                 </View>
                 <CurtirComentario
                   count={comment.num_likes}
@@ -152,15 +173,19 @@
           </ScrollView>
           <TextInput 
             style={[styles.input, theme === 'escuro' ? styles.darkText : styles.lightText]} 
-            placeholder="Escreva um comentário..." 
+            placeholder={language === 'pt' ? 'Escreva um comentário...' : 'Write a comment...'}
             value={textoComentario}
             onChangeText={setTextoComentario}
           />
           <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
-            <Text style={styles.sendButtonText}>Enviar</Text>
+            <Text style={styles.sendButtonText}>
+              {language === 'pt' ? 'Enviar' : 'Send'} {/* Texto do botão Enviar */}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Fechar</Text>
+            <Text style={styles.closeButtonText}>
+              {language === 'pt' ? 'Fechar' : 'Close'} {/* Texto do botão Fechar */}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -171,12 +196,15 @@
   // Componente principal HomeScreenGestao
   const PublicacoesGestao = () => {
     const [publicacoes, setPublicacoes] = useState([]);
+    const [filteredPublicacoes, setFilteredPublicacoes] = useState([]);
+    const [searchText, setSearchText] = useState(''); // Estado para texto de busca
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedComments, setSelectedComments] = useState([]);
     const [newPostText, setNewPostText] = useState('');
     const [likes, setLikes] = useState({});
     const [currentPostId, setCurrentPostId] = useState(null);
     const { theme } = useContext(ThemeContext); // Pegando o tema do contexto
+      const { language } = useContext(LanguageContext); // Acessa o idioma do context
     
     const fetchPublicacoes = async () => {
       const idPessoa = 21; // ID fixo, que você pode substituir conforme a lógica do seu sistema.
@@ -206,6 +234,31 @@
     useEffect(() => {
       fetchPublicacoes();
     }, []);
+
+    const handleSearch = (text) => {
+      setSearchText(text);
+      
+      // Se o campo de pesquisa estiver vazio, mostrar todas as publicações
+      if (text === '') {
+        setFilteredPublicacoes(publicacoes);
+      } else {
+        // Filtrar as publicações com base no texto inserido
+        const filtered = publicacoes.filter(pub => 
+          pub.publicacao_descricao.toLowerCase().includes(text.toLowerCase()) || 
+          pub.nome_pessoa.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredPublicacoes(filtered);
+      }
+    };
+    
+    useEffect(() => {
+      fetchPublicacoes();
+    }, []);
+  
+    useEffect(() => {
+      // Sempre que as publicações forem alteradas, resetar as publicações filtradas
+      setFilteredPublicacoes(publicacoes);
+    }, [publicacoes]);
 
     const handleLike = async (postId) => {
       const isLiked = likes[postId] || false;
@@ -271,64 +324,76 @@
     };
 
     const renderPublicacao = (pub) => (
-      <View style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]} key={pub.idPublicacao}>
-        <View style={styles.indent}>
-          <Avatar />
-          <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} theme={theme} />
-        </View>
-        <Text style={theme === 'escuro' ? styles.darkText : styles.lightText}>
+      <View
+      style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}
+      key={pub.idPublicacao}
+    >
+      <View style={styles.indent}>
+        <Avatar />
+        <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} theme={theme} />
+      </View>
+      <Text style={theme === 'escuro' ? styles.darkText : styles.lightText}>
         {pub.publicacao_descricao}
-        </Text>
-        <View style={styles.actionsRow}>
-          <Curtir
-            count={pub.quantidade_curtidas}
-            liked={likes[pub.idPublicacao]}
-            onPress={() => handleLike(pub.idPublicacao)}
+      </Text>
+      <View style={styles.actionsRow}>
+        <Curtir
+          count={pub.quantidade_curtidas}
+          liked={likes[pub.idPublicacao]}
+          onPress={() => handleLike(pub.idPublicacao)}
+        />
+        <View style={styles.commentDeleteRow}>
+          <BotaoComentar
+            onPress={async () => {
+              await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
+              setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
+              setModalVisible(true);
+            }}
+            comentarioCount={pub.quantidade_comentarios}
           />
-          <View style={styles.commentDeleteRow}>
-            <BotaoComentar
-              onPress={async () => {
-                await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
-                setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
-                setModalVisible(true);
-              }}
-              comentarioCount={pub.quantidade_comentarios}
-            />
-            <BotaoExcluir onPress={() => handleDeletePost(pub.idPublicacao)} />
-          </View>
+          <BotaoExcluir onPress={() => handleDeletePost(pub.idPublicacao)} />
         </View>
       </View>
+    </View>
     );
 
     return (
       <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }} // Ajuste o padding para a altura da área de criação de publicações
-        >
-          {publicacoes.map(renderPublicacao)}
-        </ScrollView>
-    
-        {/* Fixa a área de criação de publicações na parte inferior */}
-        <View style={[styles.fixedFooter, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-          <TextInput
-            style={[styles.inputPost, theme === 'escuro' ? styles.darkText : styles.lightText]}
-            placeholder="Escreva uma publicação..."
-            value={newPostText}
-            onChangeText={setNewPostText}
-          />
-          <TouchableOpacity style={styles.sendPostButton} onPress={handleCreatePost}>
-            <Text style={styles.sendPostButtonTex}>Publicar</Text>
-          </TouchableOpacity>
-        </View>
-    
-        <CommentModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          comments={selectedComments}
-          onCommentAdded={handleCommentUpdate}
-          publicacaoId={currentPostId}
+      {/* Barra de Pesquisa */}
+      <TextInput
+        style={[styles.searchBar, theme === 'escuro' ? styles.darkText : styles.lightText]}
+        placeholder={language === 'pt' ? 'Pesquise por publicações ou autores...' : 'Search for posts or authors...'} // Texto do placeholder
+        value={searchText}
+        onChangeText={handleSearch}
+      />
+        
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }}> {/* Ajuste o padding para a altura da área de criação de publicações */}
+        {/* Renderiza as publicações filtradas */}
+        {filteredPublicacoes.map(renderPublicacao)}
+      </ScrollView>
+  
+      {/* Fixa a área de criação de publicações na parte inferior */}
+      <View style={[styles.fixedFooter, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+        <TextInput
+          style={[styles.inputPost, theme === 'escuro' ? styles.darkText : styles.lightText]}
+          placeholder={language === 'pt' ? 'Escreva uma publicação...' : 'Write a post...'} // Texto do placeholder
+          value={newPostText}
+          onChangeText={setNewPostText}
         />
+        <TouchableOpacity style={styles.sendPostButton} onPress={handleCreatePost}>
+          <Text style={styles.sendPostButtonText}>
+            {language === 'pt' ? 'Publicar' : 'Post'} {/* Texto do botão de publicar */}
+          </Text>
+        </TouchableOpacity>
       </View>
+    
+      <CommentModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        comments={selectedComments}
+        onCommentAdded={handleCommentUpdate}
+        publicacaoId={currentPostId} // Passa o ID da publicação atual
+      />
+    </View>
     );
   };
 
@@ -337,6 +402,16 @@
       flex: 1,
       backgroundColor: '#fff',
       paddingHorizontal: 20,
+    },
+    searchBar: {
+      marginBottom: 16,
+      padding: 10,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      marginTop: 16,
+      paddingHorizontal: 10,
+      marginVertical: 10,
     },
     searchInput: {
       height: 40,
