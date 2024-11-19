@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { ThemeContext } from '../Components/ThemeContext'; // Importe o ThemeContext
 import { LanguageContext } from '../Components/LanguageContext'; // Importe o LanguageContext
+import { FontSizeContext } from '../Components/FontSizeProvider'; // Importe o contexto de tamanho da fonte
 
 import fotoGuilherme from '../../assets/FotosSobrenos/Guilherme-gomes.jpeg';
 import fotoLucas from '../../assets/FotosPerfil/Foto-perfil-Anonima.jpg';
@@ -63,8 +64,9 @@ const membrosDaEquipe = [
 const Sobrenos = () => {
   const { language } = useContext(LanguageContext); // Acesse o idioma
   const { theme } = useContext(ThemeContext); // Acesse o tema
+  const { fontSize, changeFontSize, getFontSize } = useContext(FontSizeContext); // Use o contexto de tamanho da fonte
 
-  // Defina os estilos dinâmicos com base no tema
+  // Defina os estilos dinâmicos com base no tema e tamanho da fonte
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -98,18 +100,18 @@ const Sobrenos = () => {
       justifyContent: 'center', // Centraliza verticalmente
     },
     nome: {
-      fontSize: 18,
+      fontSize: getFontSize(), // Aplica o tamanho de fonte dinâmico
       fontWeight: 'bold',
       marginBottom: 5,
       color: theme === 'escuro' ? '#fff' : '#333', // Cor do nome
     },
     funcao: {
-      fontSize: 16,
+      fontSize: getFontSize(), // Aplica o tamanho de fonte dinâmico
       marginBottom: 5,
       color: theme === 'escuro' ? '#bbb' : '#555', // Cor da função
     },
     contato: {
-      fontSize: 14,
+      fontSize: getFontSize(), // Aplica o tamanho de fonte dinâmico
       marginVertical: 2,
       color: theme === 'escuro' ? '#bbb' : '#555', // Cor dos contatos
     },
