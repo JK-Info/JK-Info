@@ -15,6 +15,7 @@ import { LanguageProvider, LanguageContext } from './src/Components/LanguageCont
 import axios from 'axios';
 import { JWT_SECRET_KEY } from '@env';
 import {ThemeProvider, ThemeContext} from './src/Components/ThemeContext.js';
+import { FontSizeProvider } from './src/Components/FontSizeProvider.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +34,7 @@ export default function App() {
   }, []);
 
   return (
+    <FontSizeProvider>
     <LanguageProvider>
     <ThemeProvider>
     <NavigationContainer>
@@ -91,5 +93,6 @@ export default function App() {
     </NavigationContainer>
     </ThemeProvider>
     </LanguageProvider>
+    </FontSizeProvider>
   );
 }
