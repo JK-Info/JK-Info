@@ -10,11 +10,13 @@ import RedeGestor from '../screenGestao/RedeGestao';
 import NotasGestao from '../screenGestao/NotasGestao';
 import PublicacoesGestao from '../screenGestao/PublicacoesGestao';
 import { LanguageContext } from '../Components/LanguageContext'; // Importa o contexto de idioma
+import { FontSizeContext } from './FontSizeProvider'; // Importa o contexto de tamanho de fonte
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigatorGestao = () => {
   const { language } = useContext(LanguageContext); // Acessa o idioma do contexto
+  const { fontSize } = useContext(FontSizeContext); // Acessa o tamanho de fonte do contexto
 
   return (
     <Drawer.Navigator
@@ -25,14 +27,20 @@ const DrawerNavigatorGestao = () => {
         drawerStyle: {
           backgroundColor: '#00527C',  // Cor de fundo do drawer
         },
+        drawerLabelStyle: {
+          fontSize: fontSize, // Aplica o tamanho dinâmico da fonte ao rótulo do drawer
+        },
         headerStyle: {
           backgroundColor: '#00527C',  // Cor do fundo do cabeçalho
         },
         headerTintColor: '#FFFFFF',  // Cor do texto do cabeçalho
+        headerTitleStyle: {
+          fontSize: fontSize, // Aplica o tamanho dinâmico da fonte ao título do cabeçalho
+        }
       }}
     >
       <Drawer.Screen 
-        name={language === 'pt' ? 'Home' : 'Home'} // Pode manter o nome fixo ou ajustar conforme o idioma
+        name={language === 'pt' ? 'Home' : 'Home'} 
         component={TabNavigatorGestor}
       />
       <Drawer.Screen 

@@ -5,12 +5,14 @@ import Notificacoes from '../screen/Notificacoes';
 import HomeScreenGestao from '../screenGestao/HomeScreenGestao';
 import { ThemeContext } from '../Components/ThemeContext'; // Importa o ThemeContext
 import { LanguageContext } from '../Components/LanguageContext'; // Importa o LanguageContext
+import { FontSizeContext } from '../Components/FontSizeProvider'; // Importa o FontSizeContext
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigatorGestor = () => {
   const { theme } = useContext(ThemeContext); // Acessa o tema atual do contexto
   const { language } = useContext(LanguageContext); // Acessa o idioma do contexto
+  const { fontSize } = useContext(FontSizeContext); // Acessa o tamanho da fonte do contexto
 
   return (
     <Tab.Navigator
@@ -21,6 +23,9 @@ const TabNavigatorGestor = () => {
           backgroundColor: theme === 'escuro' ? '#1c1c1c' : '#FFFFFF',      // Cor de fundo da tab bar
           borderTopWidth: 1,
           borderTopColor: theme === 'escuro' ? '#333' : '#ccc',             // Cor da borda superior da tab bar
+        },
+        tabBarLabelStyle: {
+          fontSize: fontSize,  // Aplica o tamanho da fonte dinamicamente
         },
         tabBarActiveBackgroundColor: theme === 'escuro' ? '#333333' : '#00527C', // Cor de fundo da aba ativa
         headerShown: false,  // Ocultar o cabeçalho em todas as telas do TabNavigator
