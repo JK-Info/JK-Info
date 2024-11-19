@@ -31,15 +31,15 @@ routerNotas.post('/notas', (req,res)=>{
 
 routerNotas.put('/notas/:id', (req,res)=>{
   const {id} = req.params;
-  const {nota} = req.body;
+  const {nota, turmaId} = req.body;
   const query = 'UPDATE notas Set nota = ? WHERE idNota = ?';
 
-  db.query(query, [nota, id], (err, results)=> {
+  db.query(query, [nota, turmaId,id], (err, results)=> {
     if(err){
       console.error('Erro ao Editar nota:', err);
       res.status(500).send({mensagem: 'Erro ao criar nota'});
     }else{
-      res.send({mensagem: 'Nota Editada Cm Sucesso!'});
+      res.send({ idNota: parseInt(id), nota, Turma_idTurma: turmaId });
     }
   });
 });

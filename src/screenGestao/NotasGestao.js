@@ -66,11 +66,18 @@ const NotasGestao = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        setNotas(notas.map((nota) => (nota.idNota === item.idNota ? data : nota)));
+        if (data.idNota && data.nota) {
+          setNotas(notas.map((n) =>
+            n.idNota === item.idNota ? data : n
+          ));
+        }else{
+          console.error('Erro: Dados inválidos retornados pela API', data);
+        };
         setNota('');
+        setNotaEditar({});
         setEditando(false);
       })
-      .catch((error) => console.error('Erro ao editar nota:', error));
+      .catch((error) => console.error('Erro ao editar lembretes:', error));
   };
 
   const handleDeleteNota = (item) => {
@@ -81,7 +88,7 @@ const NotasGestao = () => {
         const notasAtualizadas = notas.filter((n) => n.idNota !== item.idNota);
         setNotas(notasAtualizadas);
       })
-      .catch((error) => console.error('Erro ao excluir nota:', error));
+      .catch((error) => console.error('Erro ao excluir lembretes:', error));
   };
 
   if(isLoading) {
@@ -94,7 +101,7 @@ const NotasGestao = () => {
   
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Gerenciamento de Notas</Text>
+      <Text style={styles.title}>Gerenciamento de Lembretes/Avisos</Text>
 
       <Text style={styles.label}>Selecione a Turma:</Text>
       <Picker
@@ -109,7 +116,7 @@ const NotasGestao = () => {
 
       <TextInput
         style={styles.input}
-        placeholder="Digite a Nota"
+        placeholder="Digite o Aviso"
         value={nota}
         onChangeText={(text) => setNota(text)}
         keyboardType="numeric"
@@ -118,16 +125,16 @@ const NotasGestao = () => {
       {editando ? (
         <Button title="Salvar Edição" onPress={() => handleEditNota(notaEditar)} />
       ) : (
-        <Button title="Adicionar Nota" onPress={handleSendNota} />
+        <Button title="Adicionar Aviso" onPress={handleSendNota} />
       )}
 
-      <Text style={styles.subtitle}>Notas Cadastradas:</Text>
+      <Text style={styles.subtitle}>Lembretes Cadastradas:</Text>
       <FlatList
-        data={notas}
+        data={notas.filter(nota => nota && nota.idNota && nota.nota && nota.Turma_idTurma)}
         renderItem={({ item }) => (
-          <View style={styles.notaContainer} key={item.idNota}>
+          <View style={styles.notaContainer}>
             <Text style={styles.nota}>
-              Nota: {item.nota} - Turma {item.Turma_idTurma}
+              Lembretes: {item.nota} - Turma {item.Turma_idTurma}
             </Text>
             <View style={styles.buttonContainer}>
               <Button

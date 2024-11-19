@@ -1,34 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList, TextInput } from 'react-native';
 
-const alunosData = [
-  { key: '1', nome: 'Guilherme Gomes', email: 'guilherme.silva2616@etec.sp.gov.br' },
-  { key: '2', nome: 'Fernanda Santos', email: 'fernanda.santos@etec.sp.gov.br' },
-  { key: '3', nome: 'Pedro Souza', email: 'pedro.souza@etec.sp.gov.br' },
-  { key: '4', nome: 'Mariana Oliveira', email: 'mariana.oliveira@etec.sp.gov.br' },
-  { key: '5', nome: 'Lucas Silva', email: 'lucas.silva@etec.sp.gov.br' },
-  { key: '6', nome: 'Ana Maria', email: 'ana.maria@etec.sp.gov.br' },
-  { key: '7', nome: 'João da Silva', email: 'joao.silva@etec.sp.gov.br' },
-  { key: '8', nome: 'Maria Clara', email: 'maria.clara@etec.sp.gov.br' },
-];
-
-const professoresData = [
-  { key: '1', nome: 'Prof. Carlos Silva', email: 'carlos.silva@etec.sp.gov.br' },
-  { key: '2', nome: 'Prof. Ana Paula', email: 'ana.paula@etec.sp.gov.br' },
-  { key: '3', nome: 'Prof. Marcos Oliveira', email: 'marcos.oliveira@etec.sp.gov.br' },
-  { key: '4', nome: 'Prof. Maria Clara', email: 'maria.clara@etec.sp.gov.br' },
-  { key: '5', nome: 'Prof. João Pedro', email: 'joao.pedro@etec.sp.gov.br' },
-  { key: '6', nome: 'Prof. Renata', email: 'renata@etec.sp.gov.br' },
-  { key: '7', nome: 'Fernanda Lima', email: 'fernanda.lima@etec.sp.gov.br' },
-  { key: '8', nome: 'Lucas Almeida', email: 'lucas.almeida@etec.sp.gov.br' },
-];
-
 const TurmaScreen = () => {
-  const [notas, setNotas] = useState([
-    'Leonardo: Postada a atividade de PAM',
-    'Jefferson: Data de entrega da atividade de DES',
-    'Ederson: Enviado o Power Point da aula de sexta',
-  ]);
+  const [notas, setNotas] = useState([]);
+  const [alunos, setAlunos] = useState([]);
+  const [professores, setProfessores] = useState([]);
+  
+  // Substitua 'seu_token_aqui' pelo token de autenticação obtido após o login
+  const token = 'seu_token_aqui';
+
+  useEffect(() => {
+    // Buscar Notas (Lembretes)
+    fetch('http://localhost:3000/notasTurma', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => setNotas(data))
+      .catch((error) => console.error('Erro ao buscar notas:', error));
+
+    // Buscar Alunos da Turma
+    fetch('http://localhost:3000/alunosTurma', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => setAlunos(data))
+      .catch((error) => console.error('Erro ao buscar alunos:', error));
+
+    // Buscar Professores da Turma
+    fetch('http://localhost:3000/professoresTurma', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => setProfessores(data))
+      .catch((error) => console.error('Erro ao buscar professores:', error));
+  }, []);
 
   const handleNotaChange = (text, index) => {
     const updatedNotas = [...notas];
@@ -46,6 +57,15 @@ const TurmaScreen = () => {
     </View>
   );
 
+  const renderNotaItem = ({ item, index }) => (
+    <TextInput
+      style={styles.notaInput}
+      value={item.nota}
+      onChangeText={(text) => handleNotaChange(text, index)}
+      multiline={true} // Permite múltiplas linhas
+    />
+  );
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.perfil}>
@@ -61,14 +81,7 @@ const TurmaScreen = () => {
         <View style={styles.notasItem}>
           <FlatList
             data={notas}
-            renderItem={({ item, index }) => (
-              <TextInput
-                style={styles.notaInput}
-                value={item}
-                onChangeText={(text) => handleNotaChange(text, index)}
-                multiline={true} // Permite múltiplas linhas
-              />
-            )}
+            renderItem={renderNotaItem}
             keyExtractor={(item, index) => index.toString()}
             showsVerticalScrollIndicator={false}
           />
@@ -80,7 +93,7 @@ const TurmaScreen = () => {
           <View style={styles.alunosSection}>
             <Text style={styles.sectionHeader}>Alunos da Turma</Text>
             <FlatList
-              data={alunosData}
+              data={alunos}
               renderItem={renderAlunoItem}
               keyExtractor={item => item.key}
               scrollEnabled={true}
@@ -93,7 +106,7 @@ const TurmaScreen = () => {
           <View style={styles.professoresSection}>
             <Text style={styles.sectionHeader}>Professores da Turma</Text>
             <FlatList
-              data={professoresData}
+              data={professores}
               renderItem={renderAlunoItem}
               keyExtractor={item => item.key}
               scrollEnabled={true}
