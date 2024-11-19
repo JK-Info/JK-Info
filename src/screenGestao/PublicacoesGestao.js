@@ -5,86 +5,113 @@
   import { ThemeContext } from '../Components/ThemeContext';
   import Icon from 'react-native-vector-icons/Ionicons';
   import { LanguageContext } from '../Components/LanguageContext';
+  import { FontSizeContext } from '../Components/FontSizeProvider';
 
   // Componente de Avatar
   const Avatar = () => (
     <Image source={fotoPerfilAnonima} style={styles.avatarImage} />
   );
 
-  // Componente de Usuário
-  const Usuario = ({ nome, cargo, theme }) => (
-    <View style={styles.informacoesPublicacao}>
-      <Text style={theme === 'escuro' ? styles.darkText : styles.lightText}>{nome}</Text>
-      <Text style={[{ fontSize: 11 }, theme === 'escuro' ? styles.darkText : styles.lightText]}>{cargo}</Text>
-    </View>
-  );
+    // Componente de Usuário
+    const Usuario = ({ nome, cargo, theme }) => {
+      const { fontSize } = useContext(FontSizeContext); // Obtenha o tamanho de fonte do contexto
+    
+      return (
+        <View style={styles.informacoesPublicacao}>
+          <Text
+            style={[
+              theme === 'escuro' ? styles.darkText : styles.lightText,
+              { fontSize } // Aplica o tamanho de fonte dinâmico no nome
+            ]}
+          >
+            {nome}
+          </Text>
+          <Text
+            style={[
+              theme === 'escuro' ? styles.darkText : styles.lightText,
+              { fontSize } // Aplica o tamanho de fonte dinâmico no cargo também
+            ]}
+          >
+            {cargo}
+          </Text>
+        </View>
+      );
+    };
 
-// Componente de Botão de Comentar
-const BotaoComentar = ({ onPress, comentarioCount }) => {
-  const { language } = useContext(LanguageContext); // Acessa o contexto de idioma
-
-  return (
-    <View style={styles.containerBotao}>
-      <TouchableOpacity onPress={onPress} style={styles.botao}>
-        <Text style={styles.botaoTexto}>
-          {language === 'pt' ? `Comentar (${comentarioCount})` : `Comment (${comentarioCount})`}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-// Componente de Botão de Excluir
-const BotaoExcluir = ({ onPress }) => {
-  const { language } = useContext(LanguageContext); // Acessa o contexto de idioma
-
-  return (
-    <View style={styles.containerBotaoExcluir}>
-      <TouchableOpacity onPress={onPress} style={styles.botaoExcluir}>
-        <Text style={styles.botaoTexto}>
-          {language === 'pt' ? 'Excluir' : 'Delete'} {/* Troca do texto com base no idioma */}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-  const Curtir = ({ count, liked, onPress, theme }) => (
-    <View style={[styles.containerCurtir, theme === 'escuro' ? styles.darkText : styles.lightText]}>
-      <TouchableOpacity onPress={onPress}>
-        <Icon
-          name={liked ? "heart" : "heart-outline"} // Alterna entre coração preenchido e contornado
-          size={24}
-          color={liked ? '#FF0000' : '#FF0000'} // Mantém a borda vermelha nos dois estados
-        />
-      </TouchableOpacity>
-      <Text style={[styles.curtidasTexto, theme === 'escuro' ? { color: '#FFFFFF' } : styles.lightText]}>
-        {count}
-      </Text>
-    </View>
-  );
+  // Componente de Botão de Comentar
+  const BotaoComentar = ({ onPress, comentarioCount }) => {
+    const { language } = useContext(LanguageContext); // Acessa o contexto de idioma
+    const { fontSize } = useContext(FontSizeContext); // Acessa o contexto de tamanho de fonte
   
-  const CurtirComentario = ({ count, liked, onPress, theme }) => (
-    <View style={[styles.containerCurtir, theme === 'escuro' ? styles.darkText : styles.lightText]}>
-      <TouchableOpacity onPress={onPress}>
-        <Icon
-          name={liked ? "heart" : "heart-outline"} // Alterna entre coração preenchido e coração com borda
-          size={24}
-          color={liked ? '#FF0000' : '#FF0000'} // O coração sempre terá a borda vermelha
-        />
-      </TouchableOpacity>
-      <Text style={[styles.curtidasTexto, theme === 'escuro' ? { color: '#FFFFFF' } : styles.lightText]}>
-        {count}
-      </Text>
-    </View>
-  );
+    return (
+      <View style={styles.containerBotao}>
+        <TouchableOpacity onPress={onPress} style={styles.botao}>
+          <Text style={[styles.botaoTexto, { fontSize }]}>
+            {language === 'pt' ? `Comentar (${comentarioCount})` : `Comment (${comentarioCount})`}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+  // Componente de Botão de Excluir
+  const BotaoExcluir = ({ onPress }) => {
+    const { language } = useContext(LanguageContext); // Acessa o contexto de idioma
+    const { fontSize } = useContext(FontSizeContext); // Acessa o contexto de tamanho de fonte
   
+    return (
+      <View style={styles.containerBotaoExcluir}>
+        <TouchableOpacity onPress={onPress} style={styles.botaoExcluir}>
+          <Text style={[styles.botaoTexto, { fontSize }]}>
+            {language === 'pt' ? 'Excluir' : 'Delete'} {/* Troca do texto com base no idioma */}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+  const Curtir = ({ count, liked, onPress, theme }) => {
+    const { fontSize } = useContext(FontSizeContext); // Acessa o contexto de tamanho de fonte
+  
+    return (
+      <View style={[styles.containerCurtir, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+        <TouchableOpacity onPress={onPress}>
+          <Icon
+            name={liked ? "heart" : "heart-outline"} // Alterna entre coração preenchido e contornado
+            size={24}
+            color={liked ? '#FF0000' : '#FF0000'} // Mantém a borda vermelha nos dois estados
+          />
+        </TouchableOpacity>
+        <Text style={[styles.curtidasTexto, { fontSize }, theme === 'escuro' ? { color: '#FFFFFF' } : styles.lightText]}>
+          {count}
+        </Text>
+      </View>
+    );
+  };
+
+  const CurtirComentario = ({ count, liked, onPress, theme }) => {
+    const { fontSize } = useContext(FontSizeContext); // Acessa o contexto de tamanho de fonte
+  
+    return (
+      <View style={[styles.containerCurtir, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+        <TouchableOpacity onPress={onPress}>
+          <Icon
+            name={liked ? "heart" : "heart-outline"} // Alterna entre coração preenchido e coração com borda
+            size={24}
+            color={liked ? '#FF0000' : '#FF0000'} // O coração sempre terá a borda vermelha
+          />
+        </TouchableOpacity>
+        <Text style={[styles.curtidasTexto, { fontSize }, theme === 'escuro' ? { color: '#FFFFFF' } : styles.lightText]}>
+          {count}
+        </Text>
+      </View>
+    );
+  };
 
   // Componente Modal de Comentários
   const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId }) => {
     const [textoComentario, setTextoComentario] = useState('');
     const { theme } = useContext(ThemeContext); // Acessando o valor do tema
     const { language } = useContext(LanguageContext); // Acesse o idioma
+    const { getFontSize, changeFontSize } = useContext(FontSizeContext);
 
     const handleSendComment = async () => {
       if (textoComentario.trim()) {
@@ -148,7 +175,7 @@ const BotaoExcluir = ({ onPress }) => {
     >
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-          <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
             {language === 'pt' ? 'Comentários' : 'Comments'} {/* Título do Modal */}
           </Text>
           <ScrollView style={[styles.comentariosContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
@@ -156,10 +183,10 @@ const BotaoExcluir = ({ onPress }) => {
               <View key={comment.idComentario} style={[styles.comentarioContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
                 <Image source={fotoPerfilAnonima} style={styles.avatarComment} />
                 <View style={styles.comentarioTextoContainer}>
-                  <Text style={[styles.nomeAutor, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+                  <Text style={[styles.nomeAutor, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
                     {comment.nome_comentador}
                   </Text>
-                  <Text style={[styles.comentarioTexto, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+                  <Text style={[styles.comentarioTexto, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
                     {comment.texto}
                   </Text>
                 </View>
@@ -172,18 +199,20 @@ const BotaoExcluir = ({ onPress }) => {
             ))}
           </ScrollView>
           <TextInput 
-            style={[styles.input, theme === 'escuro' ? styles.darkText : styles.lightText]} 
+            style={[styles.input, theme === 'escuro' ? styles.darkText : styles.lightText,
+              { fontSize: getFontSize() }
+            ]} 
             placeholder={language === 'pt' ? 'Escreva um comentário...' : 'Write a comment...'}
             value={textoComentario}
             onChangeText={setTextoComentario}
           />
           <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
-            <Text style={styles.sendButtonText}>
+            <Text style={[styles.sendButtonText, { fontSize: getFontSize() }]}>
               {language === 'pt' ? 'Enviar' : 'Send'} {/* Texto do botão Enviar */}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>
+            <Text style={[styles.closeButtonText, { fontSize: getFontSize() }]}>
               {language === 'pt' ? 'Fechar' : 'Close'} {/* Texto do botão Fechar */}
             </Text>
           </TouchableOpacity>
@@ -204,7 +233,8 @@ const BotaoExcluir = ({ onPress }) => {
     const [likes, setLikes] = useState({});
     const [currentPostId, setCurrentPostId] = useState(null);
     const { theme } = useContext(ThemeContext); // Pegando o tema do contexto
-      const { language } = useContext(LanguageContext); // Acessa o idioma do context
+    const { language } = useContext(LanguageContext); // Acessa o idioma do context
+    const { getFontSize, changeFontSize } = useContext(FontSizeContext);
     
     const fetchPublicacoes = async () => {
       const idPessoa = 21; // ID fixo, que você pode substituir conforme a lógica do seu sistema.
@@ -289,7 +319,7 @@ const BotaoExcluir = ({ onPress }) => {
     // Função para excluir publicação
     const handleDeletePost = async (id) => {
       try {
-        const response = await axios.delete(`http://localhost:3000/deletepublicacao/${id}`);
+        const response = await axios.delete(`http://localhost:3000/delet  epublicacao/${id}`);
         if (response.status === 200) {
           console.log('Publicação excluída com sucesso.');
           // Remove a publicação do estado local
@@ -325,14 +355,18 @@ const BotaoExcluir = ({ onPress }) => {
 
     const renderPublicacao = (pub) => (
       <View
-      style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}
+      style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme,
+        { fontSize: getFontSize() }
+      ]}
       key={pub.idPublicacao}
     >
       <View style={styles.indent}>
         <Avatar />
         <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} theme={theme} />
       </View>
-      <Text style={theme === 'escuro' ? styles.darkText : styles.lightText}>
+      <Text style={[theme === 'escuro' ? styles.darkText : styles.lightText,
+        { fontSize: getFontSize() }
+      ]}>
         {pub.publicacao_descricao}
       </Text>
       <View style={styles.actionsRow}>

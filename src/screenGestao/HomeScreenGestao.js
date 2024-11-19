@@ -105,6 +105,7 @@
       </View>
     );
   };
+
   // Componente Modal de Comentários
   const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId }) => {
     const [textoComentario, setTextoComentario] = useState('');
