@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, FlatList, TouchableOpacity, Modal, 
 import axios from 'axios';
 import { ThemeContext } from '../Components/ThemeContext';
 import { LanguageContext } from '../Components/LanguageContext';
+import { FontSizeContext } from '../Components/FontSizeProvider';
 
 const RedeGestao = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -11,6 +12,10 @@ const RedeGestao = () => {
   const [alunos, setAlunos] = useState([]);
   const { theme } = useContext(ThemeContext); // Pegando o tema do contexto
   const { language } = useContext(LanguageContext); // Acesse o idioma
+  const { fontSize, changeFontSize, getFontSize } = useContext(FontSizeContext); // Use o contexto de tamanho da fonte
+
+  // Define o tamanho da fonte atual
+  const currentFontSize = getFontSize();
 
   // Função para buscar as turmas
   const fetchTurmas = async () => {
@@ -52,10 +57,10 @@ const RedeGestao = () => {
         style={styles.avatar}
       />
       <View style={styles.textContainer}>
-        <Text style={[styles.alunoNome, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+        <Text style={[styles.alunoNome, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: currentFontSize }]}>
           {item.NomeAluno || (language === 'pt' ? 'Nome não disponível' : 'Name not available')}
         </Text>
-        <Text style={[styles.alunoEmail, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+        <Text style={[styles.alunoEmail, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: currentFontSize }]}>
           {item.EmailInstitucional || (language === 'pt' ? 'Email não disponível' : 'Email not available')}
         </Text>
       </View>
@@ -65,13 +70,13 @@ const RedeGestao = () => {
   return (
     <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
       <TouchableOpacity style={styles.botaoFiltro} onPress={() => setModalVisible(true)}>
-        <Text style={styles.textoBotao}>
+        <Text style={[styles.textoBotao, { fontSize: currentFontSize }]}>
           {language === 'pt' ? `Filtrar por Turma: ${turmaSelecionada}` : `Filter by Class: ${turmaSelecionada}`}
         </Text>
       </TouchableOpacity>
 
       <ScrollView style={styles.scrollContainer}>
-        <Text style={[styles.titulo, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+        <Text style={[styles.titulo, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: currentFontSize }]}>
           {language === 'pt' ? 'Emails dos Alunos:' : 'Students Emails:'}
         </Text>
         <View style={styles.listaContainer}>
@@ -92,7 +97,7 @@ const RedeGestao = () => {
       >
         <View style={styles.modalContainer}>
           <View style={[styles.modalContent, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-            <Text style={[styles.modalTitulo, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+            <Text style={[styles.modalTitulo, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: currentFontSize }]}>
               {language === 'pt' ? 'Selecionar Turma' : 'Select Class'}
             </Text>
             <ScrollView style={styles.turmaScroll}>
@@ -103,7 +108,7 @@ const RedeGestao = () => {
                   setModalVisible(false);
                 }}
               >
-                <Text style={styles.textoTurma}>
+                <Text style={[styles.textoTurma, { fontSize: currentFontSize }]}>
                   {language === 'pt' ? 'Todas as Turmas' : 'All Classes'}
                 </Text>
               </TouchableOpacity>
@@ -116,12 +121,14 @@ const RedeGestao = () => {
                     setModalVisible(false);
                   }}
                 >
-                  <Text style={styles.textoTurma}>{turma.nomeTurma}</Text>
+                  <Text style={[styles.textoTurma, { fontSize: currentFontSize }]}>
+                    {turma.nomeTurma}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
             <TouchableOpacity style={styles.botaoFechar} onPress={() => setModalVisible(false)}>
-              <Text style={styles.textoBotaoFechar}>
+              <Text style={[styles.textoBotaoFechar, { fontSize: currentFontSize }]}>
                 {language === 'pt' ? 'Fechar' : 'Close'}
               </Text>
             </TouchableOpacity>
