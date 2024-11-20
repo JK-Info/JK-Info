@@ -1,206 +1,218 @@
-  import React, { useState, useEffect, useContext } from 'react';
-  import { View, Text, FlatList, TextInput, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
-  import { ThemeContext } from '../Components/ThemeContext';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, FlatList, TextInput, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { ThemeContext } from '../Components/ThemeContext';
+import { FontSizeContext } from '../Components/FontSizeProvider';
 
-  const NotasGestao = () => {
-    const [notas, setNotas] = useState([]);
-    const [turmaSelecionada, setTurmaSelecionada] = useState('');
-    const [nota, setNota] = useState('');
-    const [turmas, setTurmas] = useState([]);
-    const [editando, setEditando] = useState(false);
-    const [notaEditar, setNotaEditar] = useState({});
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [modalVisible, setModalVisible] = useState(false);
+const NotasGestao = () => {
+  const [notas, setNotas] = useState([]);
+  const [turmaSelecionada, setTurmaSelecionada] = useState('');
+  const [nota, setNota] = useState('');
+  const [turmas, setTurmas] = useState([]);
+  const [editando, setEditando] = useState(false);
+  const [notaEditar, setNotaEditar] = useState({});
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
-    const { theme } = useContext(ThemeContext); // Acessando o valor do tema
+  const { theme } = useContext(ThemeContext); // Acessando o valor do tema
+  const { getFontSize } = useContext(FontSizeContext); // Acessando o tamanho da fonte
 
-    useEffect(() => {
-      console.log('Carregando turmas e notas...');
-      Promise.all([
-        fetch('http://localhost:3000/turmas')
-          .then((response) => response.json())
-          .then((data) => {
-            console.log('Turmas:', data);
-            setTurmas(data);
-          })
-          .catch((error) => console.error('Erro ao carregar turmas:', error)),
-    
-        fetch('http://localhost:3000/notas')
-          .then((response) => response.json())
-          .then((data) => {
-            console.log('Notas:', data);
-            setNotas(data);
-          })
-          .catch((error) => console.error('Erro ao carregar notas:', error)),
-      ]).finally(() => setIsLoading(false));
-    }, []);
-    
-
-    const handleSendNota = () => {
-      if (!turmaSelecionada) {
-        alert('Por favor, selecione uma turma.');
-        return;
-      }
-    
-      fetch('http://localhost:3000/notas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nota, turmaId: turmaSelecionada }),  // Aqui estamos passando o ID da turma
-      })
+  useEffect(() => {
+    console.log('Carregando turmas e notas...');
+    Promise.all([
+      fetch('http://localhost:3000/turmas')
         .then((response) => response.json())
         .then((data) => {
-          setNotas((prevNotas) => [...prevNotas, data]);
-          setNota('');
+          console.log('Turmas:', data);
+          setTurmas(data);
         })
-        .catch((error) => console.error('Erro ao criar nota:', error));
-    };
+        .catch((error) => console.error('Erro ao carregar turmas:', error)),
 
-    const handleEditNota = (item) => {
-      fetch(`http://localhost:3000/notas/${item.idNota}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ nota, turmaId: turmaSelecionada }),
-      })
+      fetch('http://localhost:3000/notas')
         .then((response) => response.json())
         .then((data) => {
-          setNotas((prevNotas) =>
-            prevNotas.map((n) => (n.idNota === item.idNota ? data : n))
-          );
-          setNota('');
-          setNotaEditar({});
-          setEditando(false);
+          console.log('Notas:', data);
+          setNotas(data);
         })
-        .catch((error) => console.error('Erro ao editar nota:', error));
-    };
+        .catch((error) => console.error('Erro ao carregar notas:', error)),
+    ]).finally(() => setIsLoading(false));
+  }, []);
 
-    const handleDeleteNota = (item) => {
-      fetch(`http://localhost:3000/notas/${item.idNota}`, {
-        method: 'DELETE',
+  const handleSendNota = () => {
+    if (!turmaSelecionada) {
+      alert('Por favor, selecione uma turma.');
+      return;
+    }
+
+    fetch('http://localhost:3000/notas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nota, turmaId: turmaSelecionada }), // Enviando o ID da turma
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setNotas((prevNotas) => [...prevNotas, data]);
+        setNota('');
       })
-        .then(() => {
-          setNotas((prevNotas) => prevNotas.filter((n) => n.idNota !== item.idNota));
-        })
-        .catch((error) => console.error('Erro ao excluir nota:', error));
-    };
+      .catch((error) => console.error('Erro ao criar nota:', error));
+  };
 
-    const handleSelectTurma = (turmaId) => {
-      setTurmaSelecionada(turmaId);  // Aqui você está definindo o ID da turma, e não o nome
-      setModalVisible(false); // Fechar o modal após a seleção
-    };
+  const handleEditNota = (item) => {
+    fetch(`http://localhost:3000/notas/${item.idNota}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nota, turmaId: turmaSelecionada }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setNotas((prevNotas) =>
+          prevNotas.map((n) => (n.idNota === item.idNota ? data : n))
+        );
+        setNota('');
+        setNotaEditar({});
+        setEditando(false);
+      })
+      .catch((error) => console.error('Erro ao editar nota:', error));
+  };
 
-    if (isLoading) {
-      return <Text>Carregando Dados...</Text>;
-    }
+  const handleDeleteNota = (item) => {
+    fetch(`http://localhost:3000/notas/${item.idNota}`, {
+      method: 'DELETE',
+    })
+      .then(() => {
+        setNotas((prevNotas) => prevNotas.filter((n) => n.idNota !== item.idNota));
+      })
+      .catch((error) => console.error('Erro ao excluir nota:', error));
+  };
 
-    if (error) {
-      return <Text>{error}</Text>;
-    }
+  const handleSelectTurma = (turmaId) => {
+    setTurmaSelecionada(turmaId); // Definindo o ID da turma
+    setModalVisible(false); // Fechando o modal após a seleção
+  };
 
-    return (
-      <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkTitleText : styles.lightTitleText]}>Selecione a Turma:</Text>
-        <TouchableOpacity style={styles.pickerButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.pickerButtonText}>
-            {turmaSelecionada ? `Turma Selecionada: ${turmaSelecionada}` : 'Selecione a turma'}
-          </Text>
-        </TouchableOpacity>
+  if (isLoading) {
+    return <Text>Carregando Dados...</Text>;
+  }
 
-        {/* Modal para selecionar turma */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(!modalVisible)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={[styles.modalContent, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
-              <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText]}>Selecionar Turma</Text>
-              <ScrollView style={[styles.turmaScroll, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+  if (error) {
+    return <Text>{error}</Text>;
+  }
+
+  return (
+    <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+      <Text style={[styles.label, theme === 'escuro' ? styles.darkTitleText : styles.lightTitleText, { fontSize: getFontSize() }]}>
+        Selecione a Turma:
+      </Text>
+      <TouchableOpacity style={styles.pickerButton} onPress={() => setModalVisible(true)}>
+        <Text style={[styles.pickerButtonText, { fontSize: getFontSize() }]}>
+          {turmaSelecionada ? `Turma Selecionada: ${turmaSelecionada}` : 'Selecione a turma'}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Modal para selecionar turma */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(!modalVisible)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+            <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
+              Selecionar Turma
+            </Text>
+            <ScrollView style={[styles.turmaScroll, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+              <TouchableOpacity
+                style={[styles.turmaButton, { fontSize: getFontSize() }]}
+                onPress={() => {
+                  setTurmaSelecionada('Todas');
+                  setModalVisible(false);
+                }}
+              >
+                <Text style={[styles.textoTurma, { fontSize: getFontSize() }]}>Todas as Turmas</Text>
+              </TouchableOpacity>
+              {turmas.map((turma) => (
                 <TouchableOpacity
+                  key={turma.idTurma}
                   style={styles.turmaButton}
                   onPress={() => {
-                    setTurmaSelecionada('Todas');
+                    setTurmaSelecionada(turma.nomeTurma);
                     setModalVisible(false);
                   }}
                 >
-                  <Text style={styles.textoTurma}>Todas as Turmas</Text>
+                  <Text style={[styles.textoTurma, { fontSize: getFontSize() }]}>{turma.nomeTurma}</Text>
                 </TouchableOpacity>
-                {turmas.map((turma) => (
-                  <TouchableOpacity
-                    key={turma.idTurma}
-                    style={styles.turmaButton}
-                    onPress={() => {
-                      setTurmaSelecionada(turma.nomeTurma);
-                      setModalVisible(false);
-                    }}
-                  >
-                    <Text style={styles.textoTurma}>{turma.nomeTurma}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-              <TouchableOpacity style={styles.botaoFecharModal} onPress={() => setModalVisible(false)}>
-                <Text style={styles.textoBotaoFecharModal}>Fechar</Text>
+              ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.botaoFecharModal} onPress={() => setModalVisible(false)}>
+              <Text style={[styles.textoBotaoFecharModal, { fontSize: getFontSize() }]}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <TextInput
+        style={[
+          styles.inputAviso,
+          theme === 'escuro' ? styles.darkTheme : styles.lightTheme,
+          theme === 'escuro' ? styles.darkText : styles.lightText,
+          { fontSize: getFontSize() }
+        ]}
+        placeholder="Digite o Aviso"
+        value={nota}
+        onChangeText={(text) => setNota(text)}
+        keyboardType="default"
+      />
+
+      {editando ? (
+        <TouchableOpacity style={styles.buttonEnviarAviso} onPress={() => handleEditNota(notaEditar)}>
+          <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>Salvar Edição</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={styles.buttonEnviarAviso} onPress={handleSendNota}>
+          <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>Adicionar Aviso</Text>
+        </TouchableOpacity>
+      )}
+
+      <Text style={[styles.subtitle, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
+        Lembretes Enviados:
+      </Text>
+
+      <FlatList
+        data={notas && notas.length > 0 ? notas : []}
+        renderItem={({ item }) => (
+          <View style={styles.notaContainer}>
+            <Text style={[styles.nota, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
+              Lembretes: {item.nota} - Turma {item.Turma_idTurma}
+            </Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.buttonEnviar, { fontSize: getFontSize() }]}
+                onPress={() => {
+                  setEditando(true);
+                  setNotaEditar(item);
+                  setNota(item.nota);
+                  setTurmaSelecionada(item.Turma_idTurma);
+                }}
+              >
+                <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>Editar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.buttonExcluir} onPress={() => handleDeleteNota(item)}>
+                <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>Excluir</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-
-        <TextInput
-          style={[styles.inputAviso, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, , theme === 'escuro' ? styles.darkText : styles.lightText]}
-          placeholder="Digite o Aviso"
-          value={nota}
-          onChangeText={(text) => setNota(text)}
-          keyboardType="default"
-        />
-
-        {editando ? (
-          <TouchableOpacity style={styles.buttonEnviarAviso} onPress={() => handleEditNota(notaEditar)}>
-            <Text style={styles.buttonText}>Salvar Edição</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.buttonEnviarAviso} onPress={handleSendNota}>
-            <Text style={styles.buttonText}>Adicionar Aviso</Text>
-          </TouchableOpacity>
         )}
-
-        <Text style={[styles.subtitle, theme === 'escuro' ? styles.darkText : styles.lightText]}>Lembretes Enviados:</Text>
-
-        <FlatList
-          data={notas && notas.length > 0 ? notas : []}
-          renderItem={({ item }) => (
-            <View style={styles.notaContainer}>
-              <Text style={[styles.nota, theme === 'escuro' ? styles.darkText : styles.lightText]}>
-                Lembretes: {item.nota} - Turma {item.Turma_idTurma}
-              </Text>
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.buttonEnviar}
-                  onPress={() => {
-                    setEditando(true);
-                    setNotaEditar(item);
-                    setNota(item.nota);
-                    setTurmaSelecionada(item.Turma_idTurma);
-                  }}
-                >
-                  <Text style={styles.buttonText}>Editar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.buttonExcluir} onPress={() => handleDeleteNota(item)}>
-                  <Text style={styles.buttonText}>Excluir</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-          keyExtractor={(item) => item.idNota.toString()}
-        />
-      </View>
-    );
-  };
+        keyExtractor={(item) => item.idNota.toString()}
+      />
+    </View>
+  );
+};
 
   const styles = StyleSheet.create({
     container: {
