@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, FlatList, TextInput, StyleSheet, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { ThemeContext } from '../Components/ThemeContext';
 import { FontSizeContext } from '../Components/FontSizeProvider';
+import { LanguageContext } from '../Components/LanguageContext';
 
 const NotasGestao = () => {
   const [notas, setNotas] = useState([]);
@@ -10,12 +11,12 @@ const NotasGestao = () => {
   const [turmas, setTurmas] = useState([]);
   const [editando, setEditando] = useState(false);
   const [notaEditar, setNotaEditar] = useState({});
-  const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
 
   const { theme } = useContext(ThemeContext); // Acessando o valor do tema
   const { getFontSize } = useContext(FontSizeContext); // Acessando o tamanho da fonte
+  const { language } = useContext(LanguageContext); // Acessando o idioma
 
   useEffect(() => {
     console.log('Carregando turmas e notas...');
@@ -98,18 +99,14 @@ const NotasGestao = () => {
     return <Text>Carregando Dados...</Text>;
   }
 
-  if (error) {
-    return <Text>{error}</Text>;
-  }
-
   return (
     <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
       <Text style={[styles.label, theme === 'escuro' ? styles.darkTitleText : styles.lightTitleText, { fontSize: getFontSize() }]}>
-        Selecione a Turma:
+        {language === 'pt' ? 'Selecione a Turma:' : 'Select the Class:'}
       </Text>
       <TouchableOpacity style={styles.pickerButton} onPress={() => setModalVisible(true)}>
         <Text style={[styles.pickerButtonText, { fontSize: getFontSize() }]}>
-          {turmaSelecionada ? `Turma Selecionada: ${turmaSelecionada}` : 'Selecione a turma'}
+          {turmaSelecionada ? `${language === 'pt' ? 'Turma Selecionada:' : 'Selected Class:'} ${turmaSelecionada}` : (language === 'pt' ? 'Selecione a turma' : 'Select class')}
         </Text>
       </TouchableOpacity>
 
@@ -123,33 +120,29 @@ const NotasGestao = () => {
         <View style={styles.modalContainer}>
           <View style={[styles.modalContent, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
             <Text style={[styles.modalTitle, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
-              Selecionar Turma
+              {language === 'pt' ? 'Selecionar Turma' : 'Select Class'}
             </Text>
             <ScrollView style={[styles.turmaScroll, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
               <TouchableOpacity
                 style={[styles.turmaButton, { fontSize: getFontSize() }]}
-                onPress={() => {
-                  setTurmaSelecionada('Todas');
-                  setModalVisible(false);
-                }}
+                onPress={() => handleSelectTurma('Todas')}
               >
-                <Text style={[styles.textoTurma, { fontSize: getFontSize() }]}>Todas as Turmas</Text>
+                <Text style={[styles.textoTurma, { fontSize: getFontSize() }]}>{language === 'pt' ? 'Todas as Turmas' : 'All Classes'}</Text>
               </TouchableOpacity>
               {turmas.map((turma) => (
                 <TouchableOpacity
                   key={turma.idTurma}
                   style={styles.turmaButton}
-                  onPress={() => {
-                    setTurmaSelecionada(turma.nomeTurma);
-                    setModalVisible(false);
-                  }}
+                  onPress={() => handleSelectTurma(turma.nomeTurma)}
                 >
                   <Text style={[styles.textoTurma, { fontSize: getFontSize() }]}>{turma.nomeTurma}</Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
             <TouchableOpacity style={styles.botaoFecharModal} onPress={() => setModalVisible(false)}>
-              <Text style={[styles.textoBotaoFecharModal, { fontSize: getFontSize() }]}>Fechar</Text>
+              <Text style={[styles.textoBotaoFecharModal, { fontSize: getFontSize() }]}>
+                {language === 'pt' ? 'Fechar' : 'Close'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -162,7 +155,7 @@ const NotasGestao = () => {
           theme === 'escuro' ? styles.darkText : styles.lightText,
           { fontSize: getFontSize() }
         ]}
-        placeholder="Digite o Aviso"
+        placeholder={language === 'pt' ? 'Digite o Aviso' : 'Enter the Notice'}
         value={nota}
         onChangeText={(text) => setNota(text)}
         keyboardType="default"
@@ -170,16 +163,20 @@ const NotasGestao = () => {
 
       {editando ? (
         <TouchableOpacity style={styles.buttonEnviarAviso} onPress={() => handleEditNota(notaEditar)}>
-          <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>Salvar Edição</Text>
+          <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>
+            {language === 'pt' ? 'Salvar Edição' : 'Save Edit'}
+          </Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity style={styles.buttonEnviarAviso} onPress={handleSendNota}>
-          <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>Adicionar Aviso</Text>
+          <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>
+            {language === 'pt' ? 'Adicionar Aviso' : 'Add Notice'}
+          </Text>
         </TouchableOpacity>
       )}
 
       <Text style={[styles.subtitle, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
-        Lembretes Enviados:
+        {language === 'pt' ? 'Lembretes Enviados:' : 'Sent Notices:'}
       </Text>
 
       <FlatList
@@ -187,7 +184,7 @@ const NotasGestao = () => {
         renderItem={({ item }) => (
           <View style={styles.notaContainer}>
             <Text style={[styles.nota, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
-              Lembretes: {item.nota} - Turma {item.Turma_idTurma}
+              {`${language === 'pt' ? 'Lembretes' : 'Notices'}: ${item.nota} - ${language === 'pt' ? 'Turma' : 'Class'} ${item.Turma_idTurma}`}
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
@@ -199,11 +196,17 @@ const NotasGestao = () => {
                   setTurmaSelecionada(item.Turma_idTurma);
                 }}
               >
-                <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>Editar</Text>
+                <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>
+                  {language === 'pt' ? 'Editar' : 'Edit'}
+                </Text>
               </TouchableOpacity>
-
-              <TouchableOpacity style={styles.buttonExcluir} onPress={() => handleDeleteNota(item)}>
-                <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>Excluir</Text>
+              <TouchableOpacity
+                style={styles.buttonExcluir}
+                onPress={() => handleDeleteNota(item)}
+              >
+                <Text style={[styles.buttonText, { fontSize: getFontSize() }]}>
+                  {language === 'pt' ? 'Excluir' : 'Delete'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
