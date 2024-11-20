@@ -1,49 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, FlatList, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, FlatList, TextInput} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TurmaScreen = () => {
   const [notas, setNotas] = useState([]);
   const [alunos, setAlunos] = useState([]);
   const [professores, setProfessores] = useState([]);
-  
-  // Substitua 'seu_token_aqui' pelo token de autenticação obtido após o login
-  const token = 'seu_token_aqui';
+  const [token, setToken] = useState('');
 
   useEffect(() => {
-    // Buscar Notas (Lembretes)
-    fetch('http://localhost:3000/notasTurma', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
+    const loadToken = async () => {
+      const storedToken = await AsyncStorage.getItem('jwtToken');
+      if (storedToken) {
+        setToken(storedToken);
       }
-    })
-      .then((response) => response.json())
-      .then((data) => setNotas(data))
-      .catch((error) => console.error('Erro ao buscar notas:', error));
-
-    // Buscar Alunos da Turma
-    fetch('http://localhost:3000/alunosTurma', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => setAlunos(data))
-      .catch((error) => console.error('Erro ao buscar alunos:', error));
-
-    // Buscar Professores da Turma
-    fetch('http://localhost:3000/professoresTurma', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => setProfessores(data))
-      .catch((error) => console.error('Erro ao buscar professores:', error));
+    };
+    loadToken();
   }, []);
+
+  useEffect(() => {
+    if (!token) {
+      console.error('Token não encontrado!');
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        // Fetch Notas
+        const notasResponse = await fetch('http://localhost:3000/notasTurma', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        const notasData = await notasResponse.json();
+        console.log('Notas:', notasData);
+        setNotas(notasData);
+
+        // Fetch Alunos
+        const alunosResponse = await fetch('http://localhost:3000/alunosTurma', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        const alunosData = await alunosResponse.json();
+        console.log('Alunos:', alunosData);
+        setAlunos(alunosData);
+
+        // Fetch Professores
+        const professoresResponse = await fetch('http://localhost:3000/professoresTurma', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        const professoresData = await professoresResponse.json();
+        console.log('Professores:', professoresData);
+        setProfessores(professoresData);
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      }
+    };
+
+    fetchData();
+  }, [token]);
 
   const handleNotaChange = (text, index) => {
     const updatedNotas = [...notas];
-    updatedNotas[index] = text;
+    updatedNotas[index] = { ...updatedNotas[index], nota: text };
     setNotas(updatedNotas);
   };
 
@@ -51,8 +73,8 @@ const TurmaScreen = () => {
     <View style={styles.alunoItem}>
       <View style={styles.avatar}></View>
       <View>
-        <Text style={styles.alunoNome}>{item.nome}</Text>
-        <Text style={styles.alunoEmail}>{item.email}</Text>
+        <Text style={styles.alunoNome}>{item.NomeAluno}</Text>
+        <Text style={styles.alunoEmail}>{item.EmailAluno}</Text>
       </View>
     </View>
   );
@@ -60,9 +82,9 @@ const TurmaScreen = () => {
   const renderNotaItem = ({ item, index }) => (
     <TextInput
       style={styles.notaInput}
-      value={item.nota}
+      value={item.conteudo}
       onChangeText={(text) => handleNotaChange(text, index)}
-      multiline={true} // Permite múltiplas linhas
+      multiline={true}
     />
   );
 
@@ -78,14 +100,12 @@ const TurmaScreen = () => {
 
       <View style={styles.notasSection}>
         <Text style={styles.notasHeader}>Notas</Text>
-        <View style={styles.notasItem}>
-          <FlatList
-            data={notas}
-            renderItem={renderNotaItem}
-            keyExtractor={(item, index) => index.toString()}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+        <FlatList
+          data={notas}
+          renderItem={renderNotaItem}
+          keyExtractor={(item, index) => index.toString()}
+          showsVerticalScrollIndicator={false}
+        />
       </View>
 
       <View style={styles.listasEmailSection}>
@@ -95,7 +115,7 @@ const TurmaScreen = () => {
             <FlatList
               data={alunos}
               renderItem={renderAlunoItem}
-              keyExtractor={item => item.key}
+              keyExtractor={(item, index) => index.toString()} // Garantir chave única
               scrollEnabled={true}
               showsVerticalScrollIndicator={true}
               style={styles.flatList}
@@ -108,7 +128,7 @@ const TurmaScreen = () => {
             <FlatList
               data={professores}
               renderItem={renderAlunoItem}
-              keyExtractor={item => item.key}
+              keyExtractor={(item, index) => index.toString()} // Garantir chave única
               scrollEnabled={true}
               showsVerticalScrollIndicator={true}
               style={styles.flatList}
@@ -145,7 +165,6 @@ const styles = StyleSheet.create({
   alunoRM: {
     fontSize: 14,
     color: '#555',
-    textAlign: 'start', // Alinhar RM à direita
   },
   notasSection: {
     padding: 10,
@@ -154,12 +173,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
-  },
-  notasItem: {
-    backgroundColor: '#f1f1f1',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
   },
   notaInput: {
     backgroundColor: '#fff',
@@ -181,8 +194,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 5,
-    backgroundColor: '#f5f5f5', // Cor de fundo padrão para alunos
-    maxHeight: 400, // Altura máxima para permitir rolagem
+    backgroundColor: '#f5f5f5',
+    maxHeight: 400,
   },
   professoresSection: {
     flex: 1,
@@ -191,8 +204,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 5,
-    backgroundColor: '#f5f5f5', // Cor de fundo padrão para professores
-    maxHeight: 400, // Altura máxima para permitir rolagem
+    backgroundColor: '#f5f5f5',
+    maxHeight: 400,
   },
   sectionHeader: {
     fontSize: 15,
@@ -204,7 +217,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    backgroundColor: '#fff', // Cor de fundo para cada item da lista
+    backgroundColor: '#fff',
     padding: 10,
     borderRadius: 5,
   },
