@@ -16,7 +16,7 @@ const PerfilGestao = () => {
   const [fotoPerfil, setFotoPerfil] = useState('');
 
   const { theme } = useContext(ThemeContext); // Acessa o tema atual do contexto
-  const { fontSize } = useContext(FontSizeContext); // Acessa o tamanho da fonte do contexto
+  const { fontSize, changeFontSize, getFontSize } = useContext(FontSizeContext); // Inclua getFontSize
   const { language } = useContext(LanguageContext); // Acessa o idioma do contexto
 
   // Função para buscar o perfil do usuário
@@ -94,49 +94,61 @@ const PerfilGestao = () => {
             source={{ uri: fotoPerfil || 'https://via.placeholder.com/150' }} // Foto padrão caso não exista
             style={styles.fotoPerfil}
           />
-          <Text style={[styles.textoAlterarFoto, theme === 'escuro' ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.textoAlterarFoto, { fontSize }]}>
             {language === 'pt' ? 'Alterar foto de perfil' : 'Change profile picture'}
           </Text>
         </TouchableOpacity>
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Nome:' : 'Name:'}
         </Text>
-        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize }]}>{nome}</Text>
+        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>{nome}</Text>
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Data de Nascimento:' : 'Date of Birth:'}
         </Text>
-        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize }]}>{dataNascimento}</Text>
+        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>{dataNascimento}</Text>
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Email Institucional:' : 'Institutional Email:'}
         </Text>
-        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize }]}>{emailInstitucional}</Text>
+        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>{emailInstitucional}</Text>
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Email Pessoal:' : 'Personal Email:'}
         </Text>
         <TextInput
-          style={[styles.input, { fontSize }]}
+          style={[styles.input, 
+            { fontSize: getFontSize() }]}
           value={emailPessoal}
           onChangeText={setEmailPessoal}
           placeholder={language === 'pt' ? 'Digite seu email pessoal' : 'Enter your personal email'}
           placeholderTextColor={theme === 'escuro' ? '#888' : '#999'}
         />
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, 
+          { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Número de Celular:' : 'Phone Number:'}
         </Text>
         <TextInput
-          style={[styles.input, { fontSize }]}
+          style={[styles.input, 
+            { fontSize: getFontSize() }]}
           value={numeroCelular}
           onChangeText={setNumeroCelular}
           placeholder={language === 'pt' ? 'Digite seu número de celular' : 'Enter your phone number'}
           placeholderTextColor={theme === 'escuro' ? '#888' : '#999'}
         />
 
-        <Button title={language === 'pt' ? 'Atualizar Perfil' : 'Update Profile'} onPress={atualizarPerfil} />
+        <TouchableOpacity
+          style={[styles.botaoAtualizar,
+            { fontSize: getFontSize() }]}
+          onPress={atualizarPerfil}
+        >
+          <Text style={[styles.textoBotao,
+            { fontSize: getFontSize() }]}>
+            {language === 'pt' ? 'Atualizar Perfil' : 'Update Profile'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -201,8 +213,23 @@ const styles = StyleSheet.create({
   },
   textoAlterarFoto: {
     fontSize: 16,
-    color: '#007BFF',
+    color: '#00527C',
   },
+  botaoAtualizar: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginTop: 7,
+    width: '100%',
+    height: 50,
+    backgroundColor: '#ff6400',
+    borderRadius: 20,
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  textoBotao:{
+    color: '#ffff'
+  }
 });
 
 export default PerfilGestao;
