@@ -16,7 +16,7 @@ const Drawer = createDrawerNavigator();
 
 const DrawerNavigatorGestao = () => {
   const { language } = useContext(LanguageContext); // Acessa o idioma do contexto
-  const { fontSize } = useContext(FontSizeContext); // Acessa o tamanho de fonte do contexto
+  const { fontSize, getFontSize } = useContext(FontSizeContext); // Inclui o getFontSize
 
   return (
     <Drawer.Navigator
@@ -28,14 +28,14 @@ const DrawerNavigatorGestao = () => {
           backgroundColor: '#00527C',  // Cor de fundo do drawer
         },
         drawerLabelStyle: {
-          fontSize: fontSize, // Aplica o tamanho dinâmico da fonte ao rótulo do drawer
+          fontSize: getFontSize(), // Aplica o tamanho dinâmico da fonte ao rótulo do drawer
         },
         headerStyle: {
           backgroundColor: '#00527C',  // Cor do fundo do cabeçalho
         },
         headerTintColor: '#FFFFFF',  // Cor do texto do cabeçalho
         headerTitleStyle: {
-          fontSize: fontSize, // Aplica o tamanho dinâmico da fonte ao título do cabeçalho
+          fontSize: getFontSize(), // Aplica o tamanho dinâmico da fonte ao título do cabeçalho
         }
       }}
     >

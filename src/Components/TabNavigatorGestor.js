@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 const TabNavigatorGestor = () => {
   const { theme } = useContext(ThemeContext); // Acessa o tema atual do contexto
   const { language } = useContext(LanguageContext); // Acessa o idioma do contexto
-  const { fontSize } = useContext(FontSizeContext); // Acessa o tamanho da fonte do contexto
+  const { fontSize, getFontSize } = useContext(FontSizeContext); // Inclui o getFontSize
 
   return (
     <Tab.Navigator
@@ -25,7 +25,7 @@ const TabNavigatorGestor = () => {
           borderTopColor: theme === 'escuro' ? '#333' : '#ccc',             // Cor da borda superior da tab bar
         },
         tabBarLabelStyle: {
-          fontSize: fontSize,  // Aplica o tamanho da fonte dinamicamente
+          fontSize: getFontSize(),  // Aplica o tamanho da fonte dinamicamente
         },
         tabBarActiveBackgroundColor: theme === 'escuro' ? '#333333' : '#00527C', // Cor de fundo da aba ativa
         headerShown: false,  // Ocultar o cabeçalho em todas as telas do TabNavigator

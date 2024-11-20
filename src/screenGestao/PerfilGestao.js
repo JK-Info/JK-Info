@@ -99,44 +99,46 @@ const PerfilGestao = () => {
           </Text>
         </TouchableOpacity>
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkTitleText : styles.lightTitleText, { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Nome:' : 'Name:'}
         </Text>
-        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>{nome}</Text>
+        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>{nome}</Text>
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkTitleText : styles.lightTitleText, { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Data de Nascimento:' : 'Date of Birth:'}
         </Text>
-        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>{dataNascimento}</Text>
+        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>{dataNascimento}</Text>
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkTitleText : styles.lightTitleText, { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Email Institucional:' : 'Institutional Email:'}
         </Text>
-        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>{emailInstitucional}</Text>
+        <Text style={[styles.value, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>{emailInstitucional}</Text>
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, { fontSize: getFontSize() }]}>
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkTitleText : styles.lightTitleText, { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Email Pessoal:' : 'Personal Email:'}
         </Text>
         <TextInput
-          style={[styles.input, 
+          style={[styles.input,
+            theme === 'escuro' ? styles.darkTheme : styles.lightTheme, 
+            theme === 'escuro' ? styles.darkText : styles.lightText,
             { fontSize: getFontSize() }]}
           value={emailPessoal}
           onChangeText={setEmailPessoal}
           placeholder={language === 'pt' ? 'Digite seu email pessoal' : 'Enter your personal email'}
-          placeholderTextColor={theme === 'escuro' ? '#888' : '#999'}
         />
 
-        <Text style={[styles.label, theme === 'escuro' ? styles.darkText : styles.lightText, 
+        <Text style={[styles.label, theme === 'escuro' ? styles.darkTitleText : styles.lightTitleText, 
           { fontSize: getFontSize() }]}>
           {language === 'pt' ? 'Número de Celular:' : 'Phone Number:'}
         </Text>
         <TextInput
           style={[styles.input, 
+            theme === 'escuro' ? styles.darkTheme : styles.lightTheme,
+            theme === 'escuro' ? styles.darkText : styles.lightText,
             { fontSize: getFontSize() }]}
           value={numeroCelular}
           onChangeText={setNumeroCelular}
           placeholder={language === 'pt' ? 'Digite seu número de celular' : 'Enter your phone number'}
-          placeholderTextColor={theme === 'escuro' ? '#888' : '#999'}
         />
 
         <TouchableOpacity
@@ -169,9 +171,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9', // Fundo claro para o tema claro
   },
   darkText: {
-    color: '#000000', // Texto claro para o tema escuro
+    color: '#fff', // Texto claro para o tema escuro
   },
   lightText: {
+    color: '#000000', // Texto escuro para o tema claro
+  },
+  darkTitleText:{
+    color: '#000000', // Texto escuro para o tema claro
+  },
+  lightTitleText:{
     color: '#000000', // Texto escuro para o tema claro
   },
   label: {
