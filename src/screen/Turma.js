@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, FlatList, TextInput} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, FlatList, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TurmaScreen = () => {
@@ -7,99 +7,135 @@ const TurmaScreen = () => {
   const [alunos, setAlunos] = useState([]);
   const [professores, setProfessores] = useState([]);
   const [token, setToken] = useState('');
+  const [nomeAluno, setNomeAluno] = useState('');
+  const [rmAluno, setRmAluno] = useState('');
 
-  useEffect(() => {
-    const loadToken = async () => {
-      const storedToken = await AsyncStorage.getItem('jwtToken');
-      if (storedToken) {
-        setToken(storedToken);
-      }
-    };
-    loadToken();
-  }, []);
 
-  useEffect(() => {
-    if (!token) {
-      console.error('Token não encontrado!');
-      return;
+  // Função para obter o token de autenticação
+  const getToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      setToken(token);
+    } catch (error) {
+      console.error('Erro ao obter o token', error);
     }
-
-    const fetchData = async () => {
-      try {
-        // Fetch Notas
-        const notasResponse = await fetch('http://localhost:3000/notasTurma', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        });
-        const notasData = await notasResponse.json();
-        console.log('Notas:', notasData);
-        setNotas(notasData);
-
-        // Fetch Alunos
-        const alunosResponse = await fetch('http://localhost:3000/alunosTurma', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        });
-        const alunosData = await alunosResponse.json();
-        console.log('Alunos:', alunosData);
-        setAlunos(alunosData);
-
-        // Fetch Professores
-        const professoresResponse = await fetch('http://localhost:3000/professoresTurma', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        });
-        const professoresData = await professoresResponse.json();
-        console.log('Professores:', professoresData);
-        setProfessores(professoresData);
-      } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-      }
-    };
-
-    fetchData();
-  }, [token]);
-
-  const handleNotaChange = (text, index) => {
-    const updatedNotas = [...notas];
-    updatedNotas[index] = { ...updatedNotas[index], nota: text };
-    setNotas(updatedNotas);
   };
 
-  const renderAlunoItem = ({ item }) => (
-    <View style={styles.alunoItem}>
-      <View style={styles.avatar}></View>
-      <View>
-        <Text style={styles.alunoNome}>{item.NomeAluno}</Text>
-        <Text style={styles.alunoEmail}>{item.EmailAluno}</Text>
-      </View>
-    </View>
-  );
+  // Carregar o token quando o componente for montado
+  useEffect(() => {
+    getToken();
+  }, []);
+
+  const fetchAlunoLogado = async () => {
+    try {
+      const alunoResponse = await fetch('http://localhost:3000/alunoLogado', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const alunoData = await alunoResponse.json();
+      if (alunoData) {
+        setNomeAluno(alunoData.nomeAluno);
+        setRmAluno(alunoData.rmAluno);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados do aluno:', error);
+    }
+  };
+
+  // Função para buscar os dados (alunos, professores e notas)
+  const fetchData = async () => {
+    try {
+
+      const alunosResponse = await fetch('http://localhost:3000/alunosTurma', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const professoresResponse = await fetch('http://localhost:3000/professoresTurma', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const notasResponse = await fetch('http://localhost:3000/notasTurma', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const alunosData = await alunosResponse.json();
+      console.log("Alunos da Turma Recebidos: ");
+
+      const professoresData = await professoresResponse.json();
+      console.log("Professores Recebidos: ");
+
+      const notasData = await notasResponse.json();
+      console.log("Notas recebidas: ", notasData);
+
+      setAlunos(alunosData);
+      setProfessores(professoresData);
+      setNotas(notasData);
+    } catch (error) {
+      console.error('Erro ao buscar dados da turma:', error);
+    }
+  };
+
+  useEffect(() => {
+    getToken();
+  }, []);
+
+  // Carregar os dados quando o token for atualizado
+  useEffect(() => {
+    if (token) {
+      fetchData();
+      fetchAlunoLogado();
+    }
+  }, [token]);
 
   const renderNotaItem = ({ item, index }) => (
     <TextInput
       style={styles.notaInput}
-      value={item.conteudo}
-      onChangeText={(text) => handleNotaChange(text, index)}
+      value={item.nota ? item.nota.toString() : 'N/A'}
       multiline={true}
+      editable={false}
     />
+  );
+
+  const renderAlunoItem = ({ item }) => (
+    <View style={styles.alunoItem}>
+      <Text>{item.NomeAluno}</Text>
+    </View>
+  );
+
+  const renderProfessorItem = ({ item }) => (
+    <View style={styles.professorItem}>
+      <Text>{item.NomeProfessor}</Text>
+    </View>
   );
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.perfil}>
-        <View style={styles.avatar}></View>
-        <View>
-          <Text style={styles.alunoNome}>Nome do aluno(a)</Text>
-          <Text style={styles.alunoRM}>RM</Text>
-        </View>
+    <View style={styles.perfil}>
+      <View style={styles.avatar}></View>
+      <View>
+        <Text style={styles.alunoNome}>{nomeAluno || 'Nome do aluno'}</Text>
+        <Text style={styles.alunoRM}>{rmAluno || 'RM'}</Text>
       </View>
+    </View>
 
       <View style={styles.notasSection}>
-        <Text style={styles.notasHeader}>Notas</Text>
+        <Text style={styles.notasHeader}>Lembretes</Text>
         <FlatList
           data={notas}
           renderItem={renderNotaItem}
@@ -115,7 +151,7 @@ const TurmaScreen = () => {
             <FlatList
               data={alunos}
               renderItem={renderAlunoItem}
-              keyExtractor={(item, index) => index.toString()} // Garantir chave única
+              keyExtractor={(item, index) => index.toString()}
               scrollEnabled={true}
               showsVerticalScrollIndicator={true}
               style={styles.flatList}
@@ -127,8 +163,8 @@ const TurmaScreen = () => {
             <Text style={styles.sectionHeader}>Professores da Turma</Text>
             <FlatList
               data={professores}
-              renderItem={renderAlunoItem}
-              keyExtractor={(item, index) => index.toString()} // Garantir chave única
+              renderItem={renderProfessorItem}
+              keyExtractor={(item, index) => index.toString()}
               scrollEnabled={true}
               showsVerticalScrollIndicator={true}
               style={styles.flatList}
@@ -221,9 +257,13 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
-  alunoEmail: {
-    fontSize: 11,
-    color: '#555',
+  professorItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
   },
   listasEmailSection: {
     paddingVertical: 10,

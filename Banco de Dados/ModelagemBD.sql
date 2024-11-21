@@ -318,7 +318,7 @@ sobremesa VARCHAR(30)
 -- --------------------- Table `mydb`.`Notas`-------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
   `idNota` INT NOT NULL AUTO_INCREMENT,
-  `nota` DECIMAL(5,2) NOT NULL,  -- A nota pode ser um número decimal (por exemplo, 9.5)
+  `nota` varchar(100) NOT NULL,  -- A nota pode ser um número decimal (por exemplo, 9.5)
   `descricao` VARCHAR(255) NOT NULL,  -- Descrição da nota, como "Lembrete" ou "Aviso"
   `dataCriacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Data de criação da nota
   `Turma_idTurma` INT NOT NULL,  -- Chave estrangeira que referencia a tabela Turma
@@ -330,7 +330,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 ) ENGINE=InnoDB;
-
+alter table notas modify nota varchar(100);
 -- -----------------------------------------------------
 -- Tabela `Reclamacao`
 -- -----------------------------------------------------
@@ -375,7 +375,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Reclamacao_Respondida` (
 	SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 	-- INSERINDO CARDAPIO ---------------------------------
-    
+    select * from notas;
     INSERT INTO `mydb`.`Cardapio` (`id_dia`, `diaSemana`, `prato`, `sobremesa`) VALUES
     (1, 'Seguda', 'Arroz, Feijão, Carne Moída', ''),
     (2, 'Terça', '', ''),
@@ -777,8 +777,46 @@ INSERT INTO `mydb`.`Reclamacao_Respondida`
   (`resposta`, `Funcionario_idFuncionario`, `idReclamacaoEnviada`)
 VALUES 
   ('Agradecemos o seu feedback. Estamos trabalhando para corrigir o erro no sistema.', 1, 1);
+  
+  -- Inserir registros na tabela Pessoa
+INSERT INTO Pessoa (nome, dataNascimento, sexo, RG, CPF, ContatoInstitucional_idContatoInstitucional)
+VALUES
+('Professor A', '1980-01-15', 'Masculino', '1234567890', '12345678901', last_insert_id()),
+('Professor B', '1975-06-20', 'Feminino', '1234567891', '12345678902', last_insert_id()),
+('Professor C', '1990-03-10', 'Masculino', '1234567892', '12345678903', last_insert_id());
+
+INSERT INTO Professor (Pessoa_idPessoa)
+VALUES
+(LAST_INSERT_ID() -1),
+(LAST_INSERT_ID() -2),
+(LAST_INSERT_ID());
+
+INSERT INTO Materia (nomeMateria, Turma_idTurma)
+VALUES
+('Matemática', 1),
+('História', 1),
+('Física', 2),
+('Química', 2);
+
+-- Associar professores às matérias
+INSERT INTO Materia_has_Professor (Materia_idMateria, Professor_idProfessor)
+VALUES
+(1, 1), -- Professor A leciona Matemática na Turma 1
+(2, 2), -- Professor B leciona História na Turma 1
+(3, 3), -- Professor C leciona Física na Turma 2
+(4, 1); -- Professor A também leciona Química na Turma 2
+
+
+-- Inserir registros na tabela Professor
+INSERT INTO Professor (Pessoa_idPessoa)
+VALUES
+(LAST_INSERT_ID() - 2),
+(LAST_INSERT_ID() - 1),
+(LAST_INSERT_ID());
+
 
 select * from Funcionario;
+
 
 SELECT 
   re.idReclamacao AS idReclamacaoEnviada,
@@ -793,3 +831,115 @@ JOIN
   `mydb`.`Reclamacao_Respondida` rr
 ON 
   re.idReclamacao = rr.idReclamacaoEnviada;
+
+-------------------------------------
+-- esse select eo q mostra a nota da turma eo q o aluno esta --  
+SELECT 
+    n.idNota,
+    n.nota,
+    n.dataCriacao,
+    t.nomeTurma
+FROM 
+    Notas n
+INNER JOIN 
+    Turma t ON n.Turma_idTurma = t.idTurma
+INNER JOIN 
+    Aluno_has_Turma at ON at.Turma_idTurma = t.idTurma
+INNER JOIN 
+    Aluno a ON a.idAluno = at.Aluno_idAluno
+WHERE 
+    a.idAluno = 1; -- Substitua o "?" pelo ID do 
+    
+     
+ -------------------------------------------------------   
+    
+-- essa query mostra a turma do aluno especifico    
+SELECT 
+    DISTINCT a.idAluno,
+    p.nome,
+    t.nomeTurma
+FROM 
+    Aluno a
+INNER JOIN 
+    Pessoa p ON a.Pessoa_idPessoa = p.idPessoa
+INNER JOIN 
+    Aluno_has_Turma at ON a.idAluno = at.Aluno_idAluno
+INNER JOIN 
+    Turma t ON at.Turma_idTurma = t.idTurma
+WHERE 
+    t.idTurma = (
+        SELECT at2.Turma_idTurma
+        FROM Aluno_has_Turma at2
+        WHERE at2.Aluno_idAluno = 1
+    );
+-----------------------------------------
+
+-- essa query mostra os professores da turma do aluno especifico
+SELECT 
+    DISTINCT prof.idProfessor,
+    p.nome AS nomeProfessor,
+    t.nomeTurma
+FROM 
+    Professor prof
+INNER JOIN 
+    Pessoa p ON prof.Pessoa_idPessoa = p.idPessoa
+INNER JOIN 
+    Materia_has_Professor mp ON prof.idProfessor = mp.Professor_idProfessor
+INNER JOIN 
+    Materia m ON mp.Materia_idMateria = m.idMateria
+INNER JOIN 
+    Turma t ON m.Turma_idTurma = t.idTurma
+WHERE 
+    t.idTurma = (
+        SELECT at2.Turma_idTurma
+        FROM Aluno_has_Turma at2
+        WHERE at2.Aluno_idAluno = 2
+    );
+    -------------------------------------------------
+-- Esta query irá trazer os alunos (nome dos alunos) de uma turma específica
+SELECT
+    Turma.nomeTurma,
+    Pessoa.nome AS NomeAluno
+FROM
+    Turma
+JOIN Aluno_has_Turma ON Aluno_has_Turma.Turma_idTurma = Turma.idTurma
+JOIN Aluno ON Aluno.idAluno = Aluno_has_Turma.Aluno_idAluno
+JOIN Pessoa ON Pessoa.idPessoa = Aluno.Pessoa_idPessoa
+WHERE
+    Turma.idTurma = 2;  -- Substitua o `?` pelo ID da turma desejada
+
+-- Esta query irá trazer os professores (nome dos professores) de uma turma específica.
+ SELECT
+    Turma.nomeTurma,
+    Pessoa.nome AS NomeProfessor
+FROM
+    Turma
+JOIN Materia ON Materia.Turma_idTurma = Turma.idTurma
+JOIN Materia_has_Professor ON Materia_has_Professor.Materia_idMateria = Materia.idMateria
+JOIN Professor ON Professor.idProfessor = Materia_has_Professor.Professor_idProfessor
+JOIN Pessoa ON Pessoa.idPessoa = Professor.Pessoa_idPessoa
+WHERE
+    Turma.idTurma = 2;  -- Substitua o `?` pelo ID da turma desejada
+    
+-- Esta query trará as notas publicadas para uma turma específica.
+  SELECT
+    Turma.nomeTurma,
+    Notas.nota,
+    Notas.descricao,
+    Notas.dataCriacao
+FROM
+    Turma
+JOIN Notas ON Notas.Turma_idTurma = Turma.idTurma
+WHERE
+    Turma.idTurma = 1;  -- Substitua o `?` pelo ID da turma desejada
+
+  
+  
+  
+  select * from aluno_has_turma;
+  select * from aluno;
+select * from notas
+
+
+
+

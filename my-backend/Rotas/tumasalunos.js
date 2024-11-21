@@ -11,53 +11,52 @@ function getIdFromToken(req) {
     return decoded.userId;
 }
 
-// Rota para buscar os alunos, professores e notas de uma turma
-routerTurmasAlunos.get('/turma/:idTurma', async (req, res) => {
-    const turmaId = req.params.idTurma;
-
-    try {
-        // Buscar alunos e notas da turma
-        const queryAlunosNotas = `
-            SELECT a.nomeAluno, a.rmAluno, n.nota, t.nomeTurma
-            FROM Aluno a
-            JOIN Aluno_has_Turma at ON a.idAluno = at.idAluno
-            JOIN Turma t ON at.idTurma = t.idTurma
-            LEFT JOIN Nota n ON t.idTurma = n.idTurma
-            WHERE t.idTurma = ?;
-        `;
-
-        const queryProfessores = `
-            SELECT p.nomeProfessor
-            FROM Professor p
-            JOIN Professor_has_Turma pt ON p.idProfessor = pt.idProfessor
-            JOIN Turma t ON pt.idTurma = t.idTurma
-            WHERE t.idTurma = ?;
-        `;
-
-        const queryOutrosAlunos = `
-            SELECT a.nomeAluno, a.rmAluno
-            FROM Aluno a
-            JOIN Aluno_has_Turma at ON a.idAluno = at.idAluno
-            WHERE at.idTurma = ?;
-        `;
-
-        // Executar as queries em paralelo
-        const [alunosNotas, professores, outrosAlunos] = await Promise.all([
-            db.query(queryAlunosNotas, [turmaId]),
-            db.query(queryProfessores, [turmaId]),
-            db.query(queryOutrosAlunos, [turmaId]),
-        ]);
-
-        res.json({
-            alunosNotas,
-            professores,
-            outrosAlunos
+// Função para lidar com as queries de forma assíncrona usando Promises
+const dbQuery = (query, params) => {
+    return new Promise((resolve, reject) => {
+        db.query(query, params, (err, results) => {
+            if (err) reject(err);
+            resolve(results);
         });
+    });
+};
+
+// Rota para buscar os dados do aluno logado (nome e RM)
+routerTurmasAlunos.get('/alunoLogado', async (req, res) => {
+    try {
+        // Obtém o ID da pessoa a partir do token
+        const idPessoa = getIdFromToken(req);
+
+        // Query para buscar o nome e RM do aluno
+        const query = `
+            SELECT 
+                Pessoa.nome AS NomeAluno,
+                Aluno.rm AS RMAluno
+            FROM 
+                Pessoa
+            JOIN Aluno ON Aluno.Pessoa_idPessoa = Pessoa.idPessoa
+            WHERE 
+                Pessoa.idPessoa = ?;
+        `;
+
+        // Executa a query no banco de dados
+        const results = await dbQuery(query, [idPessoa]);
+
+        // Verifica se encontrou o aluno
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Aluno não encontrado' });
+        }
+
+        // Retorna os dados do aluno
+        const { NomeAluno, RMAluno } = results[0];
+        res.json({ nomeAluno: NomeAluno, rmAluno: RMAluno });
+
     } catch (error) {
-        console.error('Erro ao buscar dados da turma:', error);
-        res.status(500).json({ message: 'Erro interno ao buscar dados da turma' });
+        console.error('[ERRO] Falha ao buscar dados do aluno logado:', error);
+        res.status(500).json({ message: 'Erro ao buscar dados do aluno' });
     }
 });
+
 
 // Rota para buscar os alunos da turma
 routerTurmasAlunos.get('/alunosTurma', async (req, res) => {
@@ -65,30 +64,29 @@ routerTurmasAlunos.get('/alunosTurma', async (req, res) => {
         const idPessoa = getIdFromToken(req);
 
         const query = `
-            SELECT 
-                Pessoa.nome AS NomeAluno, 
-                Pessoa.email AS EmailAluno
-            FROM 
-                Turma
-            JOIN Aluno ON Aluno.Turma_idTurma = Turma.idTurma
-            JOIN Pessoa ON Pessoa.idPessoa = Aluno.Pessoa_idPessoa
-            WHERE 
-                Turma.idTurma = (
-                    SELECT Turma_idTurma 
-                    FROM Aluno 
-                    WHERE Pessoa_idPessoa = ?
-                );
+  SELECT
+    Turma.nomeTurma,
+    Pessoa.nome AS NomeAluno
+FROM
+    Turma
+JOIN Aluno_has_Turma ON Aluno_has_Turma.Turma_idTurma = Turma.idTurma
+JOIN Aluno ON Aluno.idAluno = Aluno_has_Turma.Aluno_idAluno
+JOIN Pessoa ON Pessoa.idPessoa = Aluno.Pessoa_idPessoa
+WHERE
+    Turma.idTurma = (
+        SELECT Turma_idTurma 
+        FROM Aluno_has_Turma
+        JOIN Aluno ON Aluno.idAluno = Aluno_has_Turma.Aluno_idAluno
+        WHERE Aluno.Pessoa_idPessoa = ?
+    );
+
+
         `;
-        db.query(query, [idPessoa], (err, results) => {
-            if (err) {
-                console.error(`[ERRO] Falha ao buscar alunos da turma: ${err}`);
-                return res.status(500).json({ message: 'Erro ao buscar alunos da turma' });
-            }
-            res.json(results);
-        });
+        const results = await dbQuery(query, [idPessoa]);
+        res.json(results);
     } catch (error) {
-        console.error(`[ERRO] Token inválido: ${error}`);
-        res.status(401).json({ message: 'Token inválido.' });
+        console.error(`[ERRO] Falha ao buscar alunos da turma: ${error}`);
+        res.status(500).json({ message: 'Erro ao buscar alunos da turma' });
     }
 });
 
@@ -98,25 +96,27 @@ routerTurmasAlunos.get('/professoresTurma', async (req, res) => {
         const idPessoa = getIdFromToken(req);
 
         const query = `
-            SELECT Pessoa.nome AS nome, Pessoa.email
-            FROM Professor
-            JOIN Pessoa ON Professor.Pessoa_idPessoa = Pessoa.idPessoa
-            WHERE Professor.Turma_idTurma = (
-                SELECT Turma_idTurma
-                FROM Aluno
-                WHERE Pessoa_idPessoa = ?
-            );
+            SELECT
+                Turma.nomeTurma,
+                Pessoa.nome AS NomeProfessor
+            FROM
+                Turma
+            JOIN Materia ON Materia.Turma_idTurma = Turma.idTurma
+            JOIN Materia_has_Professor ON Materia_has_Professor.Materia_idMateria = Materia.idMateria
+            JOIN Professor ON Professor.idProfessor = Materia_has_Professor.Professor_idProfessor
+            JOIN Pessoa ON Pessoa.idPessoa = Professor.Pessoa_idPessoa
+            WHERE
+                Turma.idTurma = (
+                    SELECT Turma_idTurma
+                    FROM Aluno
+                    WHERE Pessoa_idPessoa = ?
+                );
         `;
-        db.query(query, [idPessoa], (err, results) => {
-            if (err) {
-                console.error('Erro ao buscar professores da turma:', err);
-                return res.status(500).json({ message: 'Erro ao buscar professores da turma' });
-            }
-            res.json(results);
-        });
+        const results = await dbQuery(query, [idPessoa]);
+        res.json(results);
     } catch (error) {
         console.error('Erro ao buscar professores da turma:', error);
-        res.status(500).json({ message: 'Erro interno' });
+        res.status(500).json({ message: 'Erro ao buscar professores da turma' });
     }
 });
 
@@ -126,32 +126,28 @@ routerTurmasAlunos.get('/notasTurma', async (req, res) => {
         const idPessoa = getIdFromToken(req);
 
         const query = `
-            SELECT 
-                nota.nota AS conteudo, 
-                nota.data_criacao AS dataCriacao, 
-                Pessoa.nome AS professor
-            FROM 
-                nota
-            JOIN professor ON nota.professor_id = professor.id
-            JOIN pessoa ON professor.pessoa_id = pessoa.idPessoa
-            WHERE 
-                nota.turma_id = (
-                    SELECT turma_id
-                    FROM aluno
-                    WHERE pessoa_id = ?
-                )
-            ORDER BY nota.data_criacao DESC;
+            SELECT
+    Turma.nomeTurma,
+    Notas.nota,
+    Notas.descricao,
+    Notas.dataCriacao
+FROM
+    Turma
+JOIN Notas ON Notas.Turma_idTurma = Turma.idTurma
+WHERE
+    Turma.idTurma = (
+        SELECT Turma_idTurma
+        FROM Aluno_has_Turma
+        JOIN Aluno ON Aluno.idAluno = Aluno_has_Turma.Aluno_idAluno
+        WHERE Aluno.Pessoa_idPessoa = ?
+    );
+
         `;
-        db.query(query, [idPessoa], (err, results) => {
-            if (err) {
-                console.error('Erro ao buscar notas:', err);
-                return res.status(500).json({ message: 'Erro ao buscar notas' });
-            }
-            res.json(results);
-        });
+        const results = await dbQuery(query, [idPessoa]);
+        res.json(results);
     } catch (error) {
-        console.error('Erro ao buscar notas:', error);
-        res.status(500).json({ message: 'Erro interno' });
+        console.error('Erro ao buscar notas da turma:', error);
+        res.status(500).json({ message: 'Erro ao buscar notas' });
     }
 });
 
