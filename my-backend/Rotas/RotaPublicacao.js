@@ -96,11 +96,11 @@ router.post(
 // Rota DELETE para excluir uma publicação e seus dependentes (comentários e curtidas)
 router.delete('/deletepublicacao/:id', (req, res) => {
   const { id } = req.params;
-  const idPessoa = 21;  // ID do usuário que pode excluir suas próprias publicações
+  const { idPessoa } = req.body;  // ID da pessoa que está tentando excluir a publicação
 
   console.log(`Rota DELETE /deletepublicacao chamada para excluir a publicação com id: ${id} pelo usuário ${idPessoa}`);
 
-  // Verificar se a publicação pertence ao usuário com idPessoa = 21
+  // Verificar se a publicação pertence ao usuário
   const checkOwnerQuery = 'SELECT * FROM Publicacao WHERE idPublicacao = ? AND Pessoa_idPessoa = ?';
   db.query(checkOwnerQuery, [id, idPessoa], (err, result) => {
     if (err) {
@@ -155,6 +155,7 @@ router.delete('/deletepublicacao/:id', (req, res) => {
     });
   });
 });
+
 
 router.get('/getpublicacaousuario/:idPessoa', async (req, res) => {
   const { idPessoa } = req.params; // Pegando o idPessoa da URL

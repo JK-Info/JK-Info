@@ -116,18 +116,18 @@
     const handleSendComment = async () => {
       if (textoComentario.trim()) {
           try {
-              // Faz uma requisição para buscar os dados do usuário com ID 21
+              // Faz uma requisição para buscar os dados do usuário com ID 25
               const response = await axios.get(`http://localhost:3000/getusuario/21`);
               const usuario = response.data; // Supondo que a resposta contenha as informações do usuário
               const nomeUsuario = usuario.nome; // Ajuste conforme a estrutura de retorno da sua API
-
-              // Envia o comentário com o ID fixo do usuário 21
+  
+              // Envia o comentário com o ID fixo do usuário 25
               await axios.post('http://localhost:3000/postcomentario', {
                   text: textoComentario,
                   Publicacao_idPublicacao: publicacaoId,
-                  Pessoa_id: 21, // ID do usuário logado
+                  Pessoa_id: 21, // Passa o ID do usuário logado (25)
               });
-
+  
               // Atualiza a lista de comentários na tela com o nome correto do usuário
               onCommentAdded({ texto: textoComentario, nome_comentador: nomeUsuario, num_likes: 0 });
               
@@ -308,23 +308,26 @@
       setSelectedComments(prev => [...prev, newComment]);
     };
 
-    // Função para excluir publicação
-    const handleDeletePost = async (id) => {
-      try {
-        const response = await axios.delete(`http://localhost:3000/deletepublicacao/${id}`);
-        if (response.status === 200) {
-          console.log('Publicação excluída com sucesso.');
-          // Remove a publicação do estado local
-          setPublicacoes((prevPublicacoes) => 
-            prevPublicacoes.filter((pub) => pub.idPublicacao !== id)
-          );
-        }
-      } catch (error) {
-        console.error('Erro ao excluir publicação:', error);
-        Alert.alert('Erro', 'Falha ao excluir a publicação. Tente novamente.');
+  // Função para excluir publicação
+  const handleDeletePost = async (idPublicacao) => {
+    const idPessoa = 21;
+
+    try {
+      const response = await axios.delete(`http://localhost:3000/deletepublicacao/${idPublicacao}`, {
+        data: { idPessoa }, // Passa o ID da pessoa no corpo da requisição
+      });
+      if (response.status === 200) {
+        console.log('Publicação excluída com sucesso.');
+        // Remove a publicação do estado local
+        setPublicacoes((prevPublicacoes) => 
+          prevPublicacoes.filter((pub) => pub.idPublicacao !== idPublicacao)
+        );
       }
-    };
-    
+    } catch (error) {
+      console.error('Erro ao excluir publicação:', error);
+      Alert.alert('Erro', 'Falha ao excluir a publicação. Tente novamente.');
+    }
+  };
 
     const handleCreatePost = async () => {
       if (newPostText.trim()) {
