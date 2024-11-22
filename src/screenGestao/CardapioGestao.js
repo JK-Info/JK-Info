@@ -5,16 +5,16 @@ import axios from 'axios';
 
 const CardapioGestao = () => {
   const [cardapio, setCardapio] = useState([
-    { diaSemana: 'Segunda-feira', prato: ['Arroz integral', 'Feijão', 'Carne suína', 'Salada'], sobremesa: '' },
-    { diaSemana: 'Terça-feira', prato: ['Arroz integral', 'Feijão', 'Ovo'], sobremesa: 'Abacaxi' },
-    { diaSemana: 'Quarta-feira', prato: ['Arroz', 'Feijão preto', 'Atum', 'Batata doce'], sobremesa: '' },
-    { diaSemana: 'Quinta-feira', prato: ['Arroz integral', 'Feijão', 'Frango', 'Legumes'], sobremesa: '' },
-    { diaSemana: 'Sexta-feira', prato: ['Arroz', 'Feijão preto', 'Peixe', 'Salada'], sobremesa: 'Pudim' },
+    { id_dia: 1, diaSemana: 'Segunda-feira', prato1: 'Arroz integral', prato2: 'Feijão', prato3: 'Carne suína', prato4: 'Salada', sobremesa: '' },
+    { id_dia: 2, diaSemana: 'Terça-feira', prato1: 'Arroz integral', prato2: 'Feijão', prato3: 'Ovo', prato4: '', sobremesa: 'Abacaxi' },
+    { id_dia: 3, diaSemana: 'Quarta-feira', prato1: 'Arroz', prato2: 'Feijão preto', prato3: 'Atum', prato4: 'Batata doce', sobremesa: '' },
+    { id_dia: 4, diaSemana: 'Quinta-feira', prato1: 'Arroz integral', prato2: 'Feijão', prato3: 'Frango', prato4: 'Legumes', sobremesa: '' },
+    { id_dia: 5, diaSemana: 'Sexta-feira', prato1: 'Arroz', prato2: 'Feijão preto', prato3: 'Peixe', prato4: 'Salada', sobremesa: 'Pudim' },
   ]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [diaSelecionado, setDiaSelecionado] = useState(null);
-  const [prato, setprato] = useState([]);
+  const [pratos, setPratos] = useState({ prato1: '', prato2: '', prato3: '', prato4: '' });
   const [sobremesa, setSobremesa] = useState('');
 
   const dataAtual = format(new Date(), 'dd/MM/yyyy');
@@ -22,28 +22,35 @@ const CardapioGestao = () => {
 
   const abrirModal = (index) => {
     setDiaSelecionado(index);
-    setprato(cardapio[index].prato);
-    setSobremesa(cardapio[index].sobremesa);
+    const { prato1, prato2, prato3, prato4, sobremesa } = cardapio[index];
+    setPratos({ prato1, prato2, prato3, prato4 });
+    setSobremesa(sobremesa);
     setModalVisible(true);
   };
 
   const salvarAlteracoes = async () => {
     const novoCardapio = [...cardapio];
-    novoCardapio[diaSelecionado].prato = prato;
-    novoCardapio[diaSelecionado].sobremesa = sobremesa;
-  
+    novoCardapio[diaSelecionado] = {
+      ...novoCardapio[diaSelecionado],
+      ...pratos,
+      sobremesa,
+    };
+
     try {
       const response = await axios.put('http://localhost:3000/putCardapio', {
-        diaSemana: cardapio[diaSelecionado].diaSemana, // Dia da semana
-        prato: prato, // Array com os pratos
-        sobremesa: sobremesa // Sobremesa (pode ser vazio)
+        id_dia: cardapio[diaSelecionado].id_dia,
+        diaSemana: cardapio[diaSelecionado].diaSemana,
+        prato1: pratos.prato1,
+        prato2: pratos.prato2,
+        prato3: pratos.prato3,
+        prato4: pratos.prato4,
+        sobremesa,
       });
-  
+
       if (response.status === 200) {
         setCardapio(novoCardapio);
         setModalVisible(false);
         Alert.alert('Sucesso', 'Cardápio atualizado com sucesso');
-  
         obterCardapioAtualizado(); // Atualiza o cardápio no front-end
       } else {
         throw new Error('Falha ao atualizar o cardápio');
@@ -58,7 +65,6 @@ const CardapioGestao = () => {
   const obterCardapioAtualizado = async () => {
     try {
       const response = await axios.get('http://localhost:3000/getCardapio');
-
       if (response.status === 200) {
         setCardapio(response.data);
       } else {
@@ -86,9 +92,10 @@ const CardapioGestao = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.menuContainer}>
-            {item.prato.map((prato, i) => (
-              <Text key={i}>{prato}</Text>
-            ))}
+            <Text>{item.prato1}</Text>
+            {item.prato2 && <Text>{item.prato2}</Text>}
+            {item.prato3 && <Text>{item.prato3}</Text>}
+            {item.prato4 && <Text>{item.prato4}</Text>}
             {item.sobremesa ? <Text style={styles.dessert}>Sobremesa: {item.sobremesa}</Text> : null}
           </View>
         </View>
@@ -106,18 +113,26 @@ const CardapioGestao = () => {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Editar Cardápio</Text>
 
-              {prato.map((valor, index) => (
-                <TextInput
-                  key={index}
-                  style={styles.input}
-                  value={valor}
-                  onChangeText={(text) => {
-                    const novosPratos = [...prato]; // Cria uma cópia do array de pratos
-                    novosPratos[index] = text; // Atualiza o índice correto
-                    setprato(novosPratos); // Atualiza o estado
-                  }}
-                />
-              ))}
+              <TextInput
+                style={styles.input}
+                value={pratos.prato1}
+                onChangeText={(text) => setPratos((prev) => ({ ...prev, prato1: text }))}
+              />
+              <TextInput
+                style={styles.input}
+                value={pratos.prato2}
+                onChangeText={(text) => setPratos((prev) => ({ ...prev, prato2: text }))}
+              />
+              <TextInput
+                style={styles.input}
+                value={pratos.prato3}
+                onChangeText={(text) => setPratos((prev) => ({ ...prev, prato3: text }))}
+              />
+              <TextInput
+                style={styles.input}
+                value={pratos.prato4}
+                onChangeText={(text) => setPratos((prev) => ({ ...prev, prato4: text }))}
+              />
 
               <TextInput
                 style={styles.input}
