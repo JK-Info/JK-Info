@@ -311,9 +311,14 @@ CREATE TABLE IF NOT EXISTS CurtidaComentario (
 CREATE TABLE IF NOT EXISTS `mydb`.`Cardapio` (
 id_dia INT(1) NOT NULL PRIMARY KEY,
 diaSemana VARCHAR(20) NOT NULL,
-prato VARCHAR(30) NOT NULL,
+prato1 VARCHAR(30) NOT NULL,
+prato2 VARCHAR(30),
+prato3 VARCHAR(30),
+prato4 VARCHAR(30),
 sobremesa VARCHAR(30)
 ) ENGINE=InnoDB;
+
+drop table cardapio;
 
 -- --------------------- Table `mydb`.`Notas`-------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
@@ -376,12 +381,12 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Reclamacao_Respondida` (
 
 	-- INSERINDO CARDAPIO ---------------------------------
     select * from notas;
-    INSERT INTO `mydb`.`Cardapio` (`id_dia`, `diaSemana`, `prato`, `sobremesa`) VALUES
-    (1, 'Seguda', 'Arroz, Feijão, Carne Moída', ''),
-    (2, 'Terça', '', ''),
-    (3, 'Quarta', '', ''),
-    (4, 'Quinta', '', ''),
-    (5, 'Sexta', '', '');
+    INSERT INTO `mydb`.`Cardapio` (`id_dia`, `diaSemana`, `prato1`, `prato2`, `prato3`, `prato4`, `sobremesa`) VALUES
+    (1, 'Seguda', 'Arroz', 'Feijão', 'Carne Moída', '', ''),
+    (2, 'Terça', '', '', '', '', ''),
+    (3, 'Quarta', '', '', '', '', ''),
+    (4, 'Quinta', '', '', '', '', ''),
+    (5, 'Sexta', '', '', '', '', '');
 
 	-- INSERINDO TURMAS -----------------------------------
 

@@ -6,20 +6,23 @@ const db = require('../ConexaoBD/conexaoBD');
 router.put('/putCardapio', (req, res) => {
     console.log('Rota PUT /putCardapio chamada');
 
-    const { diaSemana, prato, sobremesa } = req.body;
+    const { id_dia, prato1, prato2, prato3, prato4, sobremesa } = req.body;
 
     // Validação dos dados recebidos
-    if (!diaSemana || !Array.isArray(prato)) {
+    if (!id_dia || !prato1) {
         return res.status(400).json({ 
-            message: 'Os campos "diaSemana" e "prato" (array) são obrigatórios.' 
+            message: 'Os campos "id_dia" e "prato1" são obrigatórios.' 
         });
     }
 
     try { 
-        const query = 'UPDATE Cardapio SET prato = ?, sobremesa = ? WHERE diaSemana = ?';
-        const pratosConcatenados = prato.join(', ');
+        // Atualiza os pratos individualmente no banco de dados
+        const query = `
+            UPDATE Cardapio 
+            SET prato1 = ?, prato2 = ?, prato3 = ?, prato4 = ?, sobremesa = ? 
+            WHERE id_dia = ?`;
 
-        db.query(query, [pratosConcatenados, sobremesa || '', diaSemana], (error, result) => {
+        db.query(query, [prato1, prato2 || '', prato3 || '', prato4 || '', sobremesa || '', id_dia], (error, result) => {
             if (error) {
                 console.error('Erro ao atualizar o cardápio:', error);
                 return res.status(500).json({ 
@@ -29,7 +32,7 @@ router.put('/putCardapio', (req, res) => {
 
             if (result.affectedRows === 0) {
                 return res.status(404).json({ 
-                    message: `O dia da semana "${diaSemana}" não foi encontrado no cardápio.` 
+                    message: `O cardápio para o dia com ID "${id_dia}" não foi encontrado.` 
                 });
             }
 
