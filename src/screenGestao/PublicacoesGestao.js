@@ -317,22 +317,26 @@
     };
 
     // Função para excluir publicação
-    const handleDeletePost = async (id) => {
+    const handleDeletePost = async (idPublicacao) => {
+      const idPessoa = 21; // Define o ID da pessoa como 25
+    
       try {
-        const response = await axios.delete(`http://localhost:3000/delet  epublicacao/${id}`);
+        const response = await axios.delete(`http://localhost:3000/deletepublicacao/${idPublicacao}`, {
+          data: { idPessoa }, // Passa o ID da pessoa no corpo da requisição
+        });
         if (response.status === 200) {
           console.log('Publicação excluída com sucesso.');
           // Remove a publicação do estado local
           setPublicacoes((prevPublicacoes) => 
-            prevPublicacoes.filter((pub) => pub.idPublicacao !== id)
+            prevPublicacoes.filter((pub) => pub.idPublicacao !== idPublicacao)
           );
         }
       } catch (error) {
         console.error('Erro ao excluir publicação:', error);
         Alert.alert('Erro', 'Falha ao excluir a publicação. Tente novamente.');
       }
-    };
-    
+    }; 
+
 
     const handleCreatePost = async () => {
       if (newPostText.trim()) {
