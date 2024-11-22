@@ -44,12 +44,12 @@ const DrawerNavigatorGestao = () => {
         component={TabNavigatorGestor}
       />
       <Drawer.Screen 
-        name={language === 'pt' ? 'Perfil' : 'Profile'} 
-        component={PerfilGestao} 
-      />
-      <Drawer.Screen 
         name={language === 'pt' ? 'Minhas Publicações' : 'My Posts'} 
         component={PublicacoesGestao} 
+      />
+      <Drawer.Screen 
+        name={language === 'pt' ? 'Perfil' : 'Profile'} 
+        component={PerfilGestao} 
       />
       <Drawer.Screen 
         name={language === 'pt' ? 'Rede' : 'Network'} 
