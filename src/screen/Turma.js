@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ThemeContext } from '../Components/ThemeContext'; // Importa o ThemeContext
+import { FontSizeContext } from '../Components/FontSizeProvider'; // Importa o FontSizeContext
+import { LanguageContext } from '../Components/LanguageContext'; // Importa o LanguageContext
 
 const TurmaScreen = () => {
   const [notas, setNotas] = useState([]);
@@ -10,6 +13,9 @@ const TurmaScreen = () => {
   const [nomeAluno, setNomeAluno] = useState('');
   const [rmAluno, setRmAluno] = useState('');
 
+  const { theme } = useContext(ThemeContext); // Acessa o tema atual do contexto
+  const { getFontSize, changeFontSize } = useContext(FontSizeContext);
+  const { language } = useContext(LanguageContext); // Acessa o idioma do contexto
 
   // Função para obter o token de autenticação
   const getToken = async () => {
@@ -21,7 +27,7 @@ const TurmaScreen = () => {
     }
   };
 
-  // Carregar o token quando o componente for montado
+  // Carregar o token e os dados quando o componente for montado
   useEffect(() => {
     getToken();
   }, []);
@@ -49,7 +55,6 @@ const TurmaScreen = () => {
   // Função para buscar os dados (alunos, professores e notas)
   const fetchData = async () => {
     try {
-
       const alunosResponse = await fetch('http://localhost:3000/alunosTurma', {
         method: 'GET',
         headers: {
@@ -75,10 +80,10 @@ const TurmaScreen = () => {
       });
 
       const alunosData = await alunosResponse.json();
-      console.log("Alunos da Turma Recebidos: ");
+      console.log("Alunos da Turma Recebidos: ", alunosData);
 
       const professoresData = await professoresResponse.json();
-      console.log("Professores Recebidos: ");
+      console.log("Professores Recebidos: ", professoresData);
 
       const notasData = await notasResponse.json();
       console.log("Notas recebidas: ", notasData);
@@ -91,10 +96,6 @@ const TurmaScreen = () => {
     }
   };
 
-  useEffect(() => {
-    getToken();
-  }, []);
-
   // Carregar os dados quando o token for atualizado
   useEffect(() => {
     if (token) {
@@ -103,9 +104,9 @@ const TurmaScreen = () => {
     }
   }, [token]);
 
-  const renderNotaItem = ({ item, index }) => (
+  const renderNotaItem = ({ item }) => (
     <TextInput
-      style={styles.notaInput}
+      style={[styles.notaInput, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}
       value={item.nota ? item.nota.toString() : 'N/A'}
       multiline={true}
       editable={false}
@@ -113,29 +114,34 @@ const TurmaScreen = () => {
   );
 
   const renderAlunoItem = ({ item }) => (
-    <View style={styles.alunoItem}>
-      <Text>{item.NomeAluno}</Text>
+    <View style={styles.alunoItem } >
+      <Text style={[styles.alunoText, { fontSize: getFontSize() }]}>{item.NomeAluno}</Text>
     </View>
   );
 
   const renderProfessorItem = ({ item }) => (
-    <View style={styles.professorItem}>
-      <Text>{item.NomeProfessor}</Text>
+    <View style={styles.professorItem }>
+      <Text style={[styles.professorText, { fontSize: getFontSize() }]}>{item.NomeProfessor}</Text>
     </View>
   );
 
   return (
-    <ScrollView style={styles.container}>
-    <View style={styles.perfil}>
-      <View style={styles.avatar}></View>
-      <View>
-        <Text style={styles.alunoNome}>{nomeAluno || 'Nome do aluno'}</Text>
-        <Text style={styles.alunoRM}>{rmAluno || 'RM'}</Text>
+    <ScrollView style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+      <View style={styles.perfil}>
+        <View style={styles.avatar}></View>
+        <View>
+          <Text style={[styles.alunoNome, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>
+            {nomeAluno || (language === 'pt' ? 'Nome do aluno' : 'Student Name')}
+          </Text>
+          <Text style={[styles.alunoRM, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>
+            {rmAluno || 'RM'}</Text>
+        </View>
       </View>
-    </View>
 
-      <View style={styles.notasSection}>
-        <Text style={styles.notasHeader}>Lembretes</Text>
+      <View style={[styles.notasSection, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+        <Text style={[styles.notasHeader, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>
+          {language === 'pt' ? 'Lembretes' : 'Reminders'}
+        </Text>
         <FlatList
           data={notas}
           renderItem={renderNotaItem}
@@ -144,31 +150,35 @@ const TurmaScreen = () => {
         />
       </View>
 
-      <View style={styles.listasEmailSection}>
-        <View style={styles.rowContainer}>
-          <View style={styles.alunosSection}>
-            <Text style={styles.sectionHeader}>Alunos da Turma</Text>
+      <View style={[styles.listasEmailSection, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+        <View style={[styles.rowContainer, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>
+          <View style={[styles.alunosSection, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+            <Text style={[styles.sectionHeader, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>
+              {language === 'pt' ? 'Alunos da Turma' : 'Classmates'}
+            </Text>
             <FlatList
               data={alunos}
               renderItem={renderAlunoItem}
               keyExtractor={(item, index) => index.toString()}
               scrollEnabled={true}
               showsVerticalScrollIndicator={true}
-              style={styles.flatList}
-              contentContainerStyle={styles.flatListContent}
+              style={[styles.flatList, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}
+              contentContainerStyle={[styles.flatListContent, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}
             />
           </View>
 
-          <View style={styles.professoresSection}>
-            <Text style={styles.sectionHeader}>Professores da Turma</Text>
+          <View style={[styles.professoresSection, , theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
+            <Text style={[styles.sectionHeader, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}>
+              {language === 'pt' ? 'Professores da Turma' : 'Teachers'}
+            </Text>
             <FlatList
               data={professores}
               renderItem={renderProfessorItem}
               keyExtractor={(item, index) => index.toString()}
               scrollEnabled={true}
               showsVerticalScrollIndicator={true}
-              style={styles.flatList}
-              contentContainerStyle={styles.flatListContent}
+              style={[styles.flatList, theme === 'escuro' ? styles.darkText : styles.lightText, theme === 'escuro' ? styles.darkTheme : styles.lightTheme, { fontSize: getFontSize() }]}
+              contentContainerStyle={[styles.flatListContent, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}
             />
           </View>
         </View>
@@ -181,6 +191,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  darkTheme: {
+    backgroundColor: '#292929',
+  },
+  lightTheme: {
+    backgroundColor: '#f9f9f9',
+  },
+  darkText: {
+    color: '#fff',
+  },
+  lightText: {
+    color: '#000000',
+  },
+  darkTitleText: {
+    color: '#fff',
+  },
+  lightTitleText: {
+    color: '#000000',
+  },
+  alunoText:{
+    color: '#000',
+  },
+  professorText:{
+    color: '#000',
   },
   perfil: {
     flexDirection: 'row',
@@ -228,20 +262,22 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 5,
-    backgroundColor: '#f5f5f5',
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#dddddd',
     maxHeight: 400,
+    marginTop: 5,
   },
   professoresSection: {
     flex: 1,
     padding: 10,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: '#ccc',
     borderRadius: 5,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#dddddd',
     maxHeight: 400,
+    marginTop: 5,
   },
   sectionHeader: {
     fontSize: 15,
@@ -253,17 +289,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#e0e0e0',
     padding: 10,
     borderRadius: 5,
+    borderColor: "#dddddd",
+    borderWidth: 1,
   },
   professorItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#e0e0e0',
     padding: 10,
     borderRadius: 5,
+    borderColor: "#dddddd",
+    borderWidth: 1,
   },
   listasEmailSection: {
     paddingVertical: 10,
