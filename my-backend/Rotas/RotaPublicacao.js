@@ -2,6 +2,15 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
+const jwt = require('jsonwebtoken');
+const jwtSecret = process.env.JWT_SECRET_KEY;
+
+function getIdFromToken(req) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) throw new Error('Token não fornecido.');
+    const decoded = jwt.verify(token, jwtSecret);
+    return decoded.userId;
+}
 
 // Rota para buscar todas as publicações com comentários
 router.get('/getpublicacao', async (req, res) => {
@@ -43,7 +52,7 @@ router.get('/getpublicacao', async (req, res) => {
       console.error('Erro ao buscar publicações:', error);
       res.status(500).json({ success: false, error: 'Erro ao buscar publicações.' });
     }
-  });   
+});   
 
 // Rota para criar nova publicação
 router.post(

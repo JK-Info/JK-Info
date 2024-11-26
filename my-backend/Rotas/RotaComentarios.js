@@ -1,17 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
+const jwt = require('jsonwebtoken');
+const jwtSecret = process.env.JWT_SECRET_KEY;
 
+function getIdFromToken(req) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) throw new Error('Token não fornecido.');
+    try {
+        const decoded = jwt.verify(token, jwtSecret);
+        return decoded.userId;
+    } catch (error) {
+        throw new Error('Token inválido.');
+    }
+}
+
+
+// Rota para adicionar comentário
 router.post('/postcomentario', (req, res) => {
-    const { text, Publicacao_idPublicacao, Pessoa_id } = req.body; // Pega o Pessoa_id do body
-
-    if (!text || !Publicacao_idPublicacao || !Pessoa_id) {
+    const { text, Publicacao_idPublicacao } = req.body; // Pessoa_id será obtido do token
+    if (!text || !Publicacao_idPublicacao) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
 
     try {
+        const userId = getIdFromToken(req); // Obtém o userId do token JWT
+
         const query = 'INSERT INTO Comentario (texto, Publicacao_idPublicacao, Pessoa_idPessoa) VALUES (?, ?, ?)';
-        db.query(query, [text, Publicacao_idPublicacao, Pessoa_id], (err, result) => {
+        db.query(query, [text, Publicacao_idPublicacao, userId], (err, result) => {
             if (err) {
                 console.error('Erro ao adicionar comentário:', err);
                 return res.status(500).json({ error: 'Erro ao adicionar comentário.' });
@@ -20,8 +36,13 @@ router.post('/postcomentario', (req, res) => {
             res.status(201).json({ message: 'Comentário adicionado com sucesso!' });
         });
     } catch (error) {
-        console.error('Erro ao adicionar comentário:', error);
-        res.status(500).json({ error: 'Erro ao adicionar comentário.' });
+        console.error('Erro ao adicionar comentário:', error.message);
+        if (error.message === 'Token não fornecido.') {
+            return res.status(401).json({ error: 'Token não fornecido.' });
+        } else if (error.message === 'Token inválido.') {
+            return res.status(403).json({ error: 'Token inválido.' });
+        }
+        return res.status(500).json({ error: 'Erro ao adicionar comentário.' });
     }
 });
 
@@ -69,14 +90,17 @@ router.get('/getcomentarios/:idPublicacao', (req, res) => {
     });
 });
 
+// Rota para curtir ou descurtir comentário
 router.post('/likecomentario', (req, res) => {
-    const { idComentario, liked, userId } = req.body;
+    const { idComentario, liked } = req.body;
 
     console.log(`Rota /likecomentario chamada com idComentario: ${idComentario} e liked: ${liked}`);
 
-    if (!idComentario || !userId) {
-        return res.status(400).json({ message: 'idComentario e userId são obrigatórios.' });
+    if (!idComentario) {
+        return res.status(400).json({ message: 'idComentario é obrigatório.' });
     }
+
+    const userId = getIdFromToken(req); // Obtém o userId do token JWT
 
     // Lógica para adicionar ou remover a curtida no comentário
     if (liked) {
