@@ -10,8 +10,11 @@ const ReclamacoesSugest = () => {
   const [mensagem, setMensagem] = useState('');
   const [mensagemEnviada, setMensagemEnviada] = useState(false);
   const [mensagemErro, setMensagemErro] = useState('');
+  
+  // ID da pessoa (essa variável deve vir de algum serviço de autenticação)
+  const Pessoa_idPessoa = 1; // Exemplo de ID de usuário autenticado
 
-  const EnviarReclamacoesouSugestoes = () => {
+  const EnviarReclamacoesouSugestoes = async () => {
     if (!assunto || !mensagem) {
       setMensagemErro('Por favor, preencha todos os campos.');
       setTimeout(() => {
@@ -20,16 +23,41 @@ const ReclamacoesSugest = () => {
       return;
     }
 
-    console.log('Assunto: ', assunto);
-    console.log('Mensagem: ', mensagem);
-    setAssunto('');
-    setMensagem('');
-    setMensagemEnviada(true);
-    setMensagemErro('');
+    const dados = {
+      assunto: assunto,
+      mensagem: mensagem,
+      Pessoa_idPessoa: Pessoa_idPessoa, // Passa o ID da pessoa
+    };
 
-    setTimeout(() => {
-      setMensagemEnviada(false);
-    }, 5000);
+    try {
+      // Envia a requisição para a API
+      const response = await fetch('http://localhost:3000/reclamacoes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dados),
+      });
+
+      const result = await response.json();
+
+      if (response.status === 200) {
+        setMensagemEnviada(true);
+        setAssunto('');
+        setMensagem('');
+        setMensagemErro('');
+        
+        // Mensagem de sucesso
+        setTimeout(() => {
+          setMensagemEnviada(false);
+        }, 5000);
+      } else {
+        setMensagemErro(result.message || 'Erro ao enviar reclamação.');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar reclamação:', error);
+      setMensagemErro('Erro ao enviar reclamação.');
+    }
   };
 
   const onSwipeLeft = () => {
@@ -97,14 +125,14 @@ const styles = StyleSheet.create({
     height: 50,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 30, // Bordas arredondadas
+    borderRadius: 30,
     padding: 10,
     marginVertical: 10,
   },
   inputMensagemContainer: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 18, // Bordas arredondadas
+    borderRadius: 18,
     width: '100%',
     maxHeight: 300,
     marginBottom: 10,
@@ -125,14 +153,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   sendButton: {
-    width: '30%', // Aumenta a largura do botão
-    backgroundColor: '#ff6400', // Azul
+    width: '30%',
+    backgroundColor: '#ff6400',
     borderRadius: 20,
     padding: 10,
     alignItems: 'center',
   },
   sendButtonText: {
-    color: '#FFFFFF', // Texto branco
+    color: '#FFFFFF',
     fontSize: 16,
   },
 });
