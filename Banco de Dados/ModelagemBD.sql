@@ -339,48 +339,25 @@ alter table notas modify nota varchar(100);
 -- -----------------------------------------------------
 -- Tabela `Reclamacao`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`Reclamacao_Enviada` (
-  `idReclamacao` INT NOT NULL AUTO_INCREMENT,      
-  `assunto` VARCHAR(255) NOT NULL,                  
-  `descricao` TEXT NOT NULL,                        
-  `dataReclamacao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,  
-  `Pessoa_idPessoa` INT NOT NULL,                   
-  PRIMARY KEY (`idReclamacao`),
-  INDEX `fk_Reclamacao_Enviada_Pessoa_idx` (`Pessoa_idPessoa`),
-  CONSTRAINT `fk_Reclamacao_Enviada_Pessoa`
-    FOREIGN KEY (`Pessoa_idPessoa`)
-    REFERENCES `mydb`.`Pessoa` (`idPessoa`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
-) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `reclamacoes_sugestoes` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,                      -- ID único da reclamação/sugestão
+  `assunto` VARCHAR(255) NOT NULL,                           -- Assunto da reclamação ou sugestão
+  `mensagem` TEXT NOT NULL,                                  -- Detalhamento da reclamação ou sugestão
+  `data_criacao` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,        -- Data de criação (automaticamente preenchida)
+  `Pessoa_idPessoa` INT NOT NULL,                            -- ID da pessoa que fez a reclamação/sugestão
+  CONSTRAINT `fk_Reclamacao_Pessoa` FOREIGN KEY (`Pessoa_idPessoa`) -- Relação com a tabela Pessoa
+    REFERENCES `Pessoa` (`idPessoa`)                        -- Chave estrangeira referenciando a tabela Pessoa
+    ON DELETE CASCADE                                        -- Quando a pessoa é deletada, a reclamação/sugestão também é
+    ON UPDATE CASCADE                                        -- Quando o ID da pessoa é alterado, a referência é atualizada
+);
 
-CREATE TABLE IF NOT EXISTS `mydb`.`Reclamacao_Respondida` (
-  `idReclamacaoRespondida` INT NOT NULL AUTO_INCREMENT,     -- ID da reclamação respondida
-  `resposta` TEXT NOT NULL,                                  -- Resposta dada à reclamação
-  `dataResposta` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Data e hora da resposta
-  `Funcionario_idFuncionario` INT NOT NULL,                  -- ID do funcionário que respondeu
-  `idReclamacaoEnviada` INT NOT NULL,                        -- Chave estrangeira para a reclamação enviada
-  PRIMARY KEY (`idReclamacaoRespondida`),                    -- Chave primária
-  INDEX `fk_Reclamacao_Respondida_Funcionario_idx` (`Funcionario_idFuncionario`), -- Índice para o funcionário
-  INDEX `fk_Reclamacao_Respondida_ReclamacaoEnviada_idx` (`idReclamacaoEnviada`), -- Índice para a reclamação enviada
-  CONSTRAINT `fk_Reclamacao_Respondida_Funcionario`
-    FOREIGN KEY (`Funcionario_idFuncionario`)
-    REFERENCES `mydb`.`Funcionario` (`idFuncionario`)     -- Chave estrangeira para a tabela Funcionario
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_Reclamacao_Respondida_ReclamacaoEnviada`
-    FOREIGN KEY (`idReclamacaoEnviada`)
-    REFERENCES `mydb`.`Reclamacao_Enviada` (`idReclamacao`) -- Chave estrangeira para a tabela Reclamacao_Enviada
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
-) ENGINE=InnoDB;
 
 	SET SQL_MODE=@OLD_SQL_MODE;
 	SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 	SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 	-- INSERINDO CARDAPIO ---------------------------------
-    select * from notas;
+
     INSERT INTO `mydb`.`Cardapio` (`id_dia`, `diaSemana`, `prato1`, `prato2`, `prato3`, `prato4`, `sobremesa`) VALUES
     (1, 'Seguda', 'Arroz', 'Feijão', 'Carne Moída', '', ''),
     (2, 'Terça', '', '', '', '', ''),
@@ -937,14 +914,6 @@ FROM
 JOIN Notas ON Notas.Turma_idTurma = Turma.idTurma
 WHERE
     Turma.idTurma = 1;  -- Substitua o `?` pelo ID da turma desejada
-
-  
-  
-  
-  select * from aluno_has_turma;
-  select * from aluno;
-select * from notas
-
-
-
-
+    
+	INSERT INTO `reclamacoes_sugestoes` (`assunto`, `mensagem`, `Pessoa_idPessoa`)
+	VALUES ('Problema com o serviço de internet', 'A internet está muito lenta, preciso de ajuda.', 1);
