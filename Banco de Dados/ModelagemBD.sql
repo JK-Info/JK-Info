@@ -308,17 +308,15 @@ CREATE TABLE IF NOT EXISTS CurtidaComentario (
 -- -----------------------------------------------------
 -- Table `mydb`.`Cardapio`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`Cardapio` (
-id_dia INT(1) NOT NULL PRIMARY KEY,
-diaSemana VARCHAR(20) NOT NULL,
-prato1 VARCHAR(30) NOT NULL,
-prato2 VARCHAR(30),
-prato3 VARCHAR(30),
-prato4 VARCHAR(30),
-sobremesa VARCHAR(30)
-) ENGINE=InnoDB;
-
-drop table cardapio;
+CREATE TABLE Cardapio (
+    id_dia INT PRIMARY KEY AUTO_INCREMENT,
+    diaSemana VARCHAR(50) NOT NULL,
+    prato1 VARCHAR(255),
+    prato2 VARCHAR(255),
+    prato3 VARCHAR(255),
+    prato4 VARCHAR(255),
+    sobremesa VARCHAR(255)
+);
 
 -- --------------------- Table `mydb`.`Notas`-------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`Notas` (
@@ -351,19 +349,18 @@ CREATE TABLE IF NOT EXISTS `reclamacoes_sugestoes` (
     ON UPDATE CASCADE                                        -- Quando o ID da pessoa é alterado, a referência é atualizada
 );
 
-
 	SET SQL_MODE=@OLD_SQL_MODE;
 	SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 	SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 	-- INSERINDO CARDAPIO ---------------------------------
 
-    INSERT INTO `mydb`.`Cardapio` (`id_dia`, `diaSemana`, `prato1`, `prato2`, `prato3`, `prato4`, `sobremesa`) VALUES
-    (1, 'Seguda', 'Arroz', 'Feijão', 'Carne Moída', '', ''),
-    (2, 'Terça', '', '', '', '', ''),
-    (3, 'Quarta', '', '', '', '', ''),
-    (4, 'Quinta', '', '', '', '', ''),
-    (5, 'Sexta', '', '', '', '', '');
+	INSERT INTO Cardapio (diaSemana, prato1, prato2, prato3, prato4, sobremesa) VALUES
+	('Segunda-feira', '', '', '', '', ''),
+	('Terça-feira', '', '', '', '', ''),
+	('Quarta-feira', '', '', '', '', ''),
+	('Quinta-feira', '', '', '', '', ''),
+	('Sexta-feira', '', '', '', '', '');
 
 	-- INSERINDO TURMAS -----------------------------------
 
@@ -704,6 +701,7 @@ CREATE TABLE IF NOT EXISTS `reclamacoes_sugestoes` (
 
 
 -- COMENTÁRIOS NA PUBLICAÇÃO ----------------------------------
+/*
 SELECT 
     p.idPublicacao,
     c.idComentario,
@@ -718,9 +716,10 @@ JOIN
 ORDER BY 
     p.idPublicacao, c.idComentario
 LIMIT 0, 1000;
+*/
 
 -- PUBLICAÇÃO -------------------------------------------------------------
-
+/*
 	SELECT 
 		p.idPublicacao,
 		p.descricao AS publicacao_descricao,
@@ -746,22 +745,137 @@ LIMIT 0, 1000;
 	ORDER BY 
 		p.dataPublicacao DESC
 	LIMIT 0, 1000;
+  */
+
+/*
+SELECT 
+  re.idReclamacao AS idReclamacaoEnviada,
+  re.assunto AS assuntoEnviado,
+  re.descricao AS descricaoEnviada,
+  rr.idReclamacaoRespondida,
+  rr.resposta,
+  rr.dataResposta
+FROM 
+  `mydb`.`Reclamacao_Enviada` re
+JOIN 
+  `mydb`.`Reclamacao_Respondida` rr
+ON 
+  re.idReclamacao = rr.idReclamacaoEnviada;
+*/
+
+-- esse select eo q mostra a nota da turma eo q o aluno esta -- 
+/* 
+SELECT 
+    n.idNota,
+    n.nota,
+    n.dataCriacao,
+    t.nomeTurma
+FROM 
+    Notas n
+INNER JOIN 
+    Turma t ON n.Turma_idTurma = t.idTurma
+INNER JOIN 
+    Aluno_has_Turma at ON at.Turma_idTurma = t.idTurma
+INNER JOIN 
+    Aluno a ON a.idAluno = at.Aluno_idAluno
+WHERE 
+    a.idAluno = 1; -- Substitua o "?" pelo ID do 
+*/
     
-    -- Inserção de uma reclamação nova (enviada)
-		INSERT INTO `mydb`.`Reclamacao_Enviada` (`assunto`, `descricao`, `Pessoa_idPessoa`)
-		VALUES ('Erro no sistema', 'O sistema está apresentando erro ao tentar logar.', 1);
-        
-        -- Inserção de uma reclamação respondida (movendo para a tabela de respondidas)
+-- essa query mostra a turma do aluno especifico   
+/* 
+SELECT 
+    DISTINCT a.idAluno,
+    p.nome,
+    t.nomeTurma
+FROM 
+    Aluno a
+INNER JOIN 
+    Pessoa p ON a.Pessoa_idPessoa = p.idPessoa
+INNER JOIN 
+    Aluno_has_Turma at ON a.idAluno = at.Aluno_idAluno
+INNER JOIN 
+    Turma t ON at.Turma_idTurma = t.idTurma
+WHERE 
+    t.idTurma = (
+        SELECT at2.Turma_idTurma
+        FROM Aluno_has_Turma at2
+        WHERE at2.Aluno_idAluno = 1
+    );
+*/
 
-select * from Reclamacao_Enviada;
+-- essa query mostra os professores da turma do aluno especifico
+/*
+SELECT 
+    DISTINCT prof.idProfessor,
+    p.nome AS nomeProfessor,
+    t.nomeTurma
+FROM 
+    Professor prof
+INNER JOIN 
+    Pessoa p ON prof.Pessoa_idPessoa = p.idPessoa
+INNER JOIN 
+    Materia_has_Professor mp ON prof.idProfessor = mp.Professor_idProfessor
+INNER JOIN 
+    Materia m ON mp.Materia_idMateria = m.idMateria
+INNER JOIN 
+    Turma t ON m.Turma_idTurma = t.idTurma
+WHERE 
+    t.idTurma = (
+        SELECT at2.Turma_idTurma
+        FROM Aluno_has_Turma at2
+        WHERE at2.Aluno_idAluno = 2
+    );
+*/
 
-INSERT INTO `mydb`.`Reclamacao_Respondida` 
-  (`resposta`, `Funcionario_idFuncionario`, `idReclamacaoEnviada`)
-VALUES 
-  ('Agradecemos o seu feedback. Estamos trabalhando para corrigir o erro no sistema.', 1, 1);
-  
-  -- Inserir registros na tabela Pessoa
-INSERT INTO Pessoa (nome, dataNascimento, sexo, RG, CPF, ContatoInstitucional_idContatoInstitucional)
+-- Esta query irá trazer os alunos (nome dos alunos) de uma turma específica
+/*
+SELECT
+    Turma.nomeTurma,
+    Pessoa.nome AS NomeAluno
+FROM
+    Turma
+JOIN Aluno_has_Turma ON Aluno_has_Turma.Turma_idTurma = Turma.idTurma
+JOIN Aluno ON Aluno.idAluno = Aluno_has_Turma.Aluno_idAluno
+JOIN Pessoa ON Pessoa.idPessoa = Aluno.Pessoa_idPessoa
+WHERE
+    Turma.idTurma = 2;  -- Substitua o `?` pelo ID da turma desejada
+*/
+
+-- Esta query irá trazer os professores (nome dos professores) de uma turma específica.
+/*
+ SELECT
+    Turma.nomeTurma,
+    Pessoa.nome AS NomeProfessor
+FROM
+    Turma
+JOIN Materia ON Materia.Turma_idTurma = Turma.idTurma
+JOIN Materia_has_Professor ON Materia_has_Professor.Materia_idMateria = Materia.idMateria
+JOIN Professor ON Professor.idProfessor = Materia_has_Professor.Professor_idProfessor
+JOIN Pessoa ON Pessoa.idPessoa = Professor.Pessoa_idPessoa
+WHERE
+    Turma.idTurma = 2;  -- Substitua o `?` pelo ID da turma desejada
+*/
+    
+-- Esta query trará as notas publicadas para uma turma específica.
+/*
+  SELECT
+    Turma.nomeTurma,
+    Notas.nota,
+    Notas.descricao,
+    Notas.dataCriacao
+FROM
+    Turma
+JOIN Notas ON Notas.Turma_idTurma = Turma.idTurma
+WHERE
+    Turma.idTurma = 1;  -- Substitua o `?` pelo ID da turma desejada
+    */
+    
+	INSERT INTO `reclamacoes_sugestoes` (`assunto`, `mensagem`, `Pessoa_idPessoa`)
+	VALUES ('Problema com o serviço de internet', 'A internet está muito lenta, preciso de ajuda.', 1);
+
+    
+    INSERT INTO Pessoa (nome, dataNascimento, sexo, RG, CPF, ContatoInstitucional_idContatoInstitucional)
 VALUES
 ('Professor A', '1980-01-15', 'Masculino', '1234567890', '12345678901', last_insert_id()),
 ('Professor B', '1975-06-20', 'Feminino', '1234567891', '12345678902', last_insert_id()),
@@ -795,125 +909,3 @@ VALUES
 (LAST_INSERT_ID() - 2),
 (LAST_INSERT_ID() - 1),
 (LAST_INSERT_ID());
-
-
-select * from Funcionario;
-
-
-SELECT 
-  re.idReclamacao AS idReclamacaoEnviada,
-  re.assunto AS assuntoEnviado,
-  re.descricao AS descricaoEnviada,
-  rr.idReclamacaoRespondida,
-  rr.resposta,
-  rr.dataResposta
-FROM 
-  `mydb`.`Reclamacao_Enviada` re
-JOIN 
-  `mydb`.`Reclamacao_Respondida` rr
-ON 
-  re.idReclamacao = rr.idReclamacaoEnviada;
-
--------------------------------------
--- esse select eo q mostra a nota da turma eo q o aluno esta --  
-SELECT 
-    n.idNota,
-    n.nota,
-    n.dataCriacao,
-    t.nomeTurma
-FROM 
-    Notas n
-INNER JOIN 
-    Turma t ON n.Turma_idTurma = t.idTurma
-INNER JOIN 
-    Aluno_has_Turma at ON at.Turma_idTurma = t.idTurma
-INNER JOIN 
-    Aluno a ON a.idAluno = at.Aluno_idAluno
-WHERE 
-    a.idAluno = 1; -- Substitua o "?" pelo ID do 
-    
-     
- -------------------------------------------------------   
-    
--- essa query mostra a turma do aluno especifico    
-SELECT 
-    DISTINCT a.idAluno,
-    p.nome,
-    t.nomeTurma
-FROM 
-    Aluno a
-INNER JOIN 
-    Pessoa p ON a.Pessoa_idPessoa = p.idPessoa
-INNER JOIN 
-    Aluno_has_Turma at ON a.idAluno = at.Aluno_idAluno
-INNER JOIN 
-    Turma t ON at.Turma_idTurma = t.idTurma
-WHERE 
-    t.idTurma = (
-        SELECT at2.Turma_idTurma
-        FROM Aluno_has_Turma at2
-        WHERE at2.Aluno_idAluno = 1
-    );
------------------------------------------
-
--- essa query mostra os professores da turma do aluno especifico
-SELECT 
-    DISTINCT prof.idProfessor,
-    p.nome AS nomeProfessor,
-    t.nomeTurma
-FROM 
-    Professor prof
-INNER JOIN 
-    Pessoa p ON prof.Pessoa_idPessoa = p.idPessoa
-INNER JOIN 
-    Materia_has_Professor mp ON prof.idProfessor = mp.Professor_idProfessor
-INNER JOIN 
-    Materia m ON mp.Materia_idMateria = m.idMateria
-INNER JOIN 
-    Turma t ON m.Turma_idTurma = t.idTurma
-WHERE 
-    t.idTurma = (
-        SELECT at2.Turma_idTurma
-        FROM Aluno_has_Turma at2
-        WHERE at2.Aluno_idAluno = 2
-    );
-    -------------------------------------------------
--- Esta query irá trazer os alunos (nome dos alunos) de uma turma específica
-SELECT
-    Turma.nomeTurma,
-    Pessoa.nome AS NomeAluno
-FROM
-    Turma
-JOIN Aluno_has_Turma ON Aluno_has_Turma.Turma_idTurma = Turma.idTurma
-JOIN Aluno ON Aluno.idAluno = Aluno_has_Turma.Aluno_idAluno
-JOIN Pessoa ON Pessoa.idPessoa = Aluno.Pessoa_idPessoa
-WHERE
-    Turma.idTurma = 2;  -- Substitua o `?` pelo ID da turma desejada
-
--- Esta query irá trazer os professores (nome dos professores) de uma turma específica.
- SELECT
-    Turma.nomeTurma,
-    Pessoa.nome AS NomeProfessor
-FROM
-    Turma
-JOIN Materia ON Materia.Turma_idTurma = Turma.idTurma
-JOIN Materia_has_Professor ON Materia_has_Professor.Materia_idMateria = Materia.idMateria
-JOIN Professor ON Professor.idProfessor = Materia_has_Professor.Professor_idProfessor
-JOIN Pessoa ON Pessoa.idPessoa = Professor.Pessoa_idPessoa
-WHERE
-    Turma.idTurma = 2;  -- Substitua o `?` pelo ID da turma desejada
-    
--- Esta query trará as notas publicadas para uma turma específica.
-  SELECT
-    Turma.nomeTurma,
-    Notas.nota,
-    Notas.descricao,
-    Notas.dataCriacao
-FROM
-    Turma
-JOIN Notas ON Notas.Turma_idTurma = Turma.idTurma
-WHERE
-    Turma.idTurma = 1;  -- Substitua o `?` pelo ID da turma desejada
-    
-	INSERT INTO `reclamacoes_sugestoes` (`assunto`, `mensagem`, `Pessoa_idPessoa`)
-	VALUES ('Problema com o serviço de internet', 'A internet está muito lenta, preciso de ajuda.', 1);
