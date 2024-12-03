@@ -4,13 +4,8 @@ const router = express.Router();
 const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECRET_KEY;
+const authenticateToken = require('../Midlewware/midlewareToken')
 
-function getIdFromToken(req) {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) throw new Error('Token não fornecido.');
-    const decoded = jwt.verify(token, jwtSecret);
-    return decoded.userId;
-}
 
 // Rota para buscar todas as publicações com comentários
 router.get('/getpublicacao', async (req, res) => {
@@ -57,72 +52,61 @@ router.get('/getpublicacao', async (req, res) => {
 // Rota para criar nova publicação
 router.post(
   '/postpublicacao',
+  authenticateToken, // Middleware para autenticar o token
   [
     body('descricao').notEmpty().withMessage('A descrição é obrigatória.'),
-    body('Pessoa_idPessoa').isInt().withMessage('ID da pessoa deve ser um número inteiro.')
   ],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log('Erros de validação:', errors.array());
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    // Extrai os dados do corpo da requisição
-    const { descricao, imagem, Pessoa_idPessoa } = req.body;
-    console.log('Recebendo dados para criar publicação:', { descricao, imagem, Pessoa_idPessoa });
+    const { descricao, imagem } = req.body;
+    const Pessoa_idPessoa = req.userId; // Obtém o ID do usuário autenticado
+    console.log('Criando publicação para o usuário:', Pessoa_idPessoa);
 
     try {
-      // Insere a nova publicação no banco de dados
       const query = `
         INSERT INTO Publicacao (descricao, imagem, Pessoa_idPessoa)
         VALUES (?, ?, ?)
       `;
       const values = [descricao, imagem || null, Pessoa_idPessoa];
 
-      // Executa a query para inserir a publicação no banco de dados
       db.query(query, values, (err, result) => {
         if (err) {
-          console.error('Erro ao inserir publicação no banco de dados:', err);
-          return res.status(500).json({ message: 'Erro ao criar a publicação.' });
+          console.error('Erro ao criar publicação:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao criar publicação.' });
         }
 
-        console.log('Publicação criada com sucesso, ID:', result.insertId);
-
-        // Resposta de sucesso com o ID da nova publicação
         res.status(201).json({
+          success: true,
           message: 'Publicação criada com sucesso!',
-          publicacaoId: result.insertId
+          publicacaoId: result.insertId,
         });
       });
     } catch (error) {
       console.error('Erro no servidor:', error);
-      res.status(500).json({ message: 'Erro no servidor ao criar a publicação.' });
+      res.status(500).json({ success: false, message: 'Erro no servidor.' });
     }
   }
 );
-
 // Rota DELETE para excluir uma publicação e seus dependentes (comentários e curtidas)
 router.delete('/deletepublicacao/:id', (req, res) => {
   const { id } = req.params;
-  const { idPessoa } = req.body;  // ID da pessoa que está tentando excluir a publicação
+  const Pessoa_idPessoa = getIdFromToken(req);  // ID da pessoa que está tentando excluir a publicação
 
   console.log(`Rota DELETE /deletepublicacao chamada para excluir a publicação com id: ${id} pelo usuário ${idPessoa}`);
 
   // Verificar se a publicação pertence ao usuário
   const checkOwnerQuery = 'SELECT * FROM Publicacao WHERE idPublicacao = ? AND Pessoa_idPessoa = ?';
-  db.query(checkOwnerQuery, [id, idPessoa], (err, result) => {
+  db.query(checkOwnerQuery, [id, Pessoa_idPessoa], (err, result) => {
     if (err) {
       console.error('Erro ao verificar o dono da publicação:', err);
       return res.status(500).json({ message: 'Erro ao verificar o dono da publicação.' });
     }
 
     if (result.length === 0) {
-      console.log(`Publicação ${id} não pertence ao usuário ${idPessoa}.`);
+      console.log(`Publicação ${id} não pertence ao usuário ${Pessoa_idPessoa}.`);
       return res.status(403).json({ message: 'Você não tem permissão para excluir esta publicação.' });
     }
 
-    console.log(`Publicação ${id} pertence ao usuário ${idPessoa}. Prosseguindo com a exclusão.`);
+    console.log(`Publicação ${id} pertence ao usuário ${Pessoa_idPessoa}. Prosseguindo com a exclusão.`);
 
     // Excluir curtidas associadas à publicação
     const deleteLikesQuery = 'DELETE FROM CurtidaPublicacao WHERE Publicacao_idPublicacao = ?';
@@ -167,9 +151,9 @@ router.delete('/deletepublicacao/:id', (req, res) => {
 
 
 router.get('/getpublicacaousuario/:idPessoa', async (req, res) => {
-  const { idPessoa } = req.params; // Pegando o idPessoa da URL
+  const Pessoa_idPessoa = getIdFromToken(req); // Pegando o idPessoa da URL
 
-  console.log(`Buscando publicações para o usuário com ID: ${idPessoa}`);
+  console.log(`Buscando publicações para o usuário com ID: ${Pessoa_idPessoa}`);
 
   const query = `
     SELECT 
@@ -202,7 +186,7 @@ router.get('/getpublicacaousuario/:idPessoa', async (req, res) => {
   `;
 
   try {
-    const [results] = await db.promise().query(query, [idPessoa]);
+    const [results] = await db.promise().query(query, [Pessoa_idPessoa]);
 
     console.log(`Consultados ${results.length} resultados`); // Log de quantidade de resultados encontrados
 

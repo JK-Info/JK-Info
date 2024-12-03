@@ -223,6 +223,7 @@
   };
 
   // Componente principal HomeScreenGestao
+  import AsyncStorage from '@react-native-async-storage/async-storage';
   const HomeScreenGestao = () => {
     const [publicacoes, setPublicacoes] = useState([]);
     const [filteredPublicacoes, setFilteredPublicacoes] = useState([]);
@@ -236,11 +237,12 @@
     const { language } = useContext(LanguageContext); // Acessa o idioma do context
     const { getFontSize, changeFontSize } = useContext(FontSizeContext);
     
-    const userId = 21; // User ID should be dynamic based on login context
-
     const fetchPublicacoes = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/getpublicacao');
+        const token = await AsyncStorage.getItem('jwtToken'); // Obtém o token de autenticação
+        const response = await axios.get('http://localhost:3000/getpublicacao', {
+          headers: { Authorization: `Bearer ${token}` }, // Inclui o token no cabeçalho
+        });
         setPublicacoes(response.data.data);
       } catch (error) {
         console.error('Erro ao buscar publicações:', error);
@@ -310,12 +312,12 @@
 
   // Função para excluir publicação
   const handleDeletePost = async (idPublicacao) => {
-    const idPessoa = 21;
-
     try {
-      const response = await axios.delete(`http://localhost:3000/deletepublicacao/${idPublicacao}`, {
-        data: { idPessoa }, // Passa o ID da pessoa no corpo da requisição
-      });
+      const token = await AsyncStorage.getItem('jwtToken');
+      const response = await axios.delete(
+        `http://localhost:3000/deletepublicacao/${idPublicacao}`, 
+         {headers: {Authorization: `Bearer ${token}`}}
+      );
       if (response.status === 200) {
         console.log('Publicação excluída com sucesso.');
         // Remove a publicação do estado local
@@ -332,10 +334,12 @@
     const handleCreatePost = async () => {
       if (newPostText.trim()) {
         try {
-          const response = await axios.post('http://localhost:3000/postpublicacao', {
-            descricao: newPostText,
-            Pessoa_idPessoa: 21 // Você pode substituir pelo ID real do usuário logado
-          });
+          const token = await AsyncStorage.getItem('jwtToken');
+          const response = await axios.post(
+            'http://localhost:3000/postpublicacao', 
+           {descricao: newPostText},
+            {headers: {Authorization: `Bearer ${token}`}}
+          );
           console.log('Resposta do servidor:', response.data); 
           setNewPostText('');
           fetchPublicacoes(); // Atualiza a lista de publicações
