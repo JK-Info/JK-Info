@@ -3,28 +3,20 @@ const router = express.Router();
 const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECRET_KEY;
+const authenticateToken = require('../Midlewware/midlewareToken');
 
-function getIdFromToken(req) {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) throw new Error('Token não fornecido.');
-    try {
-        const decoded = jwt.verify(token, jwtSecret);
-        return decoded.userId;
-    } catch (error) {
-        throw new Error('Token inválido.');
-    }
-}
 
 
 // Rota para adicionar comentário
-router.post('/postcomentario', (req, res) => {
+router.post('/postcomentario', authenticateToken, (req, res) => {
     const { text, Publicacao_idPublicacao } = req.body; // Pessoa_id será obtido do token
+    
     if (!text || !Publicacao_idPublicacao) {
         return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
     }
 
     try {
-        const userId = getIdFromToken(req); // Obtém o userId do token JWT
+        const userId = req.userId; // Obtém o userId do token JWT
 
         const query = 'INSERT INTO Comentario (texto, Publicacao_idPublicacao, Pessoa_idPessoa) VALUES (?, ?, ?)';
         db.query(query, [text, Publicacao_idPublicacao, userId], (err, result) => {
@@ -91,7 +83,7 @@ router.get('/getcomentarios/:idPublicacao', (req, res) => {
 });
 
 // Rota para curtir ou descurtir comentário
-router.post('/likecomentario', (req, res) => {
+router.post('/likecomentario', authenticateToken, (req, res) => {
     const { idComentario, liked } = req.body;
 
     console.log(`Rota /likecomentario chamada com idComentario: ${idComentario} e liked: ${liked}`);
@@ -100,7 +92,7 @@ router.post('/likecomentario', (req, res) => {
         return res.status(400).json({ message: 'idComentario é obrigatório.' });
     }
 
-    const userId = getIdFromToken(req); // Obtém o userId do token JWT
+    const userId = req.userId; // Obtém o userId do token JWT
 
     // Lógica para adicionar ou remover a curtida no comentário
     if (liked) {

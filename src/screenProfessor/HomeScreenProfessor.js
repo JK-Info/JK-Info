@@ -223,167 +223,171 @@ return (
 };
 
 // Componente principal HomeScreenGestao
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const HomeScreenProfessor = () => {
   const [publicacoes, setPublicacoes] = useState([]);
-  const [filteredPublicacoes, setFilteredPublicacoes] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedComments, setSelectedComments] = useState([]);
-  const [newPostText, setNewPostText] = useState('');
-  const [likes, setLikes] = useState({});
-  const [currentPostId, setCurrentPostId] = useState(null);
-  const [searchText, setSearchText] = useState(''); // Estado para texto de busca
-  const { theme } = useContext(ThemeContext); // Pegando o tema do contexto
-  const { language } = useContext(LanguageContext); // Acessa o idioma do context
-  const { getFontSize, changeFontSize } = useContext(FontSizeContext);
-  
-  const userId = 25; // User ID should be dynamic based on login context
-
-  const fetchPublicacoes = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/getpublicacao');
-      setPublicacoes(response.data.data);
-    } catch (error) {
-      console.error('Erro ao buscar publicações:', error);
-    }
-  };
-
-  const fetchComments = async (postId) => {
-    try {
-      const response = await axios.get(`http://localhost:3000/getcomentarios/${postId}`);
-      setSelectedComments(response.data); // Atualiza o estado com os comentários
-    } catch (error) {
-      console.error('Erro ao buscar comentários:', error);
-      Alert.alert('Erro', 'Não foi possível carregar os comentários.');
-    }
-  };
-
-  const handleSearch = (text) => {
-    setSearchText(text);
+    const [filteredPublicacoes, setFilteredPublicacoes] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedComments, setSelectedComments] = useState([]);
+    const [newPostText, setNewPostText] = useState('');
+    const [likes, setLikes] = useState({});
+    const [currentPostId, setCurrentPostId] = useState(null);
+    const [searchText, setSearchText] = useState(''); // Estado para texto de busca
+    const { theme } = useContext(ThemeContext); // Pegando o tema do contexto
+    const { language } = useContext(LanguageContext); // Acessa o idioma do context
+    const { getFontSize, changeFontSize } = useContext(FontSizeContext);
     
-    // Se o campo de pesquisa estiver vazio, mostrar todas as publicações
-    if (text === '') {
-      setFilteredPublicacoes(publicacoes);
-    } else {
-      // Filtrar as publicações com base no texto inserido
-      const filtered = publicacoes.filter(pub => 
-        pub.publicacao_descricao.toLowerCase().includes(text.toLowerCase()) || 
-        pub.nome_pessoa.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredPublicacoes(filtered);
-    }
-  };
-  
-  useEffect(() => {
-    fetchPublicacoes();
-  }, []);
-
-  useEffect(() => {
-    // Sempre que as publicações forem alteradas, resetar as publicações filtradas
-    setFilteredPublicacoes(publicacoes);
-  }, [publicacoes]);
-
-  const handleLike = async (postId) => {
-    const isLiked = likes[postId] || false;
-    setLikes((prev) => ({ ...prev, [postId]: !isLiked }));
-
-    try {
-      const response = await axios.post('http://localhost:3000/like', {
-        idPublicacao: postId,
-        liked: !isLiked,
-        userId,
-      });
-
-      const newCount = response.data.newCount;
-      setPublicacoes((prev) => prev.map(pub => 
-        pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub
-      ));
-    } catch (error) {
-      console.error('Erro ao curtir a publicação:', error);
-      setLikes((prev) => ({ ...prev, [postId]: isLiked })); // Reverte o like em caso de erro
-      Alert.alert('Erro', 'Falha ao curtir a publicação. Tente novamente.');
-    }
-  };
-
-  const handleCommentUpdate = (newComment) => {
-    setSelectedComments(prev => [...prev, newComment]);
-  };
-
-// Função para excluir publicação
-const handleDeletePost = async (idPublicacao) => {
-  const idPessoa = 25; // Define o ID da pessoa como 25
-
-  try {
-    const response = await axios.delete(`http://localhost:3000/deletepublicacao/${idPublicacao}`, {
-      data: { idPessoa }, // Passa o ID da pessoa no corpo da requisição
-    });
-    if (response.status === 200) {
-      console.log('Publicação excluída com sucesso.');
-      // Remove a publicação do estado local
-      setPublicacoes((prevPublicacoes) => 
-        prevPublicacoes.filter((pub) => pub.idPublicacao !== idPublicacao)
-      );
-    }
-  } catch (error) {
-    console.error('Erro ao excluir publicação:', error);
-    Alert.alert('Erro', 'Falha ao excluir a publicação. Tente novamente.');
-  }
-};  
-
-  const handleCreatePost = async () => {
-    if (newPostText.trim()) {
+    const fetchPublicacoes = async () => {
       try {
-        const response = await axios.post('http://localhost:3000/postpublicacao', {
-          descricao: newPostText,
-          Pessoa_idPessoa: 25 // Você pode substituir pelo ID real do usuário logado
+        const token = await AsyncStorage.getItem('jwtToken'); // Obtém o token de autenticação
+        const response = await axios.get('http://localhost:3000/getpublicacao', {
+          headers: { Authorization: `Bearer ${token}` }, // Inclui o token no cabeçalho
         });
-        console.log('Resposta do servidor:', response.data); 
-        setNewPostText('');
-        fetchPublicacoes(); // Atualiza a lista de publicações
+        setPublicacoes(response.data.data);
       } catch (error) {
-        console.error('Erro ao criar a publicação:', error);
-        Alert.alert('Erro', 'Falha ao criar a publicação.');
+        console.error('Erro ao buscar publicações:', error);
       }
-    } else {
-      Alert.alert('Atenção', 'Digite algo para criar uma publicação.');
+    };
+
+    const fetchComments = async (postId) => {
+      try {
+        const response = await axios.get(`http://localhost:3000/getcomentarios/${postId}`);
+        setSelectedComments(response.data); // Atualiza o estado com os comentários
+      } catch (error) {
+        console.error('Erro ao buscar comentários:', error);
+        Alert.alert('Erro', 'Não foi possível carregar os comentários.');
+      }
+    };
+
+    const handleSearch = (text) => {
+      setSearchText(text);
+      
+      // Se o campo de pesquisa estiver vazio, mostrar todas as publicações
+      if (text === '') {
+        setFilteredPublicacoes(publicacoes);
+      } else {
+        // Filtrar as publicações com base no texto inserido
+        const filtered = publicacoes.filter(pub => 
+          pub.publicacao_descricao.toLowerCase().includes(text.toLowerCase()) || 
+          pub.nome_pessoa.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredPublicacoes(filtered);
+      }
+    };
+    
+    useEffect(() => {
+      fetchPublicacoes();
+    }, []);
+
+    useEffect(() => {
+      // Sempre que as publicações forem alteradas, resetar as publicações filtradas
+      setFilteredPublicacoes(publicacoes);
+    }, [publicacoes]);
+
+    const handleLike = async (postId) => {
+      const isLiked = likes[postId] || false;
+      setLikes((prev) => ({ ...prev, [postId]: !isLiked }));
+
+      try {
+        const response = await axios.post('http://localhost:3000/like', {
+          idPublicacao: postId,
+          liked: !isLiked,
+          userId,
+        });
+
+        const newCount = response.data.newCount;
+        setPublicacoes((prev) => prev.map(pub => 
+          pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub
+        ));
+      } catch (error) {
+        console.error('Erro ao curtir a publicação:', error);
+        setLikes((prev) => ({ ...prev, [postId]: isLiked })); // Reverte o like em caso de erro
+        Alert.alert('Erro', 'Falha ao curtir a publicação. Tente novamente.');
+      }
+    };
+
+    const handleCommentUpdate = (newComment) => {
+      setSelectedComments(prev => [...prev, newComment]);
+    };
+
+  // Função para excluir publicação
+  const handleDeletePost = async (idPublicacao) => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      const response = await axios.delete(
+        `http://localhost:3000/deletepublicacao/${idPublicacao}`, 
+         {headers: {Authorization: `Bearer ${token}`}}
+      );
+      if (response.status === 200) {
+        console.log('Publicação excluída com sucesso.');
+        // Remove a publicação do estado local
+        setPublicacoes((prevPublicacoes) => 
+          prevPublicacoes.filter((pub) => pub.idPublicacao !== idPublicacao)
+        );
+      }
+    } catch (error) {
+      console.error('Erro ao excluir publicação:', error);
+      Alert.alert('Erro', 'Falha ao excluir a publicação. Tente novamente.');
     }
   };
+
+    const handleCreatePost = async () => {
+      if (newPostText.trim()) {
+        try {
+          const token = await AsyncStorage.getItem('jwtToken');
+          const response = await axios.post(
+            'http://localhost:3000/postpublicacao', 
+           {descricao: newPostText},
+            {headers: {Authorization: `Bearer ${token}`}}
+          );
+          console.log('Resposta do servidor:', response.data); 
+          setNewPostText('');
+          fetchPublicacoes(); // Atualiza a lista de publicações
+        } catch (error) {
+          console.error('Erro ao criar a publicação:', error);
+          Alert.alert('Erro', 'Falha ao criar a publicação.');
+        }
+      } else {
+        Alert.alert('Atenção', 'Digite algo para criar uma publicação.');
+      }
+    };
 
 const renderPublicacao = (pub) => (
-<View
-  style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}
-  key={pub.idPublicacao}
->
-  <View style={styles.indent}>
-    <Avatar />
-    <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} theme={theme} />
-  </View>
-  <Text
-    style={[
-      theme === 'escuro' ? styles.darkText : styles.lightText,
-      { fontSize: getFontSize() } // Aplicando o tamanho de fonte dinâmico
-    ]}
+  <View
+    style={[styles.boxPubli, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}
+    key={pub.idPublicacao}
   >
-    {pub.publicacao_descricao}
-  </Text>
-  <View style={styles.actionsRow}>
-    <Curtir
-      count={pub.quantidade_curtidas}
-      liked={likes[pub.idPublicacao]}
-      onPress={() => handleLike(pub.idPublicacao)}
-    />
-    <View style={styles.commentDeleteRow}>
-      <BotaoComentar
-        onPress={async () => {
-          await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
-          setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
-          setModalVisible(true);
-        }}
-        comentarioCount={pub.quantidade_comentarios}
+    <View style={styles.indent}>
+      <Avatar />
+      <Usuario nome={pub.nome_pessoa} cargo={pub.cargo} theme={theme} />
+    </View>
+    <Text
+      style={[
+        theme === 'escuro' ? styles.darkText : styles.lightText,
+        { fontSize: getFontSize() } // Aplicando o tamanho de fonte dinâmico
+      ]}
+    >
+      {pub.publicacao_descricao}
+    </Text>
+    <View style={styles.actionsRow}>
+      <Curtir
+        count={pub.quantidade_curtidas}
+        liked={likes[pub.idPublicacao]}
+        onPress={() => handleLike(pub.idPublicacao)}
       />
-      <BotaoExcluir onPress={() => handleDeletePost(pub.idPublicacao)} />
+      <View style={styles.commentDeleteRow}>
+        <BotaoComentar
+          onPress={async () => {
+            await fetchComments(pub.idPublicacao); // Buscar comentários ao abrir o modal
+            setCurrentPostId(pub.idPublicacao); // Define o ID da publicação atual
+            setModalVisible(true);
+          }}
+          comentarioCount={pub.quantidade_comentarios}
+        />
+        <BotaoExcluir onPress={() => handleDeletePost(pub.idPublicacao)} />
+      </View>
     </View>
   </View>
-</View>
 );
 
 return (
