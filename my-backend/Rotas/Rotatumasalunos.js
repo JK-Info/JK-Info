@@ -1,9 +1,11 @@
 const express = require('express');
-const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão
-const routerTurmasAlunos = express.Router();
+const db = require('../ConexaoBD/conexaoBD'); // Importa a conexão com o banco de dados
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECRET_KEY;
 
+const routerTurmasAlunos = express.Router();
+
+// Função para obter o ID do usuário a partir do token JWT
 function getIdFromToken(req) {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) throw new Error('Token não fornecido.');
@@ -11,24 +13,28 @@ function getIdFromToken(req) {
     return decoded.userId;
 }
 
+// Rota para buscar alunos da turma
 routerTurmasAlunos.get('/alunosTurma', async (req, res) => {
     try {
         const idPessoa = getIdFromToken(req);
 
         const query = `
             SELECT 
-                Pessoa.nome AS NomeAluno, 
-                Pessoa.email AS EmailAluno
-            FROM 
-                Turma
-            JOIN Aluno ON Aluno.Turma_idTurma = Turma.idTurma
-            JOIN Pessoa ON Pessoa.idPessoa = Aluno.Pessoa_idPessoa
-            WHERE 
-                Turma.idTurma = (
-                    SELECT Turma_idTurma 
-                    FROM Aluno 
-                    WHERE Pessoa_idPessoa = ?
-                );
+    p.nome AS NomeAluno, 
+    ci.emailInstitucional AS EmailAluno
+FROM 
+    Aluno_has_Turma at
+JOIN Aluno a ON at.Aluno_idAluno = a.idAluno
+JOIN Pessoa p ON a.Pessoa_idPessoa = p.idPessoa
+JOIN ContatoInstitucional ci ON p.ContatoInstitucional_idContatoInstitucional = ci.idContatoInstitucional
+WHERE 
+    at.Turma_idTurma = (
+        SELECT at.Turma_idTurma
+        FROM Aluno_has_Turma at
+        JOIN Aluno a ON at.Aluno_idAluno = a.idAluno
+        WHERE a.Pessoa_idPessoa = ?
+    );
+
         `;
         db.query(query, [idPessoa], (err, results) => {
             if (err) {
@@ -43,19 +49,29 @@ routerTurmasAlunos.get('/alunosTurma', async (req, res) => {
     }
 });
 
+// Rota para buscar professores da turma
 routerTurmasAlunos.get('/professoresTurma', async (req, res) => {
     try {
         const idPessoa = getIdFromToken(req);
 
         const query = `
-            SELECT Pessoa.nome AS nome, Pessoa.email
-            FROM Professor
-            JOIN Pessoa ON Professor.Pessoa_idPessoa = Pessoa.idPessoa
-            WHERE Professor.Turma_idTurma = (
-                SELECT Turma_idTurma
-                FROM Aluno
-                WHERE Pessoa_idPessoa = ?
-            );
+           SELECT 
+    p.nome AS NomeProfessor, 
+    ci.emailInstitucional AS EmailProfessor
+FROM 
+    Materia m
+JOIN Materia_has_Professor mp ON m.idMateria = mp.Materia_idMateria
+JOIN Professor prof ON mp.Professor_idProfessor = prof.idProfessor
+JOIN Pessoa p ON prof.Pessoa_idPessoa = p.idPessoa
+JOIN ContatoInstitucional ci ON p.ContatoInstitucional_idContatoInstitucional = ci.idContatoInstitucional
+WHERE 
+    m.Turma_idTurma = (
+        SELECT at.Turma_idTurma
+        FROM Aluno_has_Turma at
+        JOIN Aluno a ON at.Aluno_idAluno = a.idAluno
+        WHERE a.Pessoa_idPessoa = ?
+    );
+
         `;
         db.query(query, [idPessoa], (err, results) => {
             if (err) {
@@ -70,26 +86,26 @@ routerTurmasAlunos.get('/professoresTurma', async (req, res) => {
     }
 });
 
+// Rota para buscar notas da turma
 routerTurmasAlunos.get('/notasTurma', async (req, res) => {
     try {
         const idPessoa = getIdFromToken(req);
 
         const query = `
             SELECT 
-                nota.nota AS conteudo, 
-                nota.data_criacao AS dataCriacao, 
-                Pessoa.nome AS professor
+                n.nota AS Nota, 
+                n.descricao AS Descricao, 
+                n.dataCriacao AS DataCriacao
             FROM 
-                nota
-            JOIN professor ON nota.professor_id = professor.id
-            JOIN pessoa ON professor.pessoa_id = pessoa.idPessoa
+                Notas n
             WHERE 
-                nota.turma_id = (
-                    SELECT turma_id
-                    FROM aluno
-                    WHERE pessoa_id = ?
+                n.Turma_idTurma = (
+                    SELECT at.Turma_idTurma
+                    FROM Aluno_has_Turma at
+                    JOIN Aluno a ON at.Aluno_idAluno = a.idAluno
+                    WHERE a.Pessoa_idPessoa = ?
                 )
-            ORDER BY nota.data_criacao DESC;
+            ORDER BY n.dataCriacao DESC;
         `;
         db.query(query, [idPessoa], (err, results) => {
             if (err) {
@@ -103,6 +119,5 @@ routerTurmasAlunos.get('/notasTurma', async (req, res) => {
         res.status(500).json({ message: 'Erro interno' });
     }
 });
-
 
 module.exports = routerTurmasAlunos;

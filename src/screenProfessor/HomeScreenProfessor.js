@@ -116,22 +116,28 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
   const handleSendComment = async () => {
     if (textoComentario.trim()) {
         try {
-            // Faz uma requisição para buscar os dados do usuário com ID 25
-            const response = await axios.get('http://localhost:3000/getusuario/25');
-            const usuario = response.data; // Supondo que a resposta contenha as informações do usuário
-            const nomeUsuario = usuario.nome; // Ajuste conforme a estrutura de retorno da sua API
+            const token = await AsyncStorage.getItem('jwtToken'); // Obtém o token JWT
+            const response = await axios.post(
+                'http://localhost:3000/postcomentario',
+                {
+                    text: textoComentario,
+                    Publicacao_idPublicacao: publicacaoId,
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` }, // Adiciona o token ao cabeçalho
+                }
+            );
 
-            // Envia o comentário com o ID fixo do usuário 25
-            await axios.post('http://localhost:3000/postcomentario', {
-                text: textoComentario,
-                Publicacao_idPublicacao: publicacaoId,
-                Pessoa_id: 25, // Passa o ID do usuário logado (25)
+            console.log('Resposta do servidor:', response.data);
+
+            // Atualiza a lista de comentários localmente
+            onCommentAdded({
+                texto: textoComentario,
+                nome_comentador: 'Você', // Substitua por `response.data.nome` se necessário
+                num_likes: 0,
             });
 
-            // Atualiza a lista de comentários na tela com o nome correto do usuário
-            onCommentAdded({ texto: textoComentario, nome_comentador: nomeUsuario, num_likes: 0 });
-            
-            setTextoComentario(''); // Limpa o campo de texto após enviar
+            setTextoComentario(''); // Limpa o campo de texto
         } catch (error) {
             console.error('Erro ao enviar comentário:', error);
             Alert.alert('Erro', 'Falha ao enviar o comentário.');
@@ -141,28 +147,35 @@ const CommentModal = ({ visible, onClose, comments, onCommentAdded, publicacaoId
     }
 };
 
-const handleLikeComment = async (commentId) => {  
-    const isLiked = comments.find(comment => comment.idComentario === commentId).liked || false;
-    const userId = 25; // Substitua isso pelo ID do usuário logado dinamicamente
-  
-    try {
-      const response = await axios.post('http://localhost:3000/likecomentario', {
-        idComentario: commentId,
-        liked: !isLiked,
-        userId: userId,
-      });
-  
-      const newCount = response.data.newCount;
+const handleLikeComment = async (commentId) => {
+  const isLiked = comments.find(comment => comment.idComentario === commentId)?.liked || false;
 
-    // Atualizar a contagem de curtidas localmente
-    setSelectedComments((prevComments) =>
-      prevComments.map(comment =>
-        comment.idComentario === commentId ? { ...comment, num_likes: newCount, liked: !isLiked } : comment
-      )
-    );
+  try {
+      const token = await AsyncStorage.getItem('jwtToken'); // Obtém o token JWT
+      const response = await axios.post(
+          'http://localhost:3000/likecomentario',
+          {
+              idComentario: commentId,
+              liked: !isLiked,
+          },
+          {
+              headers: { Authorization: `Bearer ${token}` }, // Adiciona o token ao cabeçalho
+          }
+      );
+
+      const newCount = response.data.numLikes;
+
+      // Atualiza a contagem de curtidas localmente
+      onCommentAdded(
+          comments.map(comment =>
+              comment.idComentario === commentId
+                  ? { ...comment, num_likes: newCount, liked: !isLiked }
+                  : comment
+          )
+      );
   } catch (error) {
-    console.error('Erro ao curtir comentário:', error);
-    Alert.alert('Erro', 'Falha ao curtir o comentário. Tente novamente.');
+      console.error('Erro ao curtir comentário:', error);
+      Alert.alert('Erro', 'Falha ao curtir o comentário. Tente novamente.');
   }
 };
 
@@ -251,13 +264,19 @@ const HomeScreenProfessor = () => {
 
     const fetchComments = async (postId) => {
       try {
-        const response = await axios.get(`http://localhost:3000/getcomentarios/${postId}`);
-        setSelectedComments(response.data); // Atualiza o estado com os comentários
+          const token = await AsyncStorage.getItem('jwtToken'); // Obtém o token JWT do armazenamento
+          const response = await axios.get(
+              `http://localhost:3000/getcomentarios/${postId}`,
+              {
+                  headers: { Authorization: `Bearer ${token}` }, // Adiciona o token ao cabeçalho
+              }
+          );
+          setSelectedComments(response.data); // Atualiza o estado com os comentários
       } catch (error) {
-        console.error('Erro ao buscar comentários:', error);
-        Alert.alert('Erro', 'Não foi possível carregar os comentários.');
+          console.error('Erro ao buscar comentários:', error);
+          Alert.alert('Erro', 'Não foi possível carregar os comentários.');
       }
-    };
+  };
 
     const handleSearch = (text) => {
       setSearchText(text);
@@ -286,25 +305,36 @@ const HomeScreenProfessor = () => {
 
     const handleLike = async (postId) => {
       const isLiked = likes[postId] || false;
+  
       setLikes((prev) => ({ ...prev, [postId]: !isLiked }));
-
+  
       try {
-        const response = await axios.post('http://localhost:3000/like', {
-          idPublicacao: postId,
-          liked: !isLiked,
-          userId,
-        });
-
-        const newCount = response.data.newCount;
-        setPublicacoes((prev) => prev.map(pub => 
-          pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub
-        ));
+          const token = await AsyncStorage.getItem('jwtToken');
+          const response = await axios.post(
+              'http://localhost:3000/likepublicacao',
+              {
+                  idPublicacao: postId,
+                  liked: !isLiked,
+              },
+              {
+                  headers: { Authorization: `Bearer ${token}` },
+              }
+          );
+  
+          const newCount = response.data.numLikes;
+  
+          setPublicacoes((prev) =>
+              prev.map((pub) =>
+                  pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub
+              )
+          );
       } catch (error) {
-        console.error('Erro ao curtir a publicação:', error);
-        setLikes((prev) => ({ ...prev, [postId]: isLiked })); // Reverte o like em caso de erro
-        Alert.alert('Erro', 'Falha ao curtir a publicação. Tente novamente.');
+          console.error('Erro ao curtir a publicação:', error);
+          setLikes((prev) => ({ ...prev, [postId]: isLiked })); // Reverte o like em caso de erro
+          Alert.alert('Erro', 'Falha ao curtir a publicação. Tente novamente.');
       }
-    };
+  };
+  
 
     const handleCommentUpdate = (newComment) => {
       setSelectedComments(prev => [...prev, newComment]);

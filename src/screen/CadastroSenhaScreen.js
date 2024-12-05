@@ -16,7 +16,7 @@ const CadastroSenhaScreen = ({ navigation }) => {
       const response = await axios.post('http://localhost:3000/set-password', { email, senha });
       if (response.data.success) {
         Alert.alert('Sucesso', 'Senha definida com sucesso! Agora você pode fazer login.');
-        navigation.navigate('LoginScreen'); // Redireciona para a tela de login
+        navigation.navigate('Login'); // Redireciona para a tela de login
       } else {
         Alert.alert('Erro', response.data.message || 'Não foi possível definir a senha.');
       }

@@ -34,7 +34,7 @@ const TurmaScreen = () => {
 
   const fetchAlunoLogado = async () => {
     try {
-      const alunoResponse = await fetch('http://localhost:3000/alunoLogado', {
+      const alunoResponse = await fetch('http://localhost:3000/perfil', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
