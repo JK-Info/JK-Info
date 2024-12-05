@@ -86,12 +86,14 @@ router.post(
     }
   }
 );
-// Rota DELETE para excluir uma publicação e seus dependentes (comentários e curtidas)
-router.delete('/deletepublicacao/:id', (req, res) => {
-  const { id } = req.params;
-  const Pessoa_idPessoa = getIdFromToken(req);  // ID da pessoa que está tentando excluir a publicação
 
-  console.log(`Rota DELETE /deletepublicacao chamada para excluir a publicação com id: ${id} pelo usuário ${idPessoa}`);
+
+// Rota DELETE para excluir uma publicação e seus dependentes (comentários e curtidas)
+router.delete('/deletepublicacao/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const Pessoa_idPessoa = req.userId;  // ID da pessoa que está tentando excluir a publicação
+
+  console.log(`Rota DELETE /deletepublicacao chamada para excluir a publicação com id: ${id} pelo usuário ${Pessoa_idPessoa}`);
 
   // Verificar se a publicação pertence ao usuário
   const checkOwnerQuery = 'SELECT * FROM Publicacao WHERE idPublicacao = ? AND Pessoa_idPessoa = ?';
@@ -150,8 +152,8 @@ router.delete('/deletepublicacao/:id', (req, res) => {
 });
 
 
-router.get('/getpublicacaousuario/:idPessoa', async (req, res) => {
-  const Pessoa_idPessoa = getIdFromToken(req); // Pegando o idPessoa da URL
+router.get('/getpublicacaousuario', authenticateToken, async (req, res) => {
+  const Pessoa_idPessoa = req.userId; // Pegando o idPessoa da URL
 
   console.log(`Buscando publicações para o usuário com ID: ${Pessoa_idPessoa}`);
 

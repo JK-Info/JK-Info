@@ -307,25 +307,36 @@
 
     const handleLike = async (postId) => {
       const isLiked = likes[postId] || false;
+  
       setLikes((prev) => ({ ...prev, [postId]: !isLiked }));
-
+  
       try {
-        const response = await axios.post('http://localhost:3000/like', {
-          idPublicacao: postId,
-          liked: !isLiked,
-          userId,
-        });
-
-        const newCount = response.data.newCount;
-        setPublicacoes((prev) => prev.map(pub => 
-          pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub
-        ));
+          const token = await AsyncStorage.getItem('jwtToken');
+          const response = await axios.post(
+              'http://localhost:3000/likepublicacao',
+              {
+                  idPublicacao: postId,
+                  liked: !isLiked,
+              },
+              {
+                  headers: { Authorization: `Bearer ${token}` },
+              }
+          );
+  
+          const newCount = response.data.numLikes;
+  
+          setPublicacoes((prev) =>
+              prev.map((pub) =>
+                  pub.idPublicacao === postId ? { ...pub, quantidade_curtidas: newCount } : pub
+              )
+          );
       } catch (error) {
-        console.error('Erro ao curtir a publicação:', error);
-        setLikes((prev) => ({ ...prev, [postId]: isLiked })); // Reverte o like em caso de erro
-        Alert.alert('Erro', 'Falha ao curtir a publicação. Tente novamente.');
+          console.error('Erro ao curtir a publicação:', error);
+          setLikes((prev) => ({ ...prev, [postId]: isLiked })); // Reverte o like em caso de erro
+          Alert.alert('Erro', 'Falha ao curtir a publicação. Tente novamente.');
       }
-    };
+  };
+  
 
     const handleCommentUpdate = (newComment) => {
       setSelectedComments(prev => [...prev, newComment]);

@@ -134,6 +134,61 @@ router.post('/likecomentario', authenticateToken, (req, res) => {
     }
 });
 
+// Rota para curtir ou descurtir publicação
+router.post('/likepublicacao', authenticateToken, (req, res) => {
+    const { idPublicacao, liked } = req.body;
+
+    if (!idPublicacao) {
+        return res.status(400).json({ message: 'idPublicacao é obrigatório.' });
+    }
+
+    const userId = req.userId;
+
+    if (liked) {
+        const checkLikeQuery = 'SELECT * FROM CurtidaPublicacao WHERE Publicacao_idPublicacao = ? AND Pessoa_idPessoa = ?';
+        db.query(checkLikeQuery, [idPublicacao, userId], (err, results) => {
+            if (err) {
+                console.error('Erro ao verificar like na publicação:', err);
+                return res.status(500).json({ message: 'Erro ao verificar like na publicação.' });
+            }
+
+            if (results.length === 0) {
+                const insertLikeQuery = 'INSERT INTO CurtidaPublicacao (Publicacao_idPublicacao, Pessoa_idPessoa) VALUES (?, ?)';
+                db.query(insertLikeQuery, [idPublicacao, userId], (err) => {
+                    if (err) {
+                        console.error('Erro ao inserir like na publicação:', err);
+                        return res.status(500).json({ message: 'Erro ao inserir like na publicação.' });
+                    }
+                    getPublicationLikeCount(idPublicacao, res);
+                });
+            } else {
+                getPublicationLikeCount(idPublicacao, res);
+            }
+        });
+    } else {
+        const deleteLikeQuery = 'DELETE FROM CurtidaPublicacao WHERE Publicacao_idPublicacao = ? AND Pessoa_idPessoa = ?';
+        db.query(deleteLikeQuery, [idPublicacao, userId], (err) => {
+            if (err) {
+                console.error('Erro ao remover like na publicação:', err);
+                return res.status(500).json({ message: 'Erro ao remover like na publicação.' });
+            }
+            getPublicationLikeCount(idPublicacao, res);
+        });
+    }
+});
+
+const getPublicationLikeCount = (idPublicacao, res) => {
+    const countQuery = 'SELECT COUNT(*) AS numLikes FROM CurtidaPublicacao WHERE Publicacao_idPublicacao = ?';
+    db.query(countQuery, [idPublicacao], (err, results) => {
+        if (err) {
+            console.error('Erro ao buscar contagem de likes da publicação:', err);
+            return res.status(500).json({ message: 'Erro ao buscar contagem de likes da publicação.' });
+        }
+        res.json({ numLikes: results[0].numLikes });
+    });
+};
+
+
 // Função para buscar a contagem de likes de um comentário
 const getCommentLikeCount = (idComentario, res) => {
     const countQuery = 'SELECT COUNT(*) AS numLikes FROM CurtidaComentario WHERE Comentario_idComentario = ?';

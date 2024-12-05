@@ -259,7 +259,7 @@
 CREATE TABLE IF NOT EXISTS CurtidaPublicacao (
     idCurtidaPublicacao INT AUTO_INCREMENT PRIMARY KEY,
     Publicacao_idPublicacao INT,
-    userId INT,
+    Pessoa_idPessoa  INT,
     FOREIGN KEY (Publicacao_idPublicacao) 
         REFERENCES Publicacao(idPublicacao) 
         ON DELETE CASCADE,
@@ -267,6 +267,10 @@ CREATE TABLE IF NOT EXISTS CurtidaPublicacao (
         REFERENCES Pessoa(idPessoa) 
         ON DELETE CASCADE
 );
+ALTER TABLE CurtidaPublicacao
+CHANGE COLUMN userId Pessoa_idPessoa INT;
+select * from  Curtidacomentario
+
 
 	-- -----------------------------------------------------
 	-- Table `mydb`.`Comentario`
