@@ -92,21 +92,23 @@ routerTurmasAlunos.get('/notasTurma', async (req, res) => {
         const idPessoa = getIdFromToken(req);
 
         const query = `
-            SELECT 
-                n.nota AS Nota, 
-                n.descricao AS Descricao, 
-                n.dataCriacao AS DataCriacao
-            FROM 
-                Notas n
-            WHERE 
-                n.Turma_idTurma = (
-                    SELECT at.Turma_idTurma
-                    FROM Aluno_has_Turma at
-                    JOIN Aluno a ON at.Aluno_idAluno = a.idAluno
-                    WHERE a.Pessoa_idPessoa = ?
+            SELECT
+                Turma.nomeTurma,
+                Notas.nota,
+                Notas.dataCriacao
+            FROM
+                Turma
+            JOIN Notas ON Notas.Turma_idTurma = Turma.idTurma
+            WHERE
+                Turma.idTurma = (
+                    SELECT Turma_idTurma
+                    FROM Aluno_has_Turma
+                    JOIN Aluno ON Aluno.idAluno = Aluno_has_Turma.Aluno_idAluno
+                    WHERE Aluno.Pessoa_idPessoa = ?
                 )
-            ORDER BY n.dataCriacao DESC;
+            ORDER BY Notas.dataCriacao DESC;
         `;
+
         db.query(query, [idPessoa], (err, results) => {
             if (err) {
                 console.error('Erro ao buscar notas:', err);
@@ -119,5 +121,7 @@ routerTurmasAlunos.get('/notasTurma', async (req, res) => {
         res.status(500).json({ message: 'Erro interno' });
     }
 });
+
+
 
 module.exports = routerTurmasAlunos;
