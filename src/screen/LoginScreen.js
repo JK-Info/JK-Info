@@ -1,57 +1,132 @@
-import React, { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View, Alert, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import React, { useState, useEffect, useId } from 'react';
+import { StyleSheet, Text, TextInput, View, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (email === 'aluno@teste') {
-      navigation.replace('DrawerNavigatorAluno');
-    } else if (email === 'professor@teste') {
-      navigation.replace('DrawerNavigatorProfessor');
-    } else if (email === 'gestao@teste') {
-      navigation.replace('DrawerNavigatorGestao');
-    } else {
-      Alert.alert('Erro', 'Credenciais inválidas!');
+  // Verificar se o usuário já está logado
+  useEffect(() => {
+    const checkLoggedIn = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      if (token) {
+        const userType = await AsyncStorage.getItem('userType');
+        switch (userType) {
+          case 'aluno':
+            navigation.navigate('DrawerNavigatorAluno');
+            break;
+          case 'professor':
+            navigation.navigate('DrawerNavigatorProfessor');
+            break;
+          case 'funcionario':
+            navigation.navigate('DrawerNavigatorFuncionario');
+            break;
+          case 'gestao':
+            navigation.navigate('DrawerNavigatorGestao');
+            break;
+          default:
+            Alert.alert('Erro', 'Tipo de usuário inválido.');
+            break;
+        }
+      }
+    };
+    checkLoggedIn();
+  }, [navigation]);
+
+  const handleLogin = async () => {
+    if (!email || !senha) {
+      Alert.alert('Erro', 'Por favor, insira seu e-mail e senha.');
+      return;
+    }
+  
+    setLoading(true);
+  
+    try {
+      const response = await axios.post('http://localhost:3000/login', { email, senha });
+  
+      if (response.data.success) {
+        const { token, userType, userName, userEmailInstitucional, userEmailPessoal } = response.data;
+  
+        // Armazenar o token e as informações do usuário
+        await AsyncStorage.setItem('jwtToken', token); // Armazena o token como jwtToken
+        await AsyncStorage.setItem('userType', userType);
+        await AsyncStorage.setItem('userName', userName);
+        await AsyncStorage.setItem('userEmailInstitucional', userEmailInstitucional);
+        await AsyncStorage.setItem('userEmailPessoal', userEmailPessoal);
+  
+        // Navegar para a tela inicial do usuário
+        switch (userType) {
+          case 'aluno':
+            navigation.navigate('DrawerNavigatorAluno');
+            break;
+          case 'professor':
+            navigation.navigate('DrawerNavigatorProfessor');
+            break;
+          case 'funcionario':
+            navigation.navigate('DrawerNavigatorFuncionario');
+            break;
+          case 'gestao':
+            navigation.navigate('DrawerNavigatorGestao');
+            break;
+          default:
+            Alert.alert('Erro', 'Tipo de usuário inválido.');
+            break;
+        }
+      } else {
+        Alert.alert('Erro', response.data.message || 'E-mail ou senha incorretos.');
+      }
+    } catch (error) {
+      console.error('Login failed: ', error);
+      Alert.alert('Erro', 'Ocorreu um erro durante o login. Tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
+  
+  if (loading) {
+    return <ActivityIndicator size="large" color="#00527C" />;
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.h1}>
+      <View style={styles.header}>
         <Text style={styles.j}>J</Text>
         <Text style={styles.k}>K</Text>
         <Text style={styles.info}>Info</Text>
       </View>
 
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={text => setEmail(text)}
-          placeholder="Digite seu e-mail"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={text => setPassword(text)}
-          placeholder="Digite sua senha"
-          secureTextEntry
-        />
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={text => setEmail(text)}
+        placeholder="Digite seu e-mail"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      <TextInput
+        style={styles.input}
+        value={senha}
+        onChangeText={text => setSenha(text)}
+        placeholder="Digite sua senha"
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity style={styles.logar} onPress={handleLogin}>
-          <Text style={styles.textLogar}>Entrar</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Botão para cadastrar senha */}
+      <TouchableOpacity onPress={() => navigation.navigate('CadastroSenhaScreen')}>
+        <Text style={styles.linkText}>Não tem senha? Cadastre agora</Text>
+      </TouchableOpacity>
     </View>
   );
 };
-
-export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -59,18 +134,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    padding: 20,
   },
-  input: {
-    height: 50,
-    marginLeft: 20,
-    width: '90%',
-    borderColor: '#00527C', // Blue border
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    borderRadius: 20, // Rounded edges
-    color: '#000', // Text color
+  header: {
+    flexDirection: 'row',
+    marginBottom: 30,
   },
   j: {
     fontSize: 50,
@@ -88,33 +156,34 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     color: '#00527C',
   },
-  h1: {
-    flexDirection: 'row',
-    margin: 80,
-  },
-  form: {
-    width: '90%',
-    backgroundColor: '#fff', // White background
-    borderRadius: 20,
-    padding: 20,
-    elevation: 5,
-  },
-  textos: {
-    color: '#000', // Text color
-    marginLeft: 20,
-    marginTop: 10,
-  },
-  logar: {
-    alignItems: 'center',
-    marginLeft: '25%',
-    width: '50%',
+  input: {
     height: 50,
-    backgroundColor: '#ff6400', // Orange button
-    borderRadius: 20, // Rounded edges
-    justifyContent: 'center',
+    width: '90%',
+    borderColor: '#00527C',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    color: '#000',
   },
-  textLogar: {
+  button: {
+    alignItems: 'center',
+    width: '90%',
+    height: 50,
+    backgroundColor: '#00527C',
+    borderRadius: 20,
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  buttonText: {
     color: 'white',
-    padding: 5,
+    fontSize: 18,
+  },
+  linkText: {
+    color: '#00527C',
+    marginTop: 10,
+    textDecorationLine: 'underline',
   },
 });
+
+export default LoginScreen;

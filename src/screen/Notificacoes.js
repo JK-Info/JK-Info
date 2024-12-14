@@ -73,11 +73,11 @@ const Notificacoes = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff', // Cor de fundo consistente
+    backgroundColor: '#fff', 
     padding: 10,
   },
   scrollContainer: {
-    width: '100%', // Deixa o container do scroll preencher 100% da largura
+    width: '100%', 
   },
   notificacaoContainer: {
     flexDirection: 'column',
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 60, // Bordas arredondadas
+    borderRadius: 60, 
     padding: 15,
     width: '100%', // Ajusta para preencher 100% da largura do container principal
     elevation: 2, // Sombra para um efeito de elevação

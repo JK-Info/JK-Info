@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SwipeGestures from 'react-native-swipe-gestures';
-import { TouchableOpacity } from 'react-native';
+import { ThemeContext } from '../Components/ThemeContext';
+import { FontSizeContext } from '../Components/FontSizeProvider'; // Import FontSizeContext
+import { LanguageContext } from '../Components/LanguageContext'; // Import LanguageContext
 
 const ReclamacoesSugest = () => {
   const navigation = useNavigation();
@@ -11,72 +13,101 @@ const ReclamacoesSugest = () => {
   const [mensagemEnviada, setMensagemEnviada] = useState(false);
   const [mensagemErro, setMensagemErro] = useState('');
 
-  const EnviarReclamacoesouSugestoes = () => {
+  const { theme } = useContext(ThemeContext); // Acessa o tema atual do contexto
+  const { fontSize, getFontSize } = useContext(FontSizeContext); // Get FontSize
+  const { language } = useContext(LanguageContext); // Acessa o idioma do contexto
+
+  const Pessoa_idPessoa = 1; // Exemplo de ID de usuário autenticado
+
+  const EnviarReclamacoesouSugestoes = async () => {
     if (!assunto || !mensagem) {
-      setMensagemErro('Por favor, preencha todos os campos.');
-      setTimeout(() => {
-        setMensagemErro('');
-      }, 5000);
+      setMensagemErro(language === 'pt' ? 'Por favor, preencha todos os campos.' : 'Please fill out all fields.');
+      setTimeout(() => setMensagemErro(''), 5000);
       return;
     }
 
-    console.log('Assunto: ', assunto);
-    console.log('Mensagem: ', mensagem);
-    setAssunto('');
-    setMensagem('');
-    setMensagemEnviada(true);
-    setMensagemErro('');
+    const dados = {
+      assunto,
+      mensagem,
+      Pessoa_idPessoa,
+    };
 
-    setTimeout(() => {
-      setMensagemEnviada(false);
-    }, 5000);
+    try {
+      const response = await fetch('http://localhost:3000/reclamacoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados),
+      });
+
+      const result = await response.json();
+
+      if (response.status === 200) {
+        setMensagemEnviada(true);
+        setAssunto('');
+        setMensagem('');
+        setMensagemErro('');
+        setTimeout(() => setMensagemEnviada(false), 5000);
+      } else {
+        setMensagemErro(result.message || (language === 'pt' ? 'Erro ao enviar reclamação.' : 'Error sending complaint.'));
+      }
+    } catch (error) {
+      console.error('Erro ao enviar reclamação:', error);
+      setMensagemErro(language === 'pt' ? 'Erro ao enviar reclamação.' : 'Error sending complaint.');
+    }
   };
 
-  const onSwipeLeft = () => {
-    navigation.navigate('Home');
-  };
-
-  const onSwipeRight = () => {
-    // Não faz nada na tela de ReclamacoesSugest
-  };
+  const onSwipeLeft = () => navigation.navigate('Home');
 
   return (
     <SwipeGestures
       onSwipeLeft={onSwipeLeft}
-      onSwipeRight={onSwipeRight}
       config={{ velocityThreshold: 0.1, directionalOffsetThreshold: 80 }}
-      style={styles.container}
+      style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}
     >
-      <View style={styles.container}>
+      <View style={[styles.container, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}>
         <TextInput
-          style={styles.inputAssunto}
-          placeholder="Assunto"
+          style={[
+            styles.inputAssunto,
+            theme === 'escuro' ? styles.darkTheme : styles.lightTheme,
+            theme === 'escuro' ? styles.darkText : styles.lightText,
+            { fontSize: getFontSize() },
+          ]}
+          placeholder={language === 'pt' ? 'Assunto' : 'Subject'}
           value={assunto}
-          onChangeText={text => setAssunto(text)}
+          onChangeText={setAssunto}
         />
 
         <ScrollView
-          style={styles.inputMensagemContainer}
+          style={[styles.inputMensagemContainer, theme === 'escuro' ? styles.darkTheme : styles.lightTheme]}
           contentContainerStyle={styles.inputMensagemContentContainer}
         >
           <TextInput
-            style={styles.inputMensagem}
+            style={[
+              styles.inputMensagem,
+              theme === 'escuro' ? styles.darkTheme : styles.lightTheme,
+              theme === 'escuro' ? styles.darkText : styles.lightText,
+              { fontSize: getFontSize() },
+            ]}
             multiline
-            placeholder="Descreva a sua Reclamação ou Sugestão"
+            placeholder={language === 'pt' ? 'Descreva sua reclamação ou sugestão' : 'Describe your complaint or suggestion'}
             value={mensagem}
-            onChangeText={text => setMensagem(text)}
+            onChangeText={setMensagem}
           />
         </ScrollView>
 
         <TouchableOpacity onPress={EnviarReclamacoesouSugestoes} style={styles.sendButton}>
-          <Text style={styles.sendButtonText}>Enviar</Text>
+          <Text style={[styles.sendButtonText, { fontSize: getFontSize() }]}>
+            {language === 'pt' ? 'Enviar' : 'Send'}
+          </Text>
         </TouchableOpacity>
 
-        {mensagemErro !== '' && (
-          <Text style={styles.mensagemErro}>{mensagemErro}</Text>
+        {mensagemErro && (
+          <Text style={[styles.mensagemErro, { fontSize: getFontSize() }]}>{mensagemErro}</Text>
         )}
         {mensagemEnviada && (
-          <Text style={styles.mensagemEnviada}>Mensagem enviada com sucesso!</Text>
+          <Text style={[styles.mensagemEnviada, { fontSize: getFontSize() }]}>
+            {language === 'pt' ? 'Mensagem enviada com sucesso!' : 'Message sent successfully!'}
+          </Text>
         )}
       </View>
     </SwipeGestures>
@@ -92,19 +123,25 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#f0f0f0',
   },
+  darkTheme: {
+    backgroundColor: '#292929',
+  },
+  lightTheme: {
+    backgroundColor: '#f9f9f9',
+  },darkText: {color: '#fff',},lightText: {color: '#000000',},darkTitleText: {color: '#000000',},lightTitleText: {color: '#000000'},
   inputAssunto: {
     width: '100%',
     height: 50,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 30, // Bordas arredondadas
+    borderRadius: 30,
     padding: 10,
     marginVertical: 10,
   },
   inputMensagemContainer: {
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 18, // Bordas arredondadas
+    borderRadius: 18,
     width: '100%',
     maxHeight: 300,
     marginBottom: 10,
@@ -116,24 +153,24 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-  mensagemEnviada: {
-    color: 'green',
-    marginTop: 10,
-  },
-  mensagemErro: {
-    color: 'red',
-    marginTop: 10,
-  },
   sendButton: {
-    width: '30%', // Aumenta a largura do botão
-    backgroundColor: '#ff6400', // Azul
+    width: '30%',
+    backgroundColor: '#ff6400',
     borderRadius: 20,
     padding: 10,
     alignItems: 'center',
   },
   sendButtonText: {
-    color: '#FFFFFF', // Texto branco
+    color: '#FFFFFF',
     fontSize: 16,
+  },
+  mensagemErro: {
+    color: 'red',
+    marginTop: 10,
+  },
+  mensagemEnviada: {
+    color: 'green',
+    marginTop: 10,
   },
 });
 
